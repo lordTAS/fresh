@@ -1,0 +1,85 @@
+define nows               /\S+/
+define fs                 /[\t ]+/
+define nl                 /[\r\n]+/
+define nonl               /[^\r\n]+/
+define number             /\d+/
+define toplevel_card_name /[A-Za-z]{2,}/
+
+grammar ignore_block:
+    when toplevel_card_name:
+        do.return()
+    match nonl nl:
+        do.skip()
+    match nl:
+        do.skip()
+
+grammar card_main:
+    when toplevel_card_name:
+        do.return()
+    match fs /\S+ rev \S*/ nl:
+        out.add('partno', '$1')
+    match fs 'S/N' fs nows nl:
+        out.add('serialno', '$3')
+    match nonl nl:
+        do.skip()
+    match nl:
+        do.skip()
+
+grammar card:
+    when toplevel_card_name:
+        do.return()
+    match fs 'MAIN:' fs nonl nl:
+        out.enter('main')
+        card_main()
+    match fs 'PCA:' fs /\S+ rev \S+/ nl:
+        out.add('pca/partno', '$3')
+    match fs 'PID:' fs nows nl:
+        out.add('type', '$3')
+    match nonl nl:
+        do.skip()
+    match nl:
+        do.skip()
+
+grammar pca_12k:
+    match fs nonl 'S/N' fs nows nl:
+        out.add('serialno', '$4')
+    do.return()
+
+grammar card_12k:
+    when toplevel_card_name:
+        do.return()
+    match fs 'MAIN:' fs /type \d+,/ fs nonl nl:
+        out.add('main/partno', '$5')
+    match fs 'PCA:' fs nonl nl:
+        out.enter('pca')
+        out.add('partno', '$3')
+        pca_12k()
+    match fs 'subslot' fs nows ':' fs nows fs nonl nl:
+        out.add('../card?type="SPA"&slot="$3"/partno', '$6')
+    match nonl nl:
+        do.skip()
+    match nl:
+        do.skip()
+
+grammar input:
+    match /CARD|SPA/ fs nows ' : ' nonl nl:
+        out.enter('card?type="$0"&slot="$2"')
+        out.add('description', '$4')
+        card()
+    match toplevel_card_name fs nows ' : ' nonl nl:
+        out.enter('card?type="$0"&slot="$2"')
+        out.add('description', '$4')
+        ignore_block()
+    match toplevel_card_name fs nows / */ nl:
+        out.enter('card?type="$0"&slot="$2"')
+        ignore_block()
+
+    match /SLOT/ fs number /[^:]*: / nonl nl:
+        out.enter('card?type="CARD"&slot="0/$2"')
+        out.add('description', '$4')
+        card_12k()
+
+    match nonl nl:
+        do.skip()
+    match nl:
+        do.skip()

@@ -1,0 +1,124 @@
+<xml>
+  <variables>
+    <fileStoreDir>/my/output/dir</fileStoreDir>
+  </variables>
+
+  <!--
+  Data processor configuration.
+  -->
+  <!--
+  The file-store processor takes output from a device and saves it
+  in a directory structure.
+  -->
+  <processor type="file-store" name="file-store">
+      <basedir>$fileStoreDir</basedir>
+  </processor>
+
+  <!--
+  The gelatin processor transforms text files into XML documents
+  using Gelatin.
+  -->
+  <processor type="gelatin" name="gelatin">
+    <syntax-dir>.</syntax-dir>
+    <output-dir>$fileStoreDir</output-dir>
+  </processor>
+
+  <!--
+  The xslt processor transforms XML documents.
+  -->
+  <processor type="xslt" name="xslt"/>
+
+  <!--
+  The lint processor validates XML documents.
+  -->
+  <processor type="lint" name="lint"/>
+
+  <!--
+  -->
+  <provider name="ios" filename="providers/ios/IOSProvider.py">
+      <execute command="show configuration">
+          <post-process processor="file-store" filename="show_configuration.txt"/>
+          <!--
+          <post-process
+            processor="gelatin"
+            syntax="providers/ios/gel/show_running-config.gel"
+            filename="show_interface.xml"/>
+          -->
+      </execute>
+      <execute command="show version">
+          <post-process processor="file-store" filename="show_version.txt"/>
+          <post-process
+            processor="gelatin-ipmb"
+            syntax="providers/ios/gel/show_version.gel"
+            filename="show_version.xml"/>
+      </execute>
+      <execute command="show interface">
+          <post-process processor="file-store" filename="show_interface.txt"/>
+          <!--
+          <post-process
+            processor="gelatin"
+            syntax="providers/ios/gel/show_interface.gel"
+            filename="show_interface.xml"/>
+          <post-process processor="lint" schema="model.xsd" filename="generic.xml"/>
+          -->
+      </execute>
+      <execute command="show inventory">
+          <post-process processor="file-store" filename="show_inventory.txt"/>
+      </execute>
+      <!--
+      <post-process
+        processor="xslt"
+        xslt="generic.xsl"
+        input="show_running-config.xml"
+        output="generic.xml"/>
+      -->
+  </provider>
+
+  <!--
+  -->
+  <provider name="ios_xr" filename="providers/ios_xr/IOSXRProvider.py">
+      <execute command="show running-config">
+          <post-process processor="file-store" filename="show_running-config.txt"/>
+          <!--
+          <post-process
+            processor="gelatin"
+            syntax="providers/ios/gel/show_running-config.gel"
+            filename="show_interface.xml"/>
+          -->
+      </execute>
+      <execute command="show version">
+          <post-process processor="file-store" filename="show_version.txt"/>
+      </execute>
+      <execute command="show interface">
+          <post-process processor="file-store" filename="show_interface.txt"/>
+      </execute>
+      <execute command="show inventory">
+          <post-process processor="file-store" filename="show_inventory.txt"/>
+      </execute>
+  </provider>
+
+  <database name="seeddb">
+    <dbn>sqlite:///$fileStoreDir/seeddb.sqlite</dbn>
+  </database>
+
+  <!--
+  The exist-db processor takes an XML file and sends it to an
+  eXist-db XML database.
+  -->
+  <processor type="exist-db" name="exist-db">
+    <host>localhost</host>
+    <port>6949</port>
+    <user>import-user</user>
+    <password>import-user</password>
+    <collection>/exist/rest/ips</collection>
+  </processor>
+
+  <!--
+  The grabber config.
+  -->
+  <grabber>
+      <seeddb>seeddb</seeddb>
+      <provider name="ios"/>
+      <provider name="ios_xr"/>
+  </grabber>
+</xml>

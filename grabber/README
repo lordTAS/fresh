@@ -1,0 +1,6 @@
+Grabber collects information from hosts and stores it on the
+filesystem or in a database. It may also parse and transform the
+data to XML.
+
+Grabber is implemented as a service that is loaded by an Exscript
+daemon.

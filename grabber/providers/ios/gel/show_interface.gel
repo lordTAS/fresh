@@ -1,0 +1,40 @@
+define ws        /[ \t\f\v]+/
+define ows       /[ \t\f\v]*/
+define nows      /\S+/
+define nl        /[\t ]*\r?\n/
+define num       /\d+/
+define nonl      /[^\r\n]+/
+define st        /(?:up|deleted|down|administratively down)(?: \(\S+\))?/
+define field     /[^\r\n,]+/
+define field_end / *,?[ \t\f\v]*/
+define interval  /\d+ (?:second|minute|hour)/
+define io        /input|output/
+define ipv4_ip   /\d+\.\d+\.\d+\.\d+/
+
+grammar default:
+    match ws:
+        do.next()
+
+grammar interface_block:
+    match ws 'Description' ':' ws nonl nl:
+        out.add('$1', '$4')
+    match ws 'Internet address' ws 'is' ws ipv4_ip '/' num nl:
+        out.add('ip-address',    '$5')
+        out.add('prefix-length', '$7')
+    when nows nonl nl:
+        do.return()
+    match nonl nl:
+        do.skip()
+    match nl:
+        do.return()
+
+grammar input(default):
+    match nows ws 'is' ws st ', line' ws 'protocol' ws 'is' ws st nl:
+        out.enter('interface?name="$0"')
+        out.add('status',   '$4')
+        out.add('$7', '$11')
+        interface_block()
+    match nonl nl:
+        do.skip()
+    match nl:
+        do.skip()

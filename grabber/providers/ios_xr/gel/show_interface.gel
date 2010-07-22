@@ -1,0 +1,201 @@
+define ws        /[ \t\f\v]+/
+define ows       /[ \t\f\v]*/
+define nows      /\S+/
+define nl        /[\t ]*\r?\n/
+define num       /\d+/
+define nonl      /[^\r\n]+/
+define st        /(?:up|down|administratively down|up \(looped\)|not ready)/
+define field     /[^\r\n,]+/
+define field_end / *,?[ \t\f\v]*/
+define interval  /\d+ (?:second|minute|hour)/
+define io        /input|output/
+define ipv4_ip   /\d+\.\d+\.\d+\.\d+/
+
+grammar default:
+    match ws:
+        do.next()
+
+grammar dampening(default):
+    match 'half_life' ':' ws num ws 'reuse' ':' ws num nl:
+        out.add('$0', '$3')
+        out.add('$5', '$8')
+    match 'suppress' ':' ws num ws 'max-suppress-time' ':' ws num nl:
+        out.add('$0', '$3')
+        out.add('$5', '$8')
+    do.return()
+
+grammar encapsulation(default):
+    match nl:
+        do.return()
+    match 'crc' ws num field_end:
+        out.add('$0', '$2')
+    match 'controller loopback' ws field field_end:
+        out.add('$0', '$2')
+    match 'crc' ws num field_end:
+        out.add('$0', '$2')
+    match 'keepalive' ws field field_end:
+        out.add('$0', '$2')
+    match 'loopback' ws field field_end:
+        out.add('$0', '$2')
+    match 'VLAN' ws nows ws num field_end:
+        out.add('$0-$2', '$4')
+
+grammar counters(default):
+    match num ws 'packets' ws /input|output/ ',' ws num ws 'bytes' nl:
+        out.add('$4-$2', '$0')
+        out.add('$4-$9', '$7')
+    match num ws io ws 'drops' ',' ws num ws 'queue drops' ',' ws num ws io ws 'errors' nl:
+        out.enter('$2/errors/drops')
+        out.add('total',   '$0')
+        out.add('$9',      '$7')
+        out.add('$14-$16', '$12')
+    match num ws 'carrier transitions' nl:
+        out.add('$2', '$0')
+    match 'Datarate information' ws /\w+/ / *\.?/ nl:
+        out.add('$0', '$2')
+    match 'Interface counters' ws /\w+/ / *\.?/ nl:
+        out.add('$0', '$2')
+    match interval ws /input|output/ ws 'rate' ws num ws nows field_end num ws nows nl:
+        out.enter('$2/rate')
+        out.add('interval', '$0')
+        out.add('bits',     '$6 $8')
+        out.add('packets',  '$10 $12')
+    match num ws 'packets' ws io ',' ws num ws nows ',' ws num ws 'total' ws io ws 'drops' nl:
+        out.enter('$4/totals')
+        out.add('$2-$4', '$0')
+        out.add('$9-$4', '$7')
+        out.add('$14-$16-$18', '$12')
+    match num ws 'drops for' ws 'unrecognized upper-level protocol' nl:
+        out.add('$4', '$0')
+    match /Received|Output/ ws num ws 'broadcast packets' ',' ws num ws 'multicast packets' nl:
+        out.add('$4', '$2')
+        out.add('$9', '$7')
+    match /(?:Received[ \t\f\v]+)?/ num ws 'runts' ',' ws num ws 'giants' ',' ws num ws 'throttles' ',' ws num ws 'parity' nl:
+        out.add('$3', '$1')
+        out.add('$8', '$6')
+        out.add('$13', '$13')
+        out.add('$18', '$16')
+    match num ws 'input errors' ',' ws num ws 'CRC' ',' ws num ws 'frame' ',' ws num ws 'overrun' ',' ws num ws 'ignored' ',' ws num ws 'abort' nl:
+        out.enter('input/errors')
+        out.add('total', '$0')
+        out.add('$7', '$5')
+        out.add('$12', '$10')
+        out.add('$17', '$15')
+        out.add('$22', '$20')
+        out.add('$27', '$25')
+    match num ws 'output errors' ',' ws num ws 'underruns' ',' ws num ws 'applique' ',' ws num ws 'resets' nl:
+        out.enter('output/errors')
+        out.add('total', '$0')
+        out.add('$7', '$5')
+        out.add('$12', '$10')
+        out.add('$17', '$15')
+    match num ws 'output buffer failures' ',' ws num ws 'output buffers swapped out' nl:
+        out.enter('output/errors')
+        out.add('buffer-failures',     '$0')
+        out.add('buffers-swapped-out', '$5')
+    do.return()
+
+grammar interface_block(default):
+    match nl:
+        do.return()
+    match 'Interface' ws 'state transitions' ':' ws num nl:
+        out.add('$2', '$5')
+    match 'Dampening' ws nows ':' ws 'penalty' ws num ',' ws /(?:not)?/ /  */ 'suppressed' nl:
+        out.enter('dampening')
+        out.add('status', '$2')
+        out.add('$5', '$7')
+        out.add('$12', '$10$11$12')
+        dampening()
+    match 'Hardware' ws 'is' ws /[^\r\n,]+/ nl:
+        out.add('$0', '$4')
+    match 'Hardware' ws 'is' ws /[^\r\n,]+/ ',' ws 'address' ws 'is' ws nows nl:
+        out.add('$0', '$4')
+        out.add('$7', '$11')
+    match 'Hardware' ws 'is' ws /[^\r\n,]+/ ',' ws 'address' ws 'is' ws nows ws '(bia' ws nows ')' nl:
+        out.add('$0', '$4')
+        out.add('$7', '$11')
+        out.add('real-$7', '$15')
+    match 'Description' ':' ws nonl nl:
+        out.add('$0', '$3')
+    match 'Layer 2 Transport' ws 'Mode' nl:
+        out.add('$2', '$0')
+    match 'Internet address' ws 'is Unknown' nl:
+        do.next()
+    match 'Internet address' ws 'is' ws ipv4_ip '/' num nl:
+        out.add('ip-address',    '$4')
+        out.add('prefix-length', '$6')
+    match 'MTU' ws num ws 'bytes,' ws 'BW' ws nows /\n| [^\r\n]+\n/:
+        out.add('$0', '$2')
+        out.add('$6', '$8')
+    match 'MTU Unknown,' ws 'BW' ws nows /\n| [^\r\n]+\n/:
+        out.add('BW', '$4')
+    match 'reliability' ws nows ',' ws 'txload' ws nows ',' ws 'rxload' ws nows nl:
+        out.add('$0', '$2')
+        out.add('$5', '$7')
+        out.add('$10', '$12')
+    match 'Encapsulation' ws field field_end:
+        out.enter('$0?protocol="$2"')
+        encapsulation()
+    match 'LCP' ws nows nl:
+        out.add('$0', '$2')
+    match nows ':' nonl nl:
+        out.add('protocols-$0', '$2')
+    match 'Scrambling' ws 'is' ws nows ',' ws 'Invert data' ws 'is' ws nows nl:
+        out.add('$0', '$4')
+        out.add('$7', '$11')
+    match /LMI enq (?:sent|recvd)/ ws num ows ','
+          ws /LMI stat (?:sent|recvd)/ ws num ows ','
+          ws /LMI upd (?:sent|recvd)/ ws num ows ','
+          ws /(?:DTE|DCE) LMI/ ws st nl:
+        out.add('$0', '$2')
+        out.add('$6', '$8')
+        out.add('$12', '$14')
+        out.add('$18', '$20')
+    match /LMI enq (?:sent|recvd)/ ws num ows ','
+          ws /LMI stat (?:sent|recvd)/ ws num ows ','
+          ws /LMI upd (?:sent|recvd)/ ws num nl:
+        out.add('$0', '$2')
+        out.add('$6', '$8')
+        out.add('$12', '$14')
+    match 'LMI DLCI' ws num ws 'LMI type is' ws nonl /  / 'frame relay' ws nows nl:
+        out.add('$0', '$2')
+        out.add('$4', '$6')
+        out.add('$8', '$10')
+    match /[a-zA-Z]+/ '-' 'duplex' field_end field field_end 'link type is' ws nows nl:
+        out.add('duplex',    '$0')
+        out.add('bandwidth', '$4')
+        out.add('link-type', '$8')
+    match /[a-zA-Z]+/ '-' 'duplex' field_end field field_end field nl:
+        out.add('duplex',    '$0')
+        out.add('bandwidth', '$4')
+        out.add('type',      '$6')
+    match /[a-zA-Z]+/ '-' 'duplex' field_end field field_end field field_end 'link type' ws 'is' ws nows nl:
+        out.add('duplex',    '$0')
+        out.add('bandwidth', '$4')
+        out.add('type',      '$6')
+        out.add('link-type', '$12')
+    match 'output flow control' ws 'is' ws nows ',' ws 'input flow control' ws 'is' ws nows nl:
+        out.add('$0', '$4')
+        out.add('$7', '$11')
+    match 'Carrier delay' ws nows ws 'is' ws num ws nows nl:
+        out.add('$0', '$6 $8')
+    match 'loopback' ws /[^\r\n,]+/ ',' nl:
+        out.add('$0', '$2')
+    match 'ARP type' ws nows ',' ws 'ARP timeout' ws nows nl:
+        out.add('$0', '$2')
+        out.add('$5', '$7')
+    match 'Last clearing of' ws '"show interface"' ws 'counters' ws nows nl:
+        out.enter('counters')
+        out.add('$0-$4', '$6')
+        counters()
+
+grammar input(default):
+    match /.* (?:UTC|MET)/ nl:
+        do.next()
+    match nows ws 'is' ws st ', line' ws 'protocol' ws 'is' ws st nl:
+        out.enter('interface?name="$0"')
+        out.add('status',   '$4')
+        out.add('$7', '$11')
+        interface_block()
+    match nl:
+        do.skip()

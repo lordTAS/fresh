@@ -1,0 +1,122 @@
+define nows   /\S+/
+define fs     /[\t ]+/
+define nl     /[\r\n]+/
+define nonl   /[^\r\n]+/
+define number /\d+/
+
+grammar default:
+    match fs:
+        do.skip()
+
+grammar pa_bay(default):
+    match /[^\r\n]*(?:PA, |Port Adapter|, \d+ ports)[^\r\n]*/ nl:
+        out.add('description', '$0')
+    match /Serial number:?/ fs nows fs /Part number:?/ fs nows / */ nl:
+        out.add('serialno', '$2')
+        out.add('partno', '$6')
+    match /EEPROM|HW/ nonl nl:
+        do.skip()
+    do.return()
+
+grammar ignore_block(default):
+    when 'Slot' fs number ':' nl:
+        do.return()
+    match nonl nl:
+        do.skip()
+
+grammar slot_7xxx(default):
+    when /Slot/ fs number /\s*[^:]*:/ nl:
+        do.return()
+    match /WIC Slot/ fs nonl nl:
+        ignore_block()
+    match /C2[68]\d+ .*/ nl:
+        out.add('description', '$0')
+    match /PCB Serial Number *:/ fs nows nl:
+        out.add('serialno', '$2')
+    match /PCB Serial Number *:/ fs nows fs '(' nows ')' nl:
+        out.add('serialno', '$2')
+    match /Part Number *:/ fs nows nl:
+        out.add('partno', '$2')
+    match /Top Assy. Part Number *:/ fs nows nl:
+        out.add('top-assy-partno', '$2')
+    match /Route.*Processor .*/ nl:
+        out.add('description', '$0')
+    match /Chassis Interface.*/ nl:
+        out.add('description', '$0')
+    match /.*\s[Pp]ort [Aa]dapter, \d+ ports?.*|.*PA,\s.*/ nl:
+        out.add('description', '$0')
+    match /[VE]IP.*/ nl:
+        out.add('description', '$0')
+    match /Serial number:?/ fs nows fs /Part number:?/ fs nows nl:
+        out.add('serialno', '$2')
+        out.add('partno', '$6')
+    match 'Controller Memory Size:' fs number /[KM]Bytes .*RAM, / number /[KM]Bytes .*RAM/:
+        out.add('memory', '$2')
+        out.add('linememory', '$4')
+    match 'PA Bay' fs number fs 'Information:' nl:
+        out.enter('subslot?slot="$2"')
+        pa_bay()
+    match 'ROM Monitor version' fs nows:
+        out.add('rommon', '$2')
+    match nonl nl:
+        do.skip()
+    match nl:
+        do.skip()
+
+grammar pca(default):
+    match /.* S\/N/ fs nows nl:
+        out.add('serialno', '$2')
+    do.return()
+
+grammar mbus(default):
+    match /.* S\/N/ fs nows nl:
+        out.add('serialno', '$2')
+    do.return()
+
+grammar slot(default):
+    when /SLOT|Slot/:
+        do.return()
+    match /PCA:/ nonl nl:
+        pca()
+    match /MBUS:/ nonl nl:
+        out.enter('mbus')
+        mbus()
+    match /Processor Memory size:/ fs number fs 'bytes' nl:
+        out.add('memory', '$2')
+    match /DRAM size:/ fs number fs 'bytes' nl:
+        out.add('memory', '$2')
+    match /TX|RX/ fs 'Packet Memory size:' fs number fs 'bytes' /[^\r\n]*/ nl:
+        out.add('linememory/$0', '$4')
+    match /(?:Fr|to)Fab SDRAM size:/ fs number fs 'bytes' nl:
+        out.add('linememory', '$2')
+    match /MAIN: type \S+/ fs nonl nl:
+        out.add('partno', '$2')
+    match /Main:/ fs nows nl:
+        out.add('type', '$2')
+    match /FRU:  \S+:/ fs nows nl:
+        out.add('type', '$2')
+    match 'L3 Engine:' fs nows nl:
+        out.add('l3engine', '$2')
+    match 'ROM Monitor version' fs nows nl:
+        out.add('rommon', '$2')
+    match 'subslot' fs /\d+\/\d+/ ':' fs nonl nl:
+        out.add('subslot?slot="$2"/description', '$5')
+    match /SUBSLOT .*/:
+        do.return()
+    match nl:
+        do.return()
+    match nonl nl:
+        do.skip()
+
+grammar input(default):
+    match /Slot/ fs number /\s*[^:]*:/ nl:
+        out.enter('card?slot="$2"')
+        slot_7xxx()
+    match /Slot|SLOT|PEM/ fs number /\s*[^:]*:\s+/ nonl nl:
+        out.enter('card?slot="$2"')
+        out.add('description', '$4')
+        slot()
+    match nonl nl:
+        do.skip()
+    match nl:
+        do.skip()

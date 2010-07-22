@@ -1,0 +1,31 @@
+define ws     /[\t ]+/
+define nows   /\S+/
+define fs     /[\t ]*,[\t ]*/
+define field1 /[^"]*/
+define field2 /[^,\r\n]*\S/
+define nl     /[ \t]*\r?\n/
+
+grammar element:
+    match 'DESCR:' ws '"' field1 '"' nl:
+        out.add('description', '$3')
+    match 'PID:' fs:
+        do.skip()
+    match 'PID:' ws field2 fs:
+        out.add('pid', '$2')
+    match 'VID:' ws field2 fs:
+        out.add('hardware-version', '$2')
+    match 'SN:' ws nl:
+        do.skip()
+    match 'SN:' ws field2 nl:
+        out.add('serialno', '$2')
+    match nl:
+        do.return()
+
+grammar input:
+    match /.* (?:UTC|MET)/ nl:
+        do.skip()
+    match 'NAME:' ws '"' field1 '"' fs:
+        out.enter('element?name="$3"')
+        element()
+    match nl:
+        do.skip()
