@@ -12,7 +12,7 @@ class FileStore(object):
         hostname = host.get('__real_hostname__')
         path     = host.get('__path__')
         command  = host.get('__last_command__')
-        host_dir = os.path.join(self.base_dir, path, hostname)
+        host_dir = os.path.join(self.base_dir, path)
         filename = kwargs.get('filename', str2filename(command))
         filename = os.path.join(host_dir, filename)
 
