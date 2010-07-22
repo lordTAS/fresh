@@ -174,8 +174,8 @@ class HostDB(object):
     def __get_host_from_row(self, row):
         assert row is not None
         tbl_h = self._table_map['host']
-        host  = Host(row[tbl_h.c.name])
-        host.set_address(row[tbl_h.c.address])
+        host  = Host(row[tbl_h.c.address])
+        host.set_name(row[tbl_h.c.alias])
         host.set('path', row[tbl_h.c.path])
         return host
 
@@ -195,9 +195,10 @@ class HostDB(object):
         return host_list
 
     def __get_conditions(self, **kwargs):
+        tbl_h = self._table_map['host']
         where = None
 
-        for field in ('hostname', 'address', 'path'):
+        for field in ('address', 'alias', 'path'):
             if kwargs.has_key(field):
                 cond = None
                 for value in to_list(kwargs.get(field)):
