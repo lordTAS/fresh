@@ -2,7 +2,7 @@ import os, sys
 sys.path.insert(0, os.path.dirname(__file__))
 from Config import Config
 
-filename = os.path.join(os.path.dirname(__file__), 'grabber.xml')
+filename = os.path.join(os.path.dirname(__file__), 'config.xml')
 config   = Config(filename)
 grabber  = config.get_grabber()
 
