@@ -1,0 +1,5 @@
+Fresh is an automatic network inventory system, consisting of
+the following components:
+
+  seed - update the list of hosts known to Fresh
+  grabber - update the inventory of known hosts
