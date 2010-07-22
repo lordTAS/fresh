@@ -26,9 +26,10 @@ class GelatinProcessor(object):
     def start(self, conn, **kwargs):
         host      = conn.get_host()
         hostname  = host.get('__real_hostname__')
+        path      = host.get('__path__')
         command   = host.get('__last_command__')
         syntax    = kwargs.get('syntax')
-        host_dir  = os.path.join(self.output_dir, 'pe', hostname) #FIXME
+        host_dir  = os.path.join(self.output_dir, path, hostname)
         outfile   = kwargs.get('filename', str2filename(command, '.xml'))
         outfile   = os.path.join(host_dir, outfile)
         converter = self._load_syntax(syntax)
