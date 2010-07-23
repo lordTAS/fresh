@@ -19,7 +19,7 @@
   using Gelatin.
   -->
   <processor type="gelatin" name="gelatin">
-    <syntax-dir>.</syntax-dir>
+    <syntax-dir>providers</syntax-dir>
     <output-dir>$fileStoreDir</output-dir>
   </processor>
 
@@ -42,7 +42,7 @@
           <!--
           <post-process
             processor="gelatin"
-            syntax="providers/ios/gel/show_running-config.gel"
+            syntax="ios/gel/show_running-config.gel"
             filename="show_interface.xml"/>
           -->
       </execute>
@@ -50,7 +50,7 @@
           <post-process processor="file-store" filename="show_version.txt"/>
           <post-process
             processor="gelatin-ipmb"
-            syntax="providers/ios/gel/show_version.gel"
+            syntax="ios/gel/show_version.gel"
             filename="show_version.xml"/>
       </execute>
       <execute command="show interface">
@@ -58,7 +58,7 @@
           <!--
           <post-process
             processor="gelatin"
-            syntax="providers/ios/gel/show_interface.gel"
+            syntax="ios/gel/show_interface.gel"
             filename="show_interface.xml"/>
           <post-process processor="lint" schema="model.xsd" filename="generic.xml"/>
           -->
@@ -83,12 +83,16 @@
           <!--
           <post-process
             processor="gelatin"
-            syntax="providers/ios/gel/show_running-config.gel"
+            syntax="ios_xr/gel/show_running-config.gel"
             filename="show_interface.xml"/>
           -->
       </execute>
       <execute command="show version">
           <post-process processor="file-store" filename="show_version.txt"/>
+          <post-process
+            processor="gelatin-ipmb"
+            syntax="ios_xr/gel/show_version.gel"
+            filename="show_version.xml"/>
       </execute>
       <execute command="show interface">
           <post-process processor="file-store" filename="show_interface.txt"/>
