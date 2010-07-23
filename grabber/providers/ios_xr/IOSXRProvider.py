@@ -22,5 +22,22 @@ class IOSXRProvider(Provider):
         prompt   = r'[\r\n]\S+' + hostname + r'[#>] ?$'
         conn.set_prompt(re.compile(prompt))
 
+        # Whenever connection.execute() is called, clean
+        # the response up.
+        oldexecute = conn.execute
+        def execute_wrapper(command):
+            oldexecute(command)
+            response = conn.response.translate(None, '\r\x00')
+
+            # Strip the command from the response.
+            response = response.split('\n')
+            if response:
+                response.pop(0)
+            while response and '#' + command in response[0]:
+                response.pop(0)
+            conn.response = '\n'.join(response) + '\n'
+
+        conn.execute = execute_wrapper
+
     def start(self, conn):
         Provider.start(self, conn)
