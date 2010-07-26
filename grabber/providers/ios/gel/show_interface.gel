@@ -25,6 +25,8 @@ grammar interface_block:
         do.return()
     match nonl nl:
         do.skip()
+    match nonl /\r?\n?\Z/:
+        do.return()
     match nl:
         do.return()
 
