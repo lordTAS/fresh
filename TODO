@@ -1,1 +1,3 @@
 * Add doc infrastructure.
+* Complete/test the XSLTProcessor.
+* Implement the ExistDBStore.

@@ -37,34 +37,33 @@
   -->
   <provider name="ios" filename="providers/ios/IOSProvider.py">
       <auto_authorize/>
-      <execute command="show configuration">
+      <execute command="show running-config">
           <post-process processor="file-store" filename="show_configuration.txt"/>
-          <!--
           <post-process
             processor="gelatin"
             syntax="ios/gel/show_running-config.gel"
-            filename="show_interface.xml"/>
-          -->
+            filename="show_running-config.xml"/>
       </execute>
       <execute command="show version">
           <post-process processor="file-store" filename="show_version.txt"/>
           <post-process
-            processor="gelatin-ipmb"
+            processor="gelatin"
             syntax="ios/gel/show_version.gel"
             filename="show_version.xml"/>
       </execute>
       <execute command="show interface">
           <post-process processor="file-store" filename="show_interface.txt"/>
-          <!--
           <post-process
             processor="gelatin"
             syntax="ios/gel/show_interface.gel"
             filename="show_interface.xml"/>
-          <post-process processor="lint" schema="model.xsd" filename="generic.xml"/>
-          -->
       </execute>
       <execute command="show inventory">
           <post-process processor="file-store" filename="show_inventory.txt"/>
+          <post-process
+            processor="gelatin"
+            syntax="ios/gel/show_inventory.gel"
+            filename="show_inventory.xml"/>
       </execute>
       <!--
       <post-process
@@ -80,25 +79,31 @@
   <provider name="ios_xr" filename="providers/ios_xr/IOSXRProvider.py">
       <execute command="show running-config">
           <post-process processor="file-store" filename="show_running-config.txt"/>
-          <!--
           <post-process
             processor="gelatin"
             syntax="ios_xr/gel/show_running-config.gel"
-            filename="show_interface.xml"/>
-          -->
+            filename="show_running-config.xml"/>
       </execute>
       <execute command="show version">
           <post-process processor="file-store" filename="show_version.txt"/>
           <post-process
-            processor="gelatin-ipmb"
+            processor="gelatin"
             syntax="ios_xr/gel/show_version.gel"
             filename="show_version.xml"/>
       </execute>
       <execute command="show interface">
           <post-process processor="file-store" filename="show_interface.txt"/>
+          <post-process
+            processor="gelatin"
+            syntax="ios_xr/gel/show_interface.gel"
+            filename="show_interface.xml"/>
       </execute>
       <execute command="show inventory">
           <post-process processor="file-store" filename="show_inventory.txt"/>
+          <post-process
+            processor="gelatin"
+            syntax="ios_xr/gel/show_inventory.gel"
+            filename="show_inventory.xml"/>
       </execute>
   </provider>
 
