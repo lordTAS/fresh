@@ -16,8 +16,8 @@ define ipv6_ip /(?:[a-fA-F0-9]*:){1,7}(?:\d+\.\d+\.\d+\.\d+|[a-fA-F0-9]+)?/
 define ipvx_ip /[a-zA-Z0-9:\.]+[\.:][a-zA-Z0-9:\.]+/
 define if_name /[a-zA-Z\-]+[A-Z0-9\/\.:]+/
 define if_type /\S+/
-define multi_line_str_start /\^?[Cc=][\r\n]/
-define multi_line_str_end /\^?[Cc=][\r\n]/
+define multi_line_str_start /\^?[Cc=#] ?[\r\n]/
+define multi_line_str_end /\^?[Cc=#][\r\n]/
 define as_number /[1-9]\d{0,4}/
 define description /[^\r\n]+/
 define file /\S+/
@@ -36,9 +36,17 @@ grammar default:
         out.enqueue_on_add(nl, 'disable')
         do.next()
 
+grammar aaa_group_statements(default):
+    match 'server' fs ipvx_ip nl:
+        out.add('$0', '$2')
+    do.return()
+
 grammar aaa(default):
     match 'aaa' fs 'new-model' nl:
         out.add('aaa/$2')
+    match 'aaa group server' fs nows fs nows nl:
+        out.enter('aaa/group?type="$2"&name="$4"')
+        aaa_group_statements()
     match 'aaa' fs nonl nl:
         out.add('aaa/option?string="$2"')
     do.return()
@@ -72,6 +80,8 @@ grammar as_path_set(default):
 grammar async_line_statements(default):
     match /access-(?:group|class)/ fs acl_direction fs acl_name nl:
         out.add('$0?name="$2"/direction', '$4')
+    match 'authorization commands' fs nows nl:
+        out.add('$0', '$2')
     match 'authorization exec' fs nows nl:
         out.add('$0', '$2')
     match 'exec-timeout' fs number fs number nl:
@@ -364,6 +374,29 @@ grammar controller(default):
         controller_statements()
     do.return()
 
+grammar control_plane_management_plane_inband_interface_statements(default):
+    match 'allow' fs nows nl:
+        out.add('$0/protocol?name="$2"')
+    do.return()
+
+grammar control_plane_management_plane_inband_statements(default):
+    match 'interface' fs nows nl:
+        out.enter('$0?name="$2"')
+        control_plane_management_plane_inband_interface_statements()
+    do.return()
+
+grammar control_plane_management_plane_statements(default):
+    match 'inband' nl:
+        out.enter('$0')
+        control_plane_management_plane_inband_statements()
+    do.return()
+
+grammar control_plane_statements(default):
+    match 'management-plane' nl:
+        out.enter('$0')
+        control_plane_management_plane_statements()
+    do.return()
+
 grammar event(default):
     match 'event manager' fs 'environment' fs nonl nl:
         out.add('$0/$2', '$4')
@@ -371,6 +404,15 @@ grammar event(default):
         out.add('$0/$2', '$4')
     match 'event manager' fs 'policy' fs nows fs 'username' fs nows nl:
         out.add('$0/$2?name="$4"/$6', '$8')
+    do.return()
+
+grammar explicit_path_statements(default):
+    match 'index'
+       fs number
+       fs 'exclude-address'
+       fs 'ipv4 unicast'
+       fs ipv4_ip nl:
+        out.add('index?number="$2"/$4?protocol="ipv4"&address="$8"')
     do.return()
 
 grammar flow_version_statements(default):
@@ -459,6 +501,8 @@ grammar interface_statements(default):
         out.add('$0')
     match 'description' fs description nl:
         out.add('description', '$2')
+    match 'destination' fs ipvx_ip nl:
+        out.add('$0', '$2')
     match 'down-when-looped' nl:
         out.add('$0')
     match 'dot1q' fs 'vlan' fs number nl:
@@ -485,6 +529,8 @@ grammar interface_statements(default):
         out.add('$0/$2?name="$4"&direction="$6"/$8')
     match 'ipv4' fs 'unnumbered' fs nows nl:
         out.add('ip-address?$2="$4"')
+    match 'ipv4' fs 'unreachables' fs 'disable' nl:
+        out.add('$2/$4')
     match 'ipv4' fs 'verify unicast source' fs 'reachable-via' fs nows nl:
         out.add('$0/$2?$4="$6"')
     match 'ipv6' fs 'address' fs ipv6_ip '/' number nl:
@@ -507,6 +553,8 @@ grammar interface_statements(default):
         out.add('$0', '$2')
     match 'negotiation' fs nonl nl:
         out.add('$0', '$2')
+    match 'path-option' fs nonl nl:
+        out.add('$0?option="$2"')
     match 'ppp authentication chap' fs nows nl:
         out.add('ppp/chap/$2')
     match 'ppp loopback ignore' nl:
@@ -532,6 +580,8 @@ grammar interface_statements(default):
         out.add('$0?name="$4"&direction="$2"/$6')
     match 'shutdown' nl:
         out.add('disable')
+    match 'signalled-name' fs nows nl:
+        out.add('$0', '$2')
     match 'speed' fs number nl:
         out.add('$0', '$2')
     match 'vrf' fs name nl:
@@ -710,8 +760,12 @@ grammar service_commands(default):
     do.return()
 
 grammar snmp_statements(default):
+    match 'chassis-id' fs nows nl:
+        out.add('$0', '$2')
     match 'community' fs nows fs nonl nl:
         out.add('community?name="$2"', '$4')
+    match 'enable traps' fs nonl nl:
+        out.add('$0?trap="$2"')
     match 'engineID local' fs nows nl:
         out.add('engine-id', '$2')
     match 'group' fs nows fs /v2|v3/ fs nonl nl:
@@ -719,14 +773,22 @@ grammar snmp_statements(default):
         out.add('group?name="$2"/options', '$6')
     match 'host' fs nows fs 'traps' fs nows nl:
         out.add('$0?address="$2"/trap?name="$6"')
+    match 'host' fs nows fs 'traps version' fs nonl / */ nl:
+        out.add('$0?address="$2"/version', '$6')
+    match 'ifindex persist' nl:
+        out.add('$0')
     match 'ifmib stats cache' nl:
         out.add('$0')
     match 'ipv4 precedence' fs nows nl:
+        out.add('$0', '$2')
+    match 'location' fs nonl nl:
         out.add('$0', '$2')
     match 'queue-length' fs number nl:
         out.add('$0', '$2')
     match 'timeouts' fs nows fs number nl:
         out.add('$0/$2', '$4')
+    match 'trap link' fs nonl nl:
+        out.add('$0', '$2')
     match 'traps' fs nonl nl:
         out.add('enable-traps?name="$2"')
     match 'trap-source' fs nonl nl:
@@ -777,6 +839,8 @@ grammar username_statements(default):
         out.add('$0?name="$2"')
     match 'password' fs number fs nows nl:
         out.add('$0?type="$2"', '$4')
+    match 'secret' fs number fs nows nl:
+        out.add('$0?type="$2"', '$4')
     do.return()
 
 grammar username(default):
@@ -798,6 +862,8 @@ grammar ntp_statements(default):
         ntp_interface_statements()
     match 'max-associations' fs number nl:
         out.add('$0', '$2')
+    match 'server' fs ipvx_ip nl:
+        out.add('$0?address="$2"')
     match 'server' fs ipv4_ip fs 'source' fs nows nl:
         out.add('$0?address="$2"/$4', '$6')
     match 'update-calendar' nl:
@@ -823,10 +889,10 @@ grammar policy_map_class_statements(default):
     match 'police' fs 'rate' fs nonl nl:
         out.enter('$0?rate="$4"')
         policy_map_class_police_statements()
-    match 'priority' nl:
+    match 'priority' / */ nl:
         out.add('$0')
-    match 'priority' fs nl:
-        out.add('$0')
+    match 'priority' fs 'level' fs number / */ nl:
+        out.enter('$0?level="$4"')
     match 'random-detect' fs 'precedence' fs number fs nonl nl:
         out.add('$0?$2="$4"', '$6')
     match 'random-detect' fs nonl nl:
@@ -1007,6 +1073,8 @@ grammar isis_interface_statements(default):
         out.add('$0', '$2')
     match 'hello-padding' fs 'disable' nl:
         out.add('$0/$2')
+    match 'hello-password' fs 'hmac-md5 encrypted' fs nows nl:
+        out.add('$0?type="$2"', '$4')
     match 'lsp-interval' fs number nl:
         out.add('$0', '$2')
     match 'passive' nl:
@@ -1042,6 +1110,8 @@ grammar isis_af_statements(default):
     match 'redistribute' fs /connected|static|ospf \d+/ fs nows fs:
         out.enter('redistribute/source?name="$2"&destination="$4"')
         redistribute_statements()
+    match 'spf-interval' fs nonl nl:
+        out.add('$0?option="$2"')
     do.return()
 
 grammar isis_statements(default):
@@ -1050,12 +1120,16 @@ grammar isis_statements(default):
         isis_af_statements()
     match 'ignore-attached-bit' nl:
         out.add('$0')
+    match 'ignore-lsp-errors' fs 'disable' nl:
+        out.add('$0/$2')
     match 'is-type' ws nows nl:
         out.add('$0')
     match 'log adjacency changes' nl:
         out.add('$0')
-    match 'lsp-refresh-interval' fs number nl:
-        out.add('$0', '$2')
+    match /lsp-\w+-/ 'interval' fs number nl:
+        out.add('$0/interval', '$2')
+    match /lsp-\w+-interval/ fs nonl nl:
+        out.add('$0/option', '$2')
     match 'lsp-password' fs nonl nl:
         out.add('$0', '$2')
     match 'max-lsp-lifetime' fs number nl:
@@ -1064,6 +1138,8 @@ grammar isis_statements(default):
         out.add('$0', '$2')
     match 'nsf' fs nows nl:
         out.add('$0', '$2')
+    match 'set-overload-bit' fs nonl nl:
+        out.add('$0?option="$2"')
     do.return()
 
 grammar ospf_af_statements(default):
@@ -1114,15 +1190,26 @@ grammar rsvp_interface_statements(default):
     match 'bandwidth' fs number fs number nl:
         out.add('$0/average', '$2')
         out.add('$0/burst', '$4')
+    match 'signalling' fs 'dscp' fs number nl:
+        out.add('$0/$2', '$4')
     do.return()
 
 grammar rsvp_statements(default):
     match 'interface' fs if_name nl:
         out.enter('$0?name="$2"')
         rsvp_interface_statements()
+    match 'signalling' fs 'graceful-restart' nl:
+        out.add('$0/$2')
+    do.return()
+
+grammar tacacs_server_statements(default):
+    match 'key' fs number fs nows nl:
+        out.add('key?type="$2"', '$4')
     do.return()
 
 grammar mpls_traffic_eng_interface_statements(default):
+    match 'backup-path' fs 'tunnel-te' fs nows nl:
+        out.add('$0/$2?name="$4"')
     do.return()
 
 grammar mpls_traffic_eng_statements(default):
@@ -1150,8 +1237,10 @@ grammar mpls_ldp_statements(default):
         out.add('$0')
     match 'holdtime' fs number nl:
         out.add('$0', '$2')
-    match 'neighbor' fs ipv4_ip fs 'targeted' nl:
+    match 'neighbor' fs ipvx_ip fs 'targeted' nl:
         out.add('$0?address="$2"/$4')
+    match 'neighbor' fs ipvx_ip fs 'password' fs 'encrypted' fs nows nl:
+        out.add('$0?address="$2"/password?type="$6"', '$8')
     match 'router-id' fs nows nl:
         out.add('$0', '$2')
     match 'session protection' nl:
@@ -1350,9 +1439,14 @@ grammar input(default):
         out.add('aliases/alias?name="$2"', '$4')
     match 'cdp' nl:
         out.add('$0')
+    match 'control-plane' nl:
+        out.enter('$0')
+        control_plane_statements()
     match 'banner' fs word fs multi_line_str_start:
         out.enter('banner/$2')
         banner_statements()
+    match 'domain lookup' fs nows nl:
+        out.add('domain-lookup', '$2')
     match 'domain name-server' fs nonl nl:
         out.add('name-server/server?address="$2"')
     match 'domain name' fs nonl nl:
@@ -1361,16 +1455,27 @@ grammar input(default):
         out.add('domain-list/domain?name="$2"')
     match 'exception' fs nonl nl:
         out.add('exception?type="$2"')
+    match 'explicit-path' fs 'name' fs name nl:
+        out.enter('$0?name="$2"')
+        explicit_path_statements()
     match 'hostname' fs hostname nl:
         out.add('hostname', '$2')
     match 'ipv4 virtual address' fs ipv4_ip fs ipv4_mask nl:
         out.add('$0?address="$2"&mask="$4"')
     match 'rp mgmtethernet forwarding' nl:
         out.add('$0')
+    match 'mpls label range table' fs nonl nl:
+        out.add('$0', '$2')
+    match 'ssh server' fs nows nl:
+        out.add('$0?version="$2"')
+    match 'tacacs-server' fs 'timeout' fs number nl:
+        out.add('$0/timeout', '$2')
     match 'tacacs-server' fs 'host' fs nows fs 'port' fs number nl:
-        out.add('$0/host?name="$4"&port="$8"')
+        out.enter('$0/host?name="$4"&port="$8"')
+        tacacs_server_statements()
     match 'tacacs-server' fs 'key' fs number fs nonl nl:
-        out.add('$0/key?type="$4"', '$6')
+        out.enter('$0/key?type="$4"', '$6')
+        tacacs_server_statements()
     match 'tacacs' fs 'source-interface' fs nows nl:
         out.add('$0/$2', '$4')
     match 'tcp' fs nonl nl:
