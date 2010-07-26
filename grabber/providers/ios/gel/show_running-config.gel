@@ -23,7 +23,7 @@ define description /[^\r\n]+/
 define file /\S+/
 define acl_action /(?:permit|deny)/
 define acl_direction /(?:in|out)/
-define acl_name /[a-zA-Z0-9\-]+/
+define acl_name /[a-zA-Z0-9\-_]+/
 define version_number /[0-9\.]+/
 define async_line_name /\w+/
 
@@ -74,6 +74,9 @@ grammar acl_extended_statements(default):
     do.return()
 
 grammar acl_statements(default):
+    match 'remark' fs nonl nl:
+        out.add('$0', '$2')
+        do.return()
     match acl_action fs nonl nl:
         out.add('$0?condition="$2"')
         do.return()
@@ -242,6 +245,8 @@ grammar redistribute_statements:
         out.add('$0', '$2')
     match 'distribute-list' fs number:
         out.add('$0', '$2')
+    match 'match' fs nonl:
+        out.add('match', '$2')
     match name nl:
         out.add('destination', '$0')
         do.return()
@@ -251,6 +256,9 @@ grammar redistribute_statements:
 
 grammar bgp_neighbor_group_statements(default):
     match 'activate' nl:
+        out.add('$0')
+        do.return()
+    match 'allowas-in' nl:
         out.add('$0')
         do.return()
     match 'as-override' nl:
@@ -326,8 +334,16 @@ grammar bgp_neighbor_group_statements(default):
     match 'shutdown' nl:
         out.add('$0')
         do.return()
+    match 'timers' fs number fs number nl:
+        out.add('timers', '$2 $4')
+        do.return()
     match 'update-source' fs if_name nl:
         out.add('update-source', '$2')
+        do.return()
+    match 'weight' fs number nl:
+        out.add('$0', '$2')
+        do.return()
+    when /exit-\S+/ nl:
         do.return()
 
 grammar bgp_neighbor_statements(bgp_neighbor_group_statements):
@@ -335,37 +351,31 @@ grammar bgp_neighbor_statements(bgp_neighbor_group_statements):
         out.add('group', '$2')
         do.return()
 
+grammar bgp_aggregate_statements:
+    match fs 'attribute-map' fs nows:
+        out.add('$1?name="$3"')
+    match fs 'summary-only':
+        out.add('$1')
+    match nl:
+        do.return()
+
 grammar bgp_template_statements(default):
     match 'advertisement-interval' fs number nl:
         out.add('$0', '$2')
-    match 'description' fs description nl:
-        out.add('description', '$2')
-    match 'password' fs number fs nonl nl:
-        out.add('$0?type="$2"', '$4')
-    match 'remote-as' fs number nl:
-        out.add('$0', '$2')
-    match 'route-map' fs nows fs word nl:
-        out.add('$0?direction="$4"', '$2')
-    match 'next-hop-self' nl:
-        out.add('$0')
-    match 'send-community' fs word nl:
-        out.add('$0', '$2')
-    match 'soft-reconfiguration' fs word nl:
-        out.add('$0?direction="$2"')
-    match 'timers' fs number fs number nl:
-        out.add('timers', '$2 $4')
-    match 'update-source' fs if_name nl:
-        out.add('update-source', '$2')
+    bgp_neighbor_group_statements()
     match /exit-\S+/ nl:
         do.return()
 
 grammar bgp_statements(default):
     match 'auto-summary' nl:
         out.add('$0')
-    match 'aggregate-address' fs ipv4_ip fs ipv4_mask nl:
-        out.add('$0?address="$2"&mask="$4"')
+    match 'aggregate-address' fs ipv4_ip fs ipv4_mask:
+        out.enter('$0?address="$2"&mask="$4"')
+        bgp_aggregate_statements()
     match 'bgp' fs 'always-compare-med' nl:
         out.add('$2')
+    match 'bgp' fs 'scan-time' fs 'import' fs number nl:
+        out.add('$2/$4', '$6')
     match 'bgp bestpath dampening' nl:
         out.add('$0')
     match 'bgp bestpath dampening' fs 'route-map' fs nows nl:
@@ -396,6 +406,10 @@ grammar bgp_statements(default):
         out.add('maxas-limit', '$2')
     match 'bgp router-id' fs nows nl:
         out.add('router-id', '$2')
+    match 'bgp router-id vrf auto-assign' nl:
+        out.add('$0')
+    match 'default-information' fs 'originate' nl:
+        out.add('$0/$2')
     match 'maximum-paths' fs number nl:
         out.add('$0', '$2')
     match 'maximum-paths' fs 'import' fs number nl:
@@ -423,7 +437,7 @@ grammar bgp_statements(default):
         out.add('$0?address="$2"&mask="$6"/route-map', '$10')
     match 'network' fs ipv6_ip '/' number fs 'route-map' fs name nl:
         out.add('$0?address="$2"&prefixlen="$4"/route-map', '$8')
-    match 'redistribute' fs /(?:connected|static|ospf \d+)/:
+    match 'redistribute' fs /(?:connected|static|ospf \d+(?: vrf \S+)?)/:
         out.enter('redistribute/source?name="$2"')
         redistribute_statements()
     match 'synchronization' nl:
@@ -617,14 +631,18 @@ grammar interface_pvc_statements(default):
         out.add('$0', '$2')
     match 'encapsulation' fs nonl nl:
         out.add('$0', '$2')
-    match 'vbr-nrt' fs number fs number fs number nl:
-        out.add('$0?one="$2"&two="$4"&three="$6"')
+    match 'inarp' fs number nl:
+        out.add('$0', '$2')
     match 'oam-pvc' fs word fs number nl:
         out.add('$0?$2="$4"')
     match 'protocol ip' fs nonl nl:
         out.add('$0', '$2')
     match 'service-policy' fs /(?:in|out)/ fs nows nl:
         out.add('$0?name="$4"&direction="$2put"')
+    match 'ubr' fs number nl:
+        out.add('$0', '$2')
+    match 'vbr-nrt' fs number fs number fs number nl:
+        out.add('$0?one="$2"&two="$4"&three="$6"')
     do.return()
 
 grammar interface_rate_limit_statements(default):
@@ -661,10 +679,14 @@ grammar interface_statements(default):
         out.add('$0')
     match 'channel-group' fs number nl:
         out.add('$0?number="$2"')
+    match 'channel-group' fs number fs 'mode' fs nows nl:
+        out.add('$0?number="$2"/mode', '$6')
     match 'channel-group' fs 'minimum' fs nonl nl:
         out.add('$0/$2', '$4')
     match 'channel-group' fs nonl nl:
         out.add('$0/$2')
+    match 'channel-protocol' fs nows nl:
+        out.add('$0', '$2')
     match 'class-int' fs nows nl:
         out.add('$0', '$2')
     match 'clockrate' fs number nl:
@@ -733,6 +755,8 @@ grammar interface_statements(default):
         out.add('$0?address="$2"&mask="$4"/$6')
     match 'ip directed-broadcast' nl:
         out.add('directed-broadcast')
+    match 'ip' fs 'flow ingress' nl:
+        out.add('$2')
     match 'ip' fs 'load-sharing' fs nows nl:
         out.add('$2', '$4')
     match 'ip' fs /m?route-cache/ nl:
@@ -743,12 +767,16 @@ grammar interface_statements(default):
         out.add('$2', '$4')
     match 'ip' fs 'nat' fs 'outside' nl:
         out.add('$2/$4')
-    match 'ip' fs 'ospf' fs /(?:area|cost)/ fs number nl:
+    match 'ip' fs 'ospf' fs /(?:area|cost|priority)/ fs number nl:
         out.add('$2/$4', '$6')
     match 'ip' fs 'ospf' fs number fs /(?:area|cost)/ fs number nl:
         out.add('$2?number="$4"/$6', '$8')
+    match 'ip' fs 'ospf' fs 'authentication' fs nows nl:
+        out.add('$2/$4', '$6')
     match 'ip' fs 'ospf' fs 'network' fs nonl nl:
         out.add('$2/$4', '$6')
+    match 'ip' fs 'ospf' fs 'message-digest-key' fs number fs nonl nl:
+        out.add('$2/$4?name="$6"', '$8')
     match 'ip pim' fs nonl nl:
         out.add('$0/$2')
     match 'ip policy' fs 'route-map' fs nonl nl:
@@ -761,6 +789,8 @@ grammar interface_statements(default):
         out.add('isis')
     match 'ip router isis' fs nows nl:
         out.add('isis?name="$2"')
+    match 'ip rsvp' fs 'bandwidth' fs number nl:
+        out.add('$0/$2/reservable', '$4')
     match 'ip rsvp' fs 'bandwidth' fs number fs number nl:
         out.add('$0/$2/reservable', '$4')
         out.add('$0/$2/largest', '$6')
@@ -864,6 +894,8 @@ grammar interface_statements(default):
         out.add('$0')
     match 'peer' fs nonl nl:
         out.add('$0/$2')
+    match 'port-channel' fs 'min-links' fs number nl:
+        out.add('$0/$2', '$4')
     match 'pos' fs 'framing' fs nonl nl:
         out.add('$0/$2', '$4')
     match 'pos' fs 'report' fs nonl nl:
@@ -915,9 +947,9 @@ grammar interface_statements(default):
         out.add('$0/$2')
     match 'snmp' fs 'trap link-status' nl:
         out.add('$0/$2')
-    match 'speed' fs 'auto' nl:
-        out.add('$0', '$2')
     match 'speed' fs number nl:
+        out.add('$0', '$2')
+    match 'speed' fs nows nl:
         out.add('$0', '$2')
     match /(?:standby|vrrp)/
        fs 'delay'
@@ -931,6 +963,10 @@ grammar interface_statements(default):
         out.add('$0/$2', '$4')
     match /(?:standby|vrrp)/ fs number fs 'ip' fs ipv4_ip nl:
         out.add('$0?group="$2"/ip?address="$6"')
+    match /(?:standby|vrrp)/ fs number fs 'timers'
+        fs number
+        fs number nl:
+        out.add('$0?group="$2"/$4', '$6/$8')
     match /(?:standby|vrrp)/ fs number fs 'timers'
       fs 'msec' fs number
       fs 'msec' fs number nl:
@@ -997,6 +1033,8 @@ grammar interface_statements(default):
         out.add('$0', '$2')
     match 'tx-queue-limit' fs number nl:
         out.add('$0', '$2')
+    match 'udld' fs 'port aggressive' nl:
+        out.add('$0/$2')
     match 'xconnect' fs ipv4_ip fs number fs 'pw-class' fs name nl:
         out.add('$0/address', '$2')
         out.add('$0/number', '$4')
@@ -1026,6 +1064,8 @@ grammar ip_route_statements(default):
     match if_name nl:
         out.add('destination?interface="$0"')
         do.return()
+    match 'track' fs number:
+        out.add('track?number="$2"')
     match 'global' nl:
         out.add('destination?type="$0"')
         do.return()
@@ -1033,6 +1073,8 @@ grammar ip_route_statements(default):
         out.add('destination?address="$0"&metric="$2"')
     match ipvx_ip:
         out.add('destination?address="$0"')
+    match if_name:
+        out.add('destination?interface="$0"')
     match nl:
         do.return()
     do.return()
@@ -1103,8 +1145,10 @@ grammar community_list_expanded_statements(community_list_standard_statements):
 grammar ip_vrf_statements(default):
     match 'description' fs nonl nl:
         out.add('$0', '$2')
+    match 'import map' fs name nl:
+        out.add('import?map="$2"')
     match 'export map' fs name nl:
-        out.add('export?map="$2"', '$2')
+        out.add('export?map="$2"')
     match 'rd' fs nonl nl:
         out.add('route-distinguisher', '$2')
     match 'route-target' fs /(?:im|ex)port/ fs nonl nl:
@@ -1126,6 +1170,17 @@ grammar ip_flow_aggregation_statements(default):
         out.add('$0/$2', '$4')
     match 'enabled' nl:
         out.add('$0')
+    do.return()
+
+grammar ip_sla_statements(default):
+    match 'frequency' fs number nl:
+        out.add('$0', '$2')
+    match 'icmp-echo' fs ipvx_ip nl:
+        out.add('$0', '$2')
+    match 'timeout' fs number nl:
+        out.add('$0', '$2')
+    match 'vrf' fs nows nl:
+        out.add('$0', '$2')
     do.return()
 
 grammar ip_statements(default):
@@ -1233,22 +1288,35 @@ grammar ip_statements(default):
         out.add('$0/option?string="$2"')
     match 'multicast-routing distributed' nl:
         out.add('$0')
-    match 'ospf' fs 'name-lookup' nl:
-        out.add('$0')
     match 'name-server' fs nonl nl:
         out.add('name-server/server?address="$2"')
+    match 'ospf' fs 'name-lookup' nl:
+        out.add('$0')
     match 'pim' fs nows nl:
         out.add('$0/$2')
     match 'pim' fs nows fs nonl nl:
         out.add('$0/$2', '$4')
+    match 'policy-list' fs nows fs acl_action nl:
+        out.add('$0?name="$2"&action="$4"')
+        route_map_statements()
     match 'receive access-list' fs nonl nl:
         out.add('$0', '$2')
     match 'routing' nl:
         out.add('$0')
+    match 'rsvp' fs 'authentication' fs nonl nl:
+        out.add('$0/$2?type="$4"')
+    match 'rsvp' fs 'authentication' nl:
+        out.add('$0/$2')
     match 'rsvp' fs 'signalling' fs nonl nl:
         out.add('$0/$2/$4')
     match 'scp' fs 'server' fs 'enable' nl:
         out.add('$0/$2/$4')
+    match 'sla' fs number nl:
+        out.enter('$0?number="$2"')
+        ip_sla_statements()
+    match 'sla schedule' fs number fs 'life' fs nows fs 'start-time' fs nows nl:
+        out.add('$0?sla="$2"/life',       '$6')
+        out.add('$0?sla="$2"/start-time', '$10')
     match 'ssh' fs 'precedence' fs number nl:
         out.add('$0/$2', '$4')
     match 'ssh' fs 'source-interface' fs nows nl:
@@ -1322,7 +1390,7 @@ grammar isis_statements(default):
         out.add('$0', '$2')
     match 'passive-interface' fs if_name nl:
         out.add('passive/interface?name="$2"')
-    match 'redistribute' fs /(?:connected|static|ospf \d+|isis ip level-[12])/:
+    match 'redistribute' fs /(?:connected|static|ospf \d+(?: vrf \S+)?|isis ip level-[12])/:
         out.enter('redistribute/source?name="$2"')
         redistribute_statements()
     match 'set-overload-bit' nl:
@@ -1338,7 +1406,7 @@ grammar isis_statements(default):
     do.return()
 
 grammar isis(default):
-    match 'router isis' fs nl:
+    match 'router isis' / */ nl:
         out.enter('isis')
         isis_statements()
     match 'router isis' fs nows nl:
@@ -1413,6 +1481,10 @@ grammar mpls_statements(default):
     do.return()
 
 grammar mpls(default):
+    match 'mpls ip' nl:
+        out.add('$0')
+    match 'mpls ip' nl:
+        out.add('$0')
     match 'mpls' fs:
         out.enter('mpls')
         mpls_statements()
@@ -1421,6 +1493,8 @@ grammar mpls(default):
     do.return()
 
 grammar ospf_statements(default):
+    match 'area' fs number fs 'authentication' fs nows nl:
+        out.add('$0?number="$2"/authentication', '$6')
     match 'default-information' fs nonl nl:
         out.add('$0', '$2')
     match 'log-adjacency-changes' nl:
@@ -1435,7 +1509,7 @@ grammar ospf_statements(default):
     match 'passive-interface' fs if_name nl:
         out.add('$0/passive')
         out.add('$0/interface?name="$2"')
-    match 'redistribute' fs /(?:connected|static|ospf \d+|isis ip level-[12])/:
+    match 'redistribute' fs /(?:bgp \d+(?: subnets)?|connected|static|ospf \d+(?: vrf \S+)?|isis ip level-[12])/:
         out.enter('redistribute/source?name="$2"')
         redistribute_statements()
     do.return()
@@ -1443,6 +1517,9 @@ grammar ospf_statements(default):
 grammar ospf(default):
     match 'router ospf' fs number nl:
         out.enter('ospf?process="$2"')
+        ospf_statements()
+    match 'router ospf' fs number fs 'vrf' fs nows nl:
+        out.enter('ospf?process="$2"&vrf="$6"')
         ospf_statements()
     do.return()
 
@@ -1604,6 +1681,17 @@ grammar snmp(default):
         snmp_statements()
     do.return()
 
+grammar track_statements(default):
+    match 'delay' fs 'down' fs number fs 'up' fs number nl:
+        out.add('$0/down', '$4')
+        out.add('$0/up',   '$8')
+    do.return()
+
+grammar transceiver_type_statements(default):
+    match 'monitoring' nl:
+        out.add('$0')
+    do.return()
+
 grammar users(default):
     match 'username' fs name fs 'password' fs word fs word nl:
         out.add('users/user?name="$2"/password?type="$6"', '$8')
@@ -1688,6 +1776,9 @@ grammar input(default):
         out.add('$0/$2/seconds', '$6')
     match 'exception' fs /(?:core-file|dump|protocol|region-size)/ fs nows nl:
         out.add('$0/$2', '$4')
+    match 'event manager' fs 'session' fs nows fs 'username' fs nows nl:
+        out.add('$0/$2', '$4')
+        out.add('$0/$6', '$8')
     match /enable (?:secret|password)/ fs number fs nonl nl:
         out.add('security/enable-password?type="$2"', '$4')
     match 'facility-alarm' fs nonl nl:
@@ -1733,7 +1824,7 @@ grammar input(default):
     match 'modemcap entry' fs number nl:
         out.add('$0?number="$2"')
     match 'monitor' fs nonl nl:
-        out.add('options/$0 $2')
+        out.add('options/$0?option="$2"')
     match 'mta' fs 'receive' fs 'maximum-recipients' fs number nl:
         out.add('$0/$2/$4', '$6')
     match 'multilink bundle-name' fs nows nl:
@@ -1806,6 +1897,16 @@ grammar input(default):
         out.add('$0', '$2')
     match 'tftp-server-list' fs number nl:
         out.add('$0', '$2')
+    match 'track' fs number fs 'rtr' fs number fs 'reachability' nl:
+        out.enter('$0?number="$2"')
+        out.add('rtr', '$6')
+        out.add('reachability')
+        track_statements()
+    match 'transceiver type' fs nows nl:
+        out.enter('$0?name="$2"')
+        transceiver_type_statements()
+    match 'udld' fs 'aggressive' nl:
+        out.add('$0/$2')
     match 'udld' fs 'enable' nl:
         out.add('$0/$2')
     match 'upgrade fpd auto' nl:
