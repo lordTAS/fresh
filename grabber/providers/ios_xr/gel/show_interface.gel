@@ -83,6 +83,8 @@ grammar counters(default):
         out.add('$17', '$15')
         out.add('$22', '$20')
         out.add('$27', '$25')
+    match num ws 'output errors' nl:
+        out.add('output/errors/total', '$0')
     match num ws 'output errors' ',' ws num ws 'underruns' ',' ws num ws 'applique' ',' ws num ws 'resets' nl:
         out.enter('output/errors')
         out.add('total', '$0')
@@ -188,6 +190,9 @@ grammar interface_block(default):
         out.enter('counters')
         out.add('$0-$4', '$6')
         counters()
+    match 'Last input' ws nows ', output' ws nows nl:
+        out.add('last-input',  '$2')
+        out.add('last-output', '$6')
 
 grammar input(default):
     match /.* (?:UTC|MET)/ nl:
