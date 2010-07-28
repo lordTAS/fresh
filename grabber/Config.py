@@ -5,7 +5,7 @@ from seed           import HostDB
 from lxml           import etree
 from Exscriptd.util import resolve_variables
 from Grabber        import Grabber
-from processors     import FileStore, GelatinProcessor
+from processors     import FileStore, GelatinProcessor, XsltProcessor
 
 __dirname__ = os.path.dirname(__file__)
 
@@ -62,6 +62,16 @@ class Config(object):
             print 'Creating Gelatin processor "%s".' % name
             self.processors[name] = GelatinProcessor(syntax_dir, output_dir)
 
+    def _init_xsltproc(self):
+        for element in self.cfgtree.iterfind('processor[@type="xslt"]'):
+            name       = element.get('name')
+            xsl_dir    = element.find('xsl-dir').text
+            output_dir = element.find('output-dir').text
+            if not xsl_dir.startswith('/'):
+                xsl_dir = os.path.join(__dirname__, xsl_dir)
+            print 'Creating XSLT processor "%s".' % name
+            self.processors[name] = XsltProcessor(xsl_dir, output_dir)
+
     def _init_providers(self):
         for element in self.cfgtree.iterfind('provider'):
             name     = element.get('name')
@@ -79,6 +89,7 @@ class Config(object):
     def _init(self):
         self._init_file_stores()
         self._init_gelatin()
+        self._init_xsltproc()
         self._init_providers()
         element      = self.cfgtree.find('grabber')
         seeddb_name  = element.find('seeddb').text

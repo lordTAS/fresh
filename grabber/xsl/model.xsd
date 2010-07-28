@@ -1,0 +1,154 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<!-- Commonly used data types. -->
+<xs:simpleType name='nonEmptyString'>
+  <xs:restriction base='xs:string'>
+    <xs:minLength value='1'/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name='Hostname'>
+  <xs:restriction base='xs:token'>
+    <xs:pattern value="[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9]"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name='operatingSystem'>
+  <xs:sequence>
+    <xs:element name="system" type="xs:normalizedString"/>
+    <xs:element name="version" type="nonEmptyString"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:simpleType name='interfaceEnabled'>
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="enabled"/>
+    <xs:enumeration value="disabled"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name='interfaceL2Status'>
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="active"/>
+    <xs:enumeration value="inactive"/>
+    <xs:enumeration value="unknown"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name='directionType'>
+  <xs:restriction base="xs:string">
+    <xs:enumeration value="input"/>
+    <xs:enumeration value="output"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="IPv4AddressStringType">
+  <xs:restriction base="xs:token">
+    <xs:pattern value="(([1-9]?[0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}([1-9]?[0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="IPv4MaskStringType">
+  <xs:restriction base="xs:token">
+    <xs:pattern value="([12]?[0-9]?[0-9]\.){3}([12]?[0-9]?[0-9])"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="IPv4AddressType">
+  <xs:attribute name="address" type="IPv4AddressStringType" use="required"/>
+  <xs:attribute name="mask"    type="IPv4MaskStringType" use="required"/>
+</xs:complexType>
+
+<xs:complexType name="IPv4AddressListType">
+  <xs:sequence minOccurs="1" maxOccurs="unbounded">
+    <xs:element name="ipv4-address" type="IPv4AddressType"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="softwarePackageType">
+  <xs:attribute name="name" type="nonEmptyString" use="required"/>
+</xs:complexType>
+
+<xs:complexType name="softwareListType">
+  <xs:sequence minOccurs="1" maxOccurs="unbounded">
+    <xs:element name="package" type="softwarePackageType"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="policyReferenceType">
+  <xs:simpleContent>
+    <xs:extension base="nonEmptyString">
+      <xs:attribute name="direction" type="directionType" use="required"/>
+    </xs:extension>
+  </xs:simpleContent>
+</xs:complexType>
+
+<xs:complexType name="unitType">
+  <xs:sequence>
+    <xs:element name="description" type="xs:normalizedString" minOccurs="0"/>
+    <xs:element name="ipv4-address-list" type="IPv4AddressListType" minOccurs="0"/>
+    <xs:element name="policy" type="policyReferenceType" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+  <xs:attribute name="name" type="nonEmptyString" use="required"/>
+</xs:complexType>
+
+<xs:complexType name="unitListType">
+  <xs:sequence minOccurs="1" maxOccurs="unbounded">
+    <xs:element name="unit" type="unitType"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="interfaceType">
+  <xs:sequence>
+    <xs:element name="description" type="xs:normalizedString" minOccurs="0"/>
+    <xs:element name="l2-status" type="interfaceL2Status"/>
+  </xs:sequence>
+  <xs:attribute name="name" type="nonEmptyString" use="required"/>
+</xs:complexType>
+
+<xs:complexType name="cardType">
+  <xs:sequence>
+    <xs:element name="name" type="nonEmptyString"/>
+    <xs:element name="type" type="nonEmptyString"/>
+    <xs:element name="part-number" type="nonEmptyString" minOccurs="0"/>
+    <xs:element name="serial-number" type="nonEmptyString" minOccurs="0"/>
+    <xs:element name="card" type="cardType" minOccurs="0" maxOccurs="unbounded"/>
+    <xs:element name="interface" type="interfaceType" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+  <xs:attribute name="slot" type="nonEmptyString" use="required"/>
+</xs:complexType>
+
+<xs:complexType name="equipmentListType">
+  <xs:sequence minOccurs="1" maxOccurs="unbounded">
+    <xs:element name="card" type="cardType" minOccurs="0"/>
+    <xs:element name="interface" type="interfaceType" minOccurs="0" maxOccurs="unbounded"/>
+  </xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="chassisType">
+  <xs:sequence>
+    <xs:element name="os" type="operatingSystem"/>
+    <xs:element name="model" type="nonEmptyString"/>
+    <xs:element name="equipment" type="equipmentListType" minOccurs="0"/>
+    <xs:element name="software" type="softwareListType" minOccurs="0"/>
+  </xs:sequence>
+  <xs:attribute name="name" type="nonEmptyString" use="required"/>
+</xs:complexType>
+
+<!-- The document schema. -->
+<xs:element name="host">
+  <xs:complexType>
+    <xs:sequence>
+      <xs:element name="os" type="operatingSystem"/>
+      <xs:element name="model" type="nonEmptyString"/>
+      <xs:element name="chassis" type="chassisType" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="unit-list" type="unitListType" minOccurs="0"/>
+      <xs:element name="last-update" type="nonEmptyString"/>
+    </xs:sequence>
+    <xs:attribute name="name"   type="Hostname" use="required"/>
+    <xs:attribute name="domain" type="xs:token" use="required"/>
+  </xs:complexType>
+</xs:element>
+
+</xs:schema>

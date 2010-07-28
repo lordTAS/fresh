@@ -26,7 +26,10 @@
   <!--
   The xslt processor transforms XML documents.
   -->
-  <processor type="xslt" name="xslt"/>
+  <processor type="xslt" name="xslt">
+    <xsl-dir>providers</xsl-dir>
+    <output-dir>$fileStoreDir</output-dir>
+  </processor>
 
   <!--
   The lint processor validates XML documents.
@@ -65,13 +68,19 @@
             syntax="ios/gel/show_inventory.gel"
             filename="show_inventory.xml"/>
       </execute>
-      <!--
+      <execute command="show diag" ignore_error="1">
+          <post-process processor="file-store" filename="show_diag.txt"/>
+          <post-process
+            processor="gelatin"
+            syntax="ios/gel/show_diag.gel"
+            filename="show_diag.xml"/>
+      </execute>
       <post-process
         processor="xslt"
-        xslt="generic.xsl"
+        xslt="ios/xsl/generic.xsl"
+        xsd="../xsl/model.xsd"
         input="show_running-config.xml"
         output="generic.xml"/>
-      -->
   </provider>
 
   <!--
