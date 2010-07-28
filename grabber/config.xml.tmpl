@@ -38,7 +38,7 @@
   <provider name="ios" filename="providers/ios/IOSProvider.py">
       <auto_authorize/>
       <execute command="show running-config">
-          <post-process processor="file-store" filename="show_configuration.txt"/>
+          <post-process processor="file-store" filename="show_running-config.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios/gel/show_running-config.gel"
