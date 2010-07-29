@@ -747,8 +747,7 @@ grammar interface_statements(default):
     match 'ip' fs 'accounting' fs nonl nl:
         out.add('$2/$4')
     match 'ip address' nl:
-        do.flush_queue()
-        do.skip()
+        out.clear_queue()
     match 'ip address' fs ipv4_ip fs ipv4_mask nl:
         out.add('$0?address="$2"&mask="$4"')
     match 'ip address' fs ipv4_ip fs ipv4_mask fs 'secondary' nl:
