@@ -6,7 +6,7 @@ class XsltProcessor(object):
         self.xsl_dir    = xsl_dir
         self.output_dir = output_dir
 
-    def start(self, conn, **kwargs):
+    def start(self, provider, conn, **kwargs):
         host      = conn.get_host()
         path      = host.get('__path__')
         hostdir   = os.path.join(self.output_dir, path)

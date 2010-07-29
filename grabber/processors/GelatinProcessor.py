@@ -23,7 +23,7 @@ class GelatinProcessor(object):
 
             return self.converters[filename]
 
-    def start(self, conn, **kwargs):
+    def start(self, provider, conn, **kwargs):
         host      = conn.get_host()
         hostname  = host.get('__real_hostname__')
         path      = host.get('__path__')

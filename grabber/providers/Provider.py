@@ -3,12 +3,13 @@ from Exscript.protocols.Exception import TransportException
 class PostProcess(object):
     def __init__(self, provider, xml):
         processor_name = xml.get('processor')
+        self.provider  = provider
         self.processor = provider.processors[processor_name]
         self.args      = xml.attrib
         del self.args['processor']
 
     def do(self, conn):
-        self.processor.start(conn, **self.args)
+        self.processor.start(self.provider, conn, **self.args)
 
 class Authenticate(object):
     def __init__(self, provider, xml):
