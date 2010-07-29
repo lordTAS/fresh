@@ -6,7 +6,7 @@ from lxml           import etree
 from Exscriptd.util import resolve_variables
 from Grabber        import Grabber
 from FileStore      import FileStore
-from processors     import GelatinProcessor, XsltProcessor
+from processors     import GelatinProcessor, XsltProcessor, ExistDBStore
 
 __dirname__ = os.path.dirname(__file__)
 
@@ -58,21 +58,36 @@ class Config(object):
         for element in self.cfgtree.iterfind('processor[@type="gelatin"]'):
             name       = element.get('name')
             syntax_dir = element.find('syntax-dir').text
-            output_dir = element.find('output-dir').text
+            format     = element.find('format').text
             if not syntax_dir.startswith('/'):
                 syntax_dir = os.path.join(__dirname__, syntax_dir)
             print 'Creating Gelatin processor "%s".' % name
-            self.processors[name] = GelatinProcessor(syntax_dir, output_dir)
+            self.processors[name] = GelatinProcessor(syntax_dir, format)
 
     def _init_xsltproc(self):
         for element in self.cfgtree.iterfind('processor[@type="xslt"]'):
-            name       = element.get('name')
-            xsl_dir    = element.find('xsl-dir').text
-            output_dir = element.find('output-dir').text
+            name      = element.get('name')
+            xsl_dir   = element.find('xsl-dir').text
+            timestamp = element.find('add-timestamp') is not None
             if not xsl_dir.startswith('/'):
                 xsl_dir = os.path.join(__dirname__, xsl_dir)
             print 'Creating XSLT processor "%s".' % name
-            self.processors[name] = XsltProcessor(xsl_dir, output_dir)
+            self.processors[name] = XsltProcessor(xsl_dir, timestamp)
+
+    def _init_existdb(self):
+        for element in self.cfgtree.iterfind('processor[@type="exist-db"]'):
+            name       = element.get('name')
+            host       = element.find('host').text
+            port       = element.find('port').text
+            user       = element.find('user').text
+            password   = element.find('password').text
+            collection = element.find('collection').text
+            print 'Creating eXist-db processor "%s".' % name
+            self.processors[name] = ExistDBStore(host,
+                                                 port,
+                                                 user,
+                                                 password,
+                                                 collection)
 
     def _init_providers(self):
         for element in self.cfgtree.iterfind('provider'):
@@ -94,6 +109,7 @@ class Config(object):
         self._init_file_stores()
         self._init_gelatin()
         self._init_xsltproc()
+        self._init_existdb()
         self._init_providers()
         element      = self.cfgtree.find('grabber')
         seeddb_name  = element.find('seeddb').text

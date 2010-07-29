@@ -1,11 +1,11 @@
 import sys, os, glob, threading, traceback
 from util         import str2filename
-from Gelatin.util import compile, generate_string_to_file
+from Gelatin.util import compile, generate_string
 
 class GelatinProcessor(object):
-    def __init__(self, dirname, output_dir):
+    def __init__(self, dirname, format):
         self.dirname      = dirname
-        self.output_dir   = output_dir
+        self.format       = format
         self.compile_lock = threading.Lock()
         self.converters   = {}
         self.conv_locks   = {}
@@ -24,15 +24,11 @@ class GelatinProcessor(object):
             return self.converters[filename]
 
     def start(self, provider, conn, **kwargs):
-        host      = conn.get_host()
-        hostname  = host.get('__real_hostname__')
-        path      = host.get('__path__')
-        command   = host.get('__last_command__')
         syntax    = kwargs.get('syntax')
-        host_dir  = os.path.join(self.output_dir, path)
-        outfile   = kwargs.get('filename', str2filename(command, '.xml'))
-        outfile   = os.path.join(host_dir, outfile)
+        outfile   = kwargs.get('filename')
         converter = self._load_syntax(syntax)
 
         with self.conv_locks[syntax]:
-            generate_string_to_file(converter, conn.response, outfile, 'xml')
+            result = generate_string(converter, conn.response, self.format)
+
+        provider.store.store(conn, outfile, result)

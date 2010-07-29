@@ -20,7 +20,7 @@
   -->
   <processor type="gelatin" name="gelatin">
     <syntax-dir>providers</syntax-dir>
-    <output-dir>$fileStoreDir</output-dir>
+    <format>xml</format>
   </processor>
 
   <!--
@@ -28,7 +28,7 @@
   -->
   <processor type="xslt" name="xslt">
     <xsl-dir>providers</xsl-dir>
-    <output-dir>$fileStoreDir</output-dir>
+    <add-timestamp/>
   </processor>
 
   <!--
@@ -46,7 +46,10 @@
   <!--
   Actions taken on hosts running IOS.
   -->
-  <provider name="ios" filename="providers/ios/IOSProvider.py">
+  <provider
+    name="ios"
+    filename="providers/ios/IOSProvider.py"
+    store="file-store">
       <auto_authorize/>
       <execute command="show running-config">
           <store filename="show_running-config.txt"/>
@@ -89,12 +92,19 @@
         xsd="../xsl/model.xsd"
         input="show_running-config.xml"
         output="generic.xml"/>
+      <post-process
+        processor="exist-db"
+        filename="generic.xml"
+        document="{hostname}.xml"/>
   </provider>
 
   <!--
   Actions taken on hosts running IOS XR.
   -->
-  <provider name="ios_xr" filename="providers/ios_xr/IOSXRProvider.py">
+  <provider
+    name="ios_xr"
+    filename="providers/ios_xr/IOSXRProvider.py"
+    store="file-store">
       <execute command="show running-config">
           <store filename="show_running-config.txt"/>
           <post-process
@@ -129,6 +139,10 @@
         xsd="../xsl/model.xsd"
         input="show_running-config.xml"
         output="generic.xml"/>
+      <post-process
+        processor="exist-db"
+        filename="generic.xml"
+        document="{hostname}.xml"/>
   </provider>
 
   <!--

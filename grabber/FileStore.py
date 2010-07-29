@@ -6,7 +6,7 @@ class FileStore(object):
         if not os.path.isdir(self.base_dir):
             os.makedirs(self.base_dir)
 
-    def _get_path(self, conn, filename = None):
+    def get_path(self, conn, filename = None):
         host     = conn.get_host()
         hostname = host.get('__real_hostname__')
         path     = host.get('__path__')
@@ -16,8 +16,8 @@ class FileStore(object):
         return host_dir
 
     def store(self, conn, filename, content):
-        host_dir = self._get_path(conn)
-        filename = self._get_path(filename)
+        host_dir = self.get_path(conn)
+        filename = self.get_path(conn, filename)
 
         if not os.path.isdir(host_dir):
             os.makedirs(host_dir)
@@ -31,4 +31,4 @@ class FileStore(object):
         return filename
 
     def get(self, conn, filename):
-        return open(self._get_path(filename)).read()
+        return open(self.get_path(conn, filename)).read()

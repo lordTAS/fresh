@@ -1,19 +1,17 @@
 import os, time
-from lxml import etree
+from StringIO import StringIO
+from lxml     import etree
 
 class XsltProcessor(object):
-    def __init__(self, xsl_dir, output_dir):
-        self.xsl_dir    = xsl_dir
-        self.output_dir = output_dir
+    def __init__(self, xsl_dir, add_timestamp = False):
+        self.xsl_dir       = xsl_dir
+        self.add_timestamp = add_timestamp
 
     def start(self, provider, conn, **kwargs):
-        host      = conn.get_host()
-        path      = host.get('__path__')
-        hostdir   = os.path.join(self.output_dir, path)
         xslt_file = kwargs.get('xslt')
         xsd_file  = kwargs.get('xsd')
-        infile    = os.path.join(hostdir, kwargs.get('input'))
-        outfile   = os.path.join(hostdir, kwargs.get('output'))
+        infile    = kwargs.get('input')
+        outfile   = kwargs.get('output')
         if not xslt_file.startswith('/'):
             xslt_file = os.path.join(self.xsl_dir, xslt_file)
         if xsd_file and not xsd_file.startswith('/'):
@@ -22,9 +20,15 @@ class XsltProcessor(object):
         # Transform.
         xsl       = etree.parse(xslt_file)
         transform = etree.XSLT(xsl)
-        doc       = etree.parse(infile)
+        path      = provider.store.get_path(conn, infile)
+        input     = provider.store.get(conn, infile)
+        doc       = etree.parse(StringIO(input), base_url = path)
         result    = transform(doc)
-        etree.SubElement(result.getroot(), 'last-update').text = time.asctime() #FIXME: should be configurable
+
+        # Add a timestamp field to the root node in the resulting XML.
+        if self.add_timestamp:
+            ts = time.asctime()
+            etree.SubElement(result.getroot(), 'last-update').text = ts
 
         # Validate.
         if xsd_file:
@@ -33,7 +37,4 @@ class XsltProcessor(object):
             schema.assertValid(result)
 
         # Write.
-        xml  = str(result)
-        file = open(outfile, 'w')
-        file.write(xml)
-        file.close()
+        provider.store.store(conn, outfile, str(result))

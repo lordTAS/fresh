@@ -25,14 +25,27 @@ class AutoAuthorize(object):
     def do(self, conn):
         conn.auto_authorize(wait = self.wait)
 
+class Store(object):
+    def __init__(self, provider, xml):
+        self.filename = xml.get('filename')
+        self.store    = provider.store
+
+    def do(self, conn):
+        self.store.store(conn, self.filename, conn.response)
+
 class Execute(object):
     def __init__(self, provider, xml):
         self.command      = xml.get('command')
         self.ignore_error = bool(xml.get('ignore_error', False))
         self.children     = []
 
-        for child in xml.iterfind('post-process'):
-            self.children.append(PostProcess(provider, child))
+        for child in xml:
+            if child.tag == 'post-process':
+                self.children.append(PostProcess(provider, child))
+            elif child.tag == 'store':
+                self.children.append(Store(provider, child))
+            else:
+                raise Exception('Invalid XML tag: %s' % element.tag)
 
     def do(self, conn):
         conn.get_host().set('__last_command__', self.command)
@@ -45,14 +58,6 @@ class Execute(object):
             conn.execute(self.command)
         for child in self.children:
             child.do(conn)
-
-class Store(object):
-    def __init__(self, provider, xml):
-        self.filename  = xml.get('filename')
-        self.filestore = provider.filestore
-
-    def do(self, conn):
-        self.filestore.store(conn, self.filename, conn.response)
 
 class Provider(object):
     def __init__(self, xml, processors, stores):
@@ -71,10 +76,11 @@ class Provider(object):
                 self.tasks.append(Execute(self, element))
             elif element.tag == 'post-process':
                 self.tasks.append(PostProcess(self, element))
-            elif element.tag == 'store':
-                self.tasks.append(Store(self, element))
             else:
                 raise Exception('Invalid XML tag: %s' % element.tag)
+
+    def get_store(self):
+        return self.store
 
     def start(self, conn):
         for task in self.tasks:
