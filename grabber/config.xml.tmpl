@@ -32,11 +32,19 @@
   </processor>
 
   <!--
-  The lint processor validates XML documents.
+  The exist-db processor takes an XML file and sends it to an
+  eXist-db XML database.
   -->
-  <processor type="lint" name="lint"/>
+  <processor type="exist-db" name="exist-db">
+    <host>localhost</host>
+    <port>6949</port>
+    <user>import-user</user>
+    <password>import-user</password>
+    <collection>/exist/rest/ips</collection>
+  </processor>
 
   <!--
+  Actions taken on hosts running IOS.
   -->
   <provider name="ios" filename="providers/ios/IOSProvider.py">
       <auto_authorize/>
@@ -84,6 +92,7 @@
   </provider>
 
   <!--
+  Actions taken on hosts running IOS XR.
   -->
   <provider name="ios_xr" filename="providers/ios_xr/IOSXRProvider.py">
       <execute command="show running-config">
@@ -116,21 +125,12 @@
       </execute>
   </provider>
 
+  <!--
+  The seeddb is the database containing the list host hosts.
+  -->
   <database name="seeddb">
     <dbn>sqlite:///$fileStoreDir/seeddb.sqlite</dbn>
   </database>
-
-  <!--
-  The exist-db processor takes an XML file and sends it to an
-  eXist-db XML database.
-  -->
-  <processor type="exist-db" name="exist-db">
-    <host>localhost</host>
-    <port>6949</port>
-    <user>import-user</user>
-    <password>import-user</password>
-    <collection>/exist/rest/ips</collection>
-  </processor>
 
   <!--
   The grabber config.
