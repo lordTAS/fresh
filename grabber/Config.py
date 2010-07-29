@@ -5,7 +5,8 @@ from seed           import HostDB
 from lxml           import etree
 from Exscriptd.util import resolve_variables
 from Grabber        import Grabber
-from processors     import FileStore, GelatinProcessor, XsltProcessor
+from FileStore      import FileStore
+from processors     import GelatinProcessor, XsltProcessor
 
 __dirname__ = os.path.dirname(__file__)
 
@@ -14,6 +15,7 @@ class Config(object):
         self.cfgtree    = etree.parse(filename)
         self.variables  = {}
         self.providers  = {}
+        self.stores     = {}
         self.processors = {}
         self.grabber    = None
         self._clean_tree()
@@ -46,11 +48,11 @@ class Config(object):
         return HostDB(engine)
 
     def _init_file_stores(self):
-        for element in self.cfgtree.iterfind('processor[@type="file-store"]'):
+        for element in self.cfgtree.iterfind('file-store'):
             name    = element.get('name')
             basedir = element.find('basedir').text
             print 'Creating file store "%s".' % name
-            self.processors[name] = FileStore(basedir)
+            self.stores[name] = FileStore(basedir)
 
     def _init_gelatin(self):
         for element in self.cfgtree.iterfind('processor[@type="gelatin"]'):
@@ -84,7 +86,9 @@ class Config(object):
             print 'Loading provider "%s" (%s).' % (name, modname)
             themodule            = imp.load_source(modname, filename)
             theclass             = getattr(themodule, modname)
-            self.providers[name] = theclass(element, self.processors)
+            self.providers[name] = theclass(element,
+                                            self.processors,
+                                            self.stores)
 
     def _init(self):
         self._init_file_stores()

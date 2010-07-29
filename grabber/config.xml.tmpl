@@ -10,9 +10,9 @@
   The file-store processor takes output from a device and saves it
   in a directory structure.
   -->
-  <processor type="file-store" name="file-store">
+  <file-store name="file-store">
       <basedir>$fileStoreDir</basedir>
-  </processor>
+  </file-store>
 
   <!--
   The gelatin processor transforms text files into XML documents
@@ -49,35 +49,35 @@
   <provider name="ios" filename="providers/ios/IOSProvider.py">
       <auto_authorize/>
       <execute command="show running-config">
-          <post-process processor="file-store" filename="show_running-config.txt"/>
+          <store filename="show_running-config.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios/gel/show_running-config.gel"
             filename="show_running-config.xml"/>
       </execute>
       <execute command="show version">
-          <post-process processor="file-store" filename="show_version.txt"/>
+          <store filename="show_version.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios/gel/show_version.gel"
             filename="show_version.xml"/>
       </execute>
       <execute command="show interface">
-          <post-process processor="file-store" filename="show_interface.txt"/>
+          <store filename="show_interface.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios/gel/show_interface.gel"
             filename="show_interface.xml"/>
       </execute>
       <execute command="show inventory">
-          <post-process processor="file-store" filename="show_inventory.txt"/>
+          <store filename="show_inventory.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios/gel/show_inventory.gel"
             filename="show_inventory.xml"/>
       </execute>
       <execute command="show diag" ignore_error="1">
-          <post-process processor="file-store" filename="show_diag.txt"/>
+          <store filename="show_diag.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios/gel/show_diag.gel"
@@ -96,33 +96,39 @@
   -->
   <provider name="ios_xr" filename="providers/ios_xr/IOSXRProvider.py">
       <execute command="show running-config">
-          <post-process processor="file-store" filename="show_running-config.txt"/>
+          <store filename="show_running-config.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios_xr/gel/show_running-config.gel"
             filename="show_running-config.xml"/>
       </execute>
       <execute command="show version">
-          <post-process processor="file-store" filename="show_version.txt"/>
+          <store filename="show_version.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios_xr/gel/show_version.gel"
             filename="show_version.xml"/>
       </execute>
       <execute command="show interface">
-          <post-process processor="file-store" filename="show_interface.txt"/>
+          <store filename="show_interface.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios_xr/gel/show_interface.gel"
             filename="show_interface.xml"/>
       </execute>
       <execute command="show inventory">
-          <post-process processor="file-store" filename="show_inventory.txt"/>
+          <store filename="show_inventory.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios_xr/gel/show_inventory.gel"
             filename="show_inventory.xml"/>
       </execute>
+      <post-process
+        processor="xslt"
+        xslt="ios_xr/xsl/generic.xsl"
+        xsd="../xsl/model.xsd"
+        input="show_running-config.xml"
+        output="generic.xml"/>
   </provider>
 
   <!--

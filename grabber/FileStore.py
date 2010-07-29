@@ -1,5 +1,4 @@
 import os
-from util import str2filename
 
 class FileStore(object):
     def __init__(self, base_dir):
@@ -7,14 +6,18 @@ class FileStore(object):
         if not os.path.isdir(self.base_dir):
             os.makedirs(self.base_dir)
 
-    def start(self, conn, **kwargs):
+    def _get_path(self, conn, filename = None):
         host     = conn.get_host()
         hostname = host.get('__real_hostname__')
         path     = host.get('__path__')
-        command  = host.get('__last_command__')
         host_dir = os.path.join(self.base_dir, path)
-        filename = kwargs.get('filename', str2filename(command))
-        filename = os.path.join(host_dir, filename)
+        if filename:
+            return os.path.join(host_dir, filename)
+        return host_dir
+
+    def store(self, conn, filename, content):
+        host_dir = self._get_path(conn)
+        filename = self._get_path(filename)
 
         if not os.path.isdir(host_dir):
             os.makedirs(host_dir)
@@ -23,6 +26,9 @@ class FileStore(object):
         if os.path.isfile(filename):
             os.remove(filename)
         file = open(filename, 'w')
-        file.write(conn.response)
+        file.write(content)
         file.close()
         return filename
+
+    def get(self, conn, filename):
+        return open(self._get_path(filename)).read()

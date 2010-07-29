@@ -45,10 +45,20 @@ class Execute(object):
         for child in self.children:
             child.do(conn)
 
+class Store(object):
+    def __init__(self, provider, xml):
+        self.filename  = xml.get('filename')
+        self.filestore = provider.filestore
+
+    def do(self, conn):
+        self.filestore.store(conn, self.filename, conn.response)
+
 class Provider(object):
-    def __init__(self, xml, processors):
+    def __init__(self, xml, processors, stores):
         self.name       = xml.get('name')
+        store           = xml.get('store')
         self.processors = processors
+        self.store      = stores[store]
         self.tasks      = []
 
         for element in xml:
@@ -60,6 +70,8 @@ class Provider(object):
                 self.tasks.append(Execute(self, element))
             elif element.tag == 'post-process':
                 self.tasks.append(PostProcess(self, element))
+            elif element.tag == 'store':
+                self.tasks.append(Store(self, element))
             else:
                 raise Exception('Invalid XML tag: %s' % element.tag)
 
