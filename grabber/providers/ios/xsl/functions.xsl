@@ -5,7 +5,7 @@
  xmlns:func="http://exslt.org/functions"
  xmlns:cfggrab="localhost"
  extension-element-prefixes="str func">
- <xsl:import href="../../../xsl/functions.xsl"/>
+<xsl:import href="../../../xsl/functions.xsl"/>
 
 <func:function name="cfggrab:getInterfaceName">
   <xsl:param name="interfaceName"/>

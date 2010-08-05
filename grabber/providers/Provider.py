@@ -1,3 +1,4 @@
+from lxml import etree
 from Exscript.protocols.Exception import TransportException
 
 class PostProcess(object):
@@ -76,6 +77,8 @@ class Provider(object):
                 self.tasks.append(Execute(self, element))
             elif element.tag == 'post-process':
                 self.tasks.append(PostProcess(self, element))
+            elif element.tag is etree.Comment:
+                pass
             else:
                 raise Exception('Invalid XML tag: %s' % element.tag)
 

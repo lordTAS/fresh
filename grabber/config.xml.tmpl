@@ -146,6 +146,95 @@
   </provider>
 
   <!--
+  Actions taken on hosts running JunOS.
+  -->
+  <provider
+    name="junos"
+    filename="providers/junos/JunOSProvider.py"
+    store="file-store">
+      <!-- normal commands -->
+      <execute command="show configuration">
+          <store filename="show_configuration.txt"/>
+      </execute>
+      <execute command="show version brief">
+          <store filename="show_version_brief.txt"/>
+      </execute>
+      <execute command="show chassis hardware detail">
+          <store filename="show_chassis_hardware_detail.txt"/>
+      </execute>
+      <execute command="show chassis hardware models">
+          <store filename="show_chassis_hardware_models.txt"/>
+      </execute>
+      <execute command="show chassis hardware extensive">
+          <store filename="show_chassis_hardware_extensive.txt"/>
+      </execute>
+      <execute command="show chassis firmware">
+          <store filename="show_chassis_firmware.txt"/>
+      </execute>
+      <execute command="show system firmware">
+          <store filename="show_system_firmware.txt"/>
+      </execute>
+      <execute command="show system storage">
+          <store filename="show_system_storage.txt"/>
+      </execute>
+      <execute command="show version">
+          <store filename="show_version.txt"/>
+      </execute>
+      <execute command="show interface">
+          <store filename="show_interface.txt"/>
+      </execute>
+      <execute command="show route summary">
+          <store filename="show_route_summary.txt"/>
+      </execute>
+      <execute command="show system core-dumps">
+          <store filename="show_system_core-dumps.txt"/>
+      </execute>
+      <execute command="show system users">
+          <store filename="show_system_users.txt"/>
+      </execute>
+
+      <!-- Commands with "| display set". -->
+      <execute command="show configuration | display set">
+          <store filename="show_configuration_display_set.txt"/>
+      </execute>
+
+      <!-- XML commands. -->
+      <execute command="show configuration | display xml">
+          <store filename="show_configuration.xml"/>
+      </execute>
+      <execute command="show version | display xml">
+          <store filename="show_version.xml"/>
+      </execute>
+      <execute command="show chassis hardware detail | display xml">
+          <store filename="show_chassis_hardware_detail.xml"/>
+      </execute>
+      <execute command="show chassis hardware | display xml">
+          <store filename="show_chassis_hardware.xml"/>
+      </execute>
+      <execute command="show interface | display xml">
+          <store filename="show_interface.xml"/>
+      </execute>
+
+      <!-- Commands on the other routing engine. -->
+      <execute command="request routing-engine login other-routing-engine"/>
+      <execute command="show system users">
+          <store filename="show_system_users_other_re.txt"/>
+      </execute>
+      <execute command="exit"/>
+
+      <post-process
+        processor="xslt"
+        xslt="junos/xsl/generic.xsl"
+        xsd="../xsl/model.xsd"
+        input="show_configuration.xml"
+        output="generic.xml"/>
+      <post-process
+        processor="exist-db"
+        filename="generic.xml"
+        document="{hostname}.xml"/>
+  </provider>
+
+  <!--
   The seeddb is the database containing the list host hosts.
   -->
   <database name="seeddb">
