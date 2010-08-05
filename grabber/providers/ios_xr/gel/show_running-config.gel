@@ -59,8 +59,8 @@ grammar acl_statements(default):
     do.return()
 
 grammar acl(default):
-    match 'ipv4 access-list' fs name nl:
-        out.enter('acl?name="$2"&protocol="ipv4"')
+    match /ipv[46]/ fs 'access-list' fs name nl:
+        out.enter('acl?name="$4"&protocol="$0"')
         acl_statements()
     do.return()
 
@@ -507,6 +507,8 @@ grammar interface_statements(default):
         out.add('$0')
     match 'dot1q' fs 'vlan' fs number nl:
         out.add('$0?vlan="$4"')
+    match 'dot1q' fs 'vlan' fs number fs number nl:
+        out.add('$0?vlan="$4"&vlan2="$6"')
     match 'duplex' fs word nl:
         out.add('$0', '$2')
     match 'encapsulation' fs nonl nl:
@@ -523,15 +525,15 @@ grammar interface_statements(default):
         out.add('$0?address="$2"&mask="$4"')
     match 'ipv4 address' fs ipv4_ip fs ipv4_mask fs 'secondary' nl:
         out.add('$0?address="$2"&mask="$4"/$6')
-    match 'ipv4' fs 'access-group' fs nows fs nows nl:
+    match /ipv[46]/ fs 'access-group' fs nows fs nows nl:
         out.add('$0/$2?name="$4"&direction="$6"')
-    match 'ipv4' fs 'access-group' fs nows fs nows fs nows nl:
+    match /ipv[46]/ fs 'access-group' fs nows fs nows fs nows nl:
         out.add('$0/$2?name="$4"&direction="$6"/$8')
-    match 'ipv4' fs 'unnumbered' fs nows nl:
+    match /ipv[46]/ fs 'unnumbered' fs nows nl:
         out.add('ip-address?$2="$4"')
-    match 'ipv4' fs 'unreachables' fs 'disable' nl:
+    match /ipv[46]/ fs 'unreachables' fs 'disable' nl:
         out.add('$2/$4')
-    match 'ipv4' fs 'verify unicast source' fs 'reachable-via' fs nows nl:
+    match /ipv[46]/ fs 'verify unicast source' fs 'reachable-via' fs nows nl:
         out.add('$0/$2?$4="$6"')
     match 'ipv6' fs 'address' fs ipv6_ip '/' number nl:
         out.add('ipv6/$2?address="$4"&prefixlen="$6"')

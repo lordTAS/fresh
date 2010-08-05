@@ -398,9 +398,11 @@ grammar bgp_statements(default):
         out.add('enforce-first-as')
     match 'bgp log-neighbor-changes' nl:
         out.add('log-neighbor-changes')
-    match 'bgp nexthop trigger' fs 'enable' nl:
+    match 'bgp nexthop' fs 'trigger' fs 'enable' nl:
         out.add('$0/$2')
-    match 'bgp nexthop trigger' fs 'delay' fs number nl:
+    match 'bgp nexthop' fs 'trigger' fs 'delay' fs number nl:
+        out.add('$0/$2/$4', '$6')
+    match 'bgp nexthop' fs 'route-map' fs name nl:
         out.add('$0/$2', '$4')
     match 'bgp maxas-limit' fs number nl:
         out.add('maxas-limit', '$2')
@@ -1859,6 +1861,8 @@ grammar input(default):
         out.add('$0/$2', '$4')
     match 'resource policy' nl:
         out.add('$0')
+    match 'security' fs 'passwords' fs 'min-length' fs number nl:
+        out.add('$0/$2/$4', '$6')
     match 'scheduler' fs 'allocate' nl:
         out.add('$0/$2')
     match 'scheduler' fs 'allocate' fs number fs number nl:
