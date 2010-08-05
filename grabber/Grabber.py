@@ -7,6 +7,8 @@ class Grabber(object):
 
     def get_path_from_address(self, address):
         host = self.seeddb.get_host(address = address)
+        if not host:
+            raise Exception('unknown host: %s' % address)
         return host.get('path')
 
     def grab(self, conn):
