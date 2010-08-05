@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import os, base64, re, imp
 from sqlalchemy     import create_engine
-from seed           import HostDB
+from fresh.seed     import HostDB
 from lxml           import etree
 from Exscriptd.util import resolve_variables
 from Grabber        import Grabber
