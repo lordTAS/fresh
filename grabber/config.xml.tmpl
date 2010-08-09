@@ -86,6 +86,126 @@
             syntax="ios/gel/show_diag.gel"
             filename="show_diag.xml"/>
       </execute>
+      <execute command="show cef linecard" ignore_error="1">
+          <store filename="show_cef_linecard.txt"/>
+      </execute>
+      <execute command="who">
+          <store filename="who.txt"/>
+      </execute>
+      <execute command="show clock">
+          <store filename="show_clock.txt"/>
+      </execute>
+      <execute command="show c7200" ignore_error="1">
+          <store filename="show_c7200.txt"/>
+      </execute>
+      <execute command="show gsr chassis-info" ignore_error="1">
+          <store filename="show_gsr_chassis-info.txt"/>
+      </execute>
+      <execute command="show chassis eeprom" ignore_error="1">
+          <store filename="show_chassis_eeprom.txt"/>
+      </execute>
+      <execute command="show module" ignore_error="1">
+          <store filename="show_module.txt"/>
+      </execute>
+      <execute command="show idprom all" ignore_error="1">
+          <store filename="show_idprom_all.txt"/>
+      </execute>
+      <execute command="show sprom chassis" ignore_error="1">
+          <store filename="show_sprom_chassis.txt"/>
+      </execute>
+      <execute command="show cdp nei">
+          <store filename="show_cdp_nei.txt"/>
+      </execute>
+      <execute command="show cdp nei detail" ignore_error="1">
+          <store filename="show_cdp_nei_detail.txt"/>
+      </execute>
+      <execute command="show slot0:" ignore_error="1">
+          <store filename="show_slot0.txt"/>
+      </execute>
+      <execute command="show slot1:" ignore_error="1">
+          <store filename="show_slot1.txt"/>
+      </execute>
+      <execute command="show disk0:" ignore_error="1">
+          <store filename="show_disk0.txt"/>
+      </execute>
+      <execute command="show disk1:" ignore_error="1">
+          <store filename="show_disk1.txt"/>
+      </execute>
+      <execute command="show disk2:" ignore_error="1">
+          <store filename="show_disk2.txt"/>
+      </execute>
+      <execute command="show bootflash:" ignore_error="1">
+          <store filename="show_bootflash.txt"/>
+      </execute>
+      <execute command="show slaveslot0:" ignore_error="1">
+          <store filename="show_slaveslot0.txt"/>
+      </execute>
+      <execute command="show slaveslot1:" ignore_error="1">
+          <store filename="show_slaveslot1.txt"/>
+      </execute>
+      <execute command="show slavedisk0:" ignore_error="1">
+          <store filename="show_slavedisk0.txt"/>
+      </execute>
+      <execute command="show slavedisk1:" ignore_error="1">
+          <store filename="show_slavedisk1.txt"/>
+      </execute>
+      <execute command="show slavedisk2:" ignore_error="1">
+          <store filename="show_slavedisk2.txt"/>
+      </execute>
+      <execute command="show slavebootflash:" ignore_error="1">
+          <store filename="show_slavebootflash.txt"/>
+      </execute>
+      <execute command="show sec-slot0:" ignore_error="1">
+          <store filename="show_sec-slot0.txt"/>
+      </execute>
+      <execute command="show sec-slot1:" ignore_error="1">
+          <store filename="show_sec-slot1.txt"/>
+      </execute>
+      <execute command="show sec-disk0:" ignore_error="1">
+          <store filename="show_sec-disk0.txt"/>
+      </execute>
+      <execute command="show sec-disk1:" ignore_error="1">
+          <store filename="show_sec-disk1.txt"/>
+      </execute>
+      <execute command="show sec-disk2:" ignore_error="1">
+          <store filename="show_sec-disk2.txt"/>
+      </execute>
+      <execute command="show sec-bootflash:" ignore_error="1">
+          <store filename="show_sec-bootflash.txt"/>
+      </execute>
+      <execute command="show file system">
+          <store filename="show_file_system.txt"/>
+      </execute>
+      <execute command="show rsp chassis-info" ignore_error="1">
+          <store filename="show_rsp_chassis-info.txt"/>
+      </execute>
+      <execute command="show redundancy" ignore_error="1">
+          <store filename="show_redundancy.txt"/>
+      </execute>
+      <execute command="show redundancy all" ignore_error="1">
+          <store filename="show_redundancy_all.txt"/>
+      </execute>
+      <execute command="show environment all" ignore_error="1">
+          <store filename="show_environment_all.txt"/>
+      </execute>
+      <execute command="show controller fia" ignore_error="1">
+          <store filename="show_controller_fia.txt"/>
+      </execute>
+      <execute command="show mem summary">
+          <store filename="show_mem_summary.txt"/>
+      </execute>
+      <execute command="show ip route summary">
+          <store filename="show_ip_route_summary.txt"/>
+      </execute>
+      <execute command="show processes cpu">
+          <store filename="show_processes_cpu.txt"/>
+      </execute>
+      <execute command="show ip cef 0.0.0.0 0.0.0.0 internal" ignore_error="1">
+          <store filename="show_ip_cef_0.0.0.0_0.0.0.0_internal.txt"/>
+      </execute>
+      <execute command="execute-on standby show gsr" ignore_error="1">
+          <store filename="execute-on_standby_show_gsr.txt"/>
+      </execute>
       <post-process
         processor="xslt"
         xslt="ios/xsl/generic.xsl"
@@ -112,6 +232,9 @@
             syntax="ios_xr/gel/show_running-config.gel"
             filename="show_running-config.xml"/>
       </execute>
+      <execute command="show run formal">
+          <store filename="show_run_formal.txt"/>
+      </execute>
       <execute command="show version">
           <store filename="show_version.txt"/>
           <post-process
@@ -126,12 +249,88 @@
             syntax="ios_xr/gel/show_interface.gel"
             filename="show_interface.xml"/>
       </execute>
+      <execute command="admin show diag">
+          <store filename="admin_show_diag.txt"/>
+          <post-process
+            processor="gelatin"
+            syntax="ios_xr/gel/admin_show_diag.gel"
+            filename="admin_show_diag.xml"/>
+      </execute>
+      <execute command="admin show running-config">
+          <store filename="admin_show_running-config.txt"/>
+      </execute>
       <execute command="show inventory">
           <store filename="show_inventory.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios_xr/gel/show_inventory.gel"
             filename="show_inventory.xml"/>
+      </execute>
+      <execute command="show ipv4 int brief">
+          <store filename="show_ipv4_int_brief.txt"/>
+      </execute>
+      <execute command="show clock">
+          <store filename="show_clock.txt"/>
+      </execute>
+      <execute command="show users">
+          <store filename="show_users.txt"/>
+      </execute>
+      <execute command="show install active">
+          <store filename="show_install_active.txt"/>
+      </execute>
+      <execute command="show cdp nei">
+          <store filename="show_cdp_nei.txt"/>
+      </execute>
+      <execute command="show cdp nei detail">
+          <store filename="show_cdp_nei_detail.txt"/>
+      </execute>
+      <execute command="show ntp status">
+          <store filename="show_ntp_status.txt"/>
+      </execute>
+      <execute command="dir harddisk:dumper location all">
+          <store filename="dir_harddiskdumper_location_all.txt"/>
+      </execute>
+      <execute command="dir harddisk: location all">
+          <store filename="dir_harddisk_location_all.txt"/>
+      </execute>
+      <execute command="dir compactflash: location all">
+          <store filename="dir_compactflash_location_all.txt"/>
+      </execute>
+      <execute command="dir disk0:dumper location all">
+          <store filename="dir_disk0dumper_location_all.txt"/>
+      </execute>
+      <execute command="dir disk0: location all">
+          <store filename="dir_disk0_location_all.txt"/>
+      </execute>
+      <execute command="dir disk0:/showtech location all">
+          <store filename="dir_disk0showtech_location_all.txt"/>
+      </execute>
+      <execute command="show filesystem">
+          <store filename="show_filesystem.txt"/>
+      </execute>
+      <execute command="show redundancy">
+          <store filename="show_redundancy.txt"/>
+      </execute>
+      <execute command="show mem summary">
+          <store filename="show_mem_summary.txt"/>
+      </execute>
+      <execute command="show route summary">
+          <store filename="show_route_summary.txt"/>
+      </execute>
+      <execute command="show processes cpu">
+          <store filename="show_processes_cpu.txt"/>
+      </execute>
+      <execute command="show processes memory">
+          <store filename="show_processes_memory.txt"/>
+      </execute>
+      <execute command="show platform">
+          <store filename="show_platform.txt"/>
+      </execute>
+      <execute command="admin show controllers fabric clock">
+          <store filename="admin_show_controllers_fabric_clock.txt"/>
+      </execute>
+      <execute command="admin show controllers fabric fab-control">
+          <store filename="admin_show_controllers_fabric_fab-control.txt"/>
       </execute>
       <post-process
         processor="xslt"
