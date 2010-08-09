@@ -265,7 +265,7 @@ grammar clock(default):
 
 grammar community_set_statements(default):
     match nows /,?/ nl:
-        out.add('community?name="$0"', '$2')
+        out.add('community?name="$0"')
     do.return()
 
 grammar community_set(default):
@@ -913,9 +913,9 @@ grammar policy_map_class_statements(default):
         out.add('$0/$2/$4', '$6')
     match 'shape' fs 'average' fs 'percent' fs number fs nl:
         out.add('$0/$2/$4', '$6')
-    match 'shape' fs 'average' fs number fs /[km]?bps/ nl:
+    match 'shape' fs 'average' fs number fs /[gkm]?bps/ nl:
         out.add('$0/$2/$6', '$4')
-    match 'shape' fs 'average' fs number fs /[km]?bps/ fs nl:
+    match 'shape' fs 'average' fs number fs /[gkm]?bps/ fs nl:
         out.add('$0/$2/$6', '$4')
     match 'queue-limit' fs number fs /(?:packets|bytes)/ nl:
         out.add('$0?unit="$4"', '$2')
@@ -927,6 +927,8 @@ grammar policy_map_statements(default):
     match 'class' fs nonl nl:
         out.enter('$0?name="$2"')
         policy_map_class_statements()
+    match 'description' fs nonl nl:
+        out.add('$0', '$2')
     do.return()
 
 grammar policy_maps(default):
@@ -939,15 +941,15 @@ grammar prefix_set_statements(default):
     match ipv6_ip '/' number /,?/ nl:
         out.add('entry?prefix="$0/$2"')
     match ipv6_ip '/' number fs /[lg]e/ fs number /,?/ nl:
-        out.add('entry?prefix="$0/$2"&$4="$6"', '$8')
+        out.add('entry?prefix="$0/$2"&$4="$6"')
     match ipv6_ip '/' number fs /[lg]e/ fs number fs /[lg]e/ fs number /,?/ nl:
-        out.add('entry?prefix="$0/$2"&$4="$6"&$8="$10"', '$12')
+        out.add('entry?prefix="$0/$2"&$4="$6"&$8="$10"')
     match ipv4_ip '/' number /,?/ nl:
         out.add('entry?prefix="$0/$2"')
     match ipv4_ip '/' number fs /[lg]e/ fs number /,?/ nl:
-        out.add('entry?prefix="$0/$2"&$4="$6"', '$8')
+        out.add('entry?prefix="$0/$2"&$4="$6"')
     match ipv4_ip '/' number fs /[lg]e/ fs number fs /[lg]e/ fs number /,?/ nl:
-        out.add('entry?prefix="$0/$2"&$4="$6"&$8="$10"', '$12')
+        out.add('entry?prefix="$0/$2"&$4="$6"&$8="$10"')
     do.return()
 
 grammar prefix_set(default):
@@ -1157,6 +1159,8 @@ grammar ospf_area_interface_statements(default):
     do.return()
 
 grammar ospf_area_statements(default):
+    match 'cost' fs number nl:
+        out.add('$0', '$2')
     match 'interface' fs nows nl:
         out.enter('$0?name="$2"')
         ospf_area_interface_statements()
