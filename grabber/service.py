@@ -1,6 +1,5 @@
-import os, sys
-sys.path.insert(0, os.path.dirname(__file__))
-from Config import Config
+import os
+from grabber.Config import Config
 
 config  = Config(__service__.config_file('config.xml'))
 grabber = config.get_grabber()
