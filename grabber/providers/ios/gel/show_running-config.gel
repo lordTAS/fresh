@@ -213,7 +213,7 @@ grammar async_line_statements(default):
         out.add('$0', '$2')
     match 'timeout' fs 'login response' fs number nl:
         out.add('$0/$2', '$4')
-    match 'transport' fs nows fs nows nl:
+    match 'transport' fs nows fs nonl nl:
         out.add('$0/$2', '$4')
     do.return()
 
@@ -281,6 +281,9 @@ grammar bgp_neighbor_group_statements(default):
         do.return()
     match 'ip-address' fs ipv4_ip nl:
         out.add('address', '$2')
+        do.return()
+    match 'local-as' fs number nl:
+        out.add('$0', '$2')
         do.return()
     match 'next-hop-self' nl:
         out.add('$0')
@@ -825,6 +828,8 @@ grammar interface_statements(default):
         out.add('$0/$2')
     match 'isdn' fs /(?:switch-type|spid\d+)/ fs nonl nl:
         out.add('$0/$2', '$4')
+    match 'isis' fs 'advertise prefix' / */ nl:
+        out.add('$0/$2')
     match 'isis' fs 'authentication' fs 'key-chain' fs nows nl:
         out.add('$0/$2/$4', '$6')
     match 'isis' fs 'authentication' fs 'mode' fs nows nl:
@@ -919,6 +924,8 @@ grammar interface_statements(default):
         out.add('$0/$2', '$4')
     match 'priority-group' fs number nl:
         out.add('$0', '$2')
+    match 'priority-queue' fs 'queue-limit' fs number / */ nl:
+        out.add('$0/$2', '$4')
     match 'pvc' fs nows fs nonl nl:
         out.enter('$0?name="$2"&number="$4"')
         interface_pvc_statements()
@@ -948,6 +955,8 @@ grammar interface_statements(default):
         out.add('$0/$2')
     match 'snmp' fs 'trap link-status' nl:
         out.add('$0/$2')
+    match 'spanning-tree' fs 'portfast' nl:
+        out.add('$0/$2')
     match 'speed' fs number nl:
         out.add('$0', '$2')
     match 'speed' fs nows nl:
@@ -960,6 +969,13 @@ grammar interface_statements(default):
        fs number nl:
         out.add('$0/$2/$4', '$6')
         out.add('$0/$2/$8', '$10')
+    match /(?:standby|vrrp)/
+       fs number
+       fs 'preempt'
+       fs 'delay'
+       fs 'minimum'
+       fs number nl:
+        out.add('$0?group="$2"/$4/$6/$8', '$10')
     match /(?:standby|vrrp)/ fs 'version' fs number nl:
         out.add('$0/$2', '$4')
     match /(?:standby|vrrp)/ fs number fs 'ip' fs ipv4_ip nl:
@@ -1034,12 +1050,22 @@ grammar interface_statements(default):
         out.add('$0', '$2')
     match 'tx-queue-limit' fs number nl:
         out.add('$0', '$2')
-    match 'udld' fs 'port aggressive' nl:
-        out.add('$0/$2')
+    match 'udld' fs 'port' fs 'disable' nl:
+        out.add('$0/$2/$4')
+    match 'udld' fs 'port' fs 'aggressive' nl:
+        out.add('$0/$2/$4')
+    match 'wrr-queue' fs /bandwidth|queue-limit/ fs nonl nl:
+        out.add('$0/$2', '$4')
+    match 'wrr-queue' fs 'random-detect' fs nonl nl:
+        out.add('$0/$2?option="$4"')
+    match 'xconnect' fs ipv4_ip fs number fs 'encapsulation' fs nows nl:
+        out.add('$0/address', '$2')
+        out.add('$0/number', '$4')
+        out.add('$0/$6', '$8')
     match 'xconnect' fs ipv4_ip fs number fs 'pw-class' fs name nl:
         out.add('$0/address', '$2')
         out.add('$0/number', '$4')
-        out.add('$0/$6?name="$8"', '$8')
+        out.add('$0/$6', '$8')
     do.return()
 
 grammar interface(default):
@@ -1065,6 +1091,8 @@ grammar ip_route_statements(default):
     match if_name nl:
         out.add('destination?interface="$0"')
         do.return()
+    match 'tag' fs number:
+        out.add('tag', '$2')
     match 'track' fs number:
         out.add('track?number="$2"')
     match 'global' nl:
@@ -1387,6 +1415,8 @@ grammar isis_statements(default):
         out.add('$0/$2')
     match 'net' fs nonl nl:
         out.add('$0', '$2')
+    match 'nsf' fs nows nl:
+        out.add('$0', '$2')
     match 'is-type' fs nonl nl:
         out.add('$0', '$2')
     match 'passive-interface' fs if_name nl:
@@ -1498,6 +1528,8 @@ grammar ospf_statements(default):
         out.add('$0?number="$2"/authentication', '$6')
     match 'default-information' fs nonl nl:
         out.add('$0', '$2')
+    match 'domain-tag' fs number nl:
+        out.add('$0', '$2')
     match 'log-adjacency-changes' nl:
         out.add('$0')
     match 'network' fs ipv4_ip fs ipv4_umask nl:
@@ -1505,6 +1537,8 @@ grammar ospf_statements(default):
     match 'network' fs ipv4_ip fs ipv4_umask fs 'area' fs number nl:
         out.add('$0?address="$2"&umask="$6"')
         out.add('$0?address="$2"&umask="$6"/area', '$8')
+    match 'nsf ietf' fs 'restart-interval' fs number nl:
+        out.add('$0/$2', '$4')
     match 'passive-interface' fs 'default' nl:
         out.add('$0/$2')
     match 'passive-interface' fs if_name nl:
@@ -1534,10 +1568,14 @@ grammar policy_map_class_police_statements(default):
         out.add('burst', '$2')
     match number:
         out.add('bitrate', '$0')
+    match 'aggregate' fs name:
+        out.add('$0', '$2')
     match /rate|burst|peak-burst/ fs number:
         out.add('$0', '$2')
-    match /cir|bc|be/ fs number:
-        out.add('$0', '$2')
+    match /cir|pir|bc|be/ fs number:
+        out.add('$0?unit="bps"', '$2')
+    match /cir|pir|bc|be/ fs 'percent' fs number:
+        out.add('$0?unit="percent"', '$4')
     match /[a-z]+-action/ fs nows:
         out.add('$0', '$2')
     do.return()
@@ -1712,6 +1750,11 @@ grammar vc_class(default):
         vc_class_statements()
     do.return()
 
+grammar vlan_statements(default):
+    match 'name' fs name nl:
+        out.add('$0', '$2')
+    do.return()
+
 grammar banner_statements:
     match multi_line_str_end:
         do.return()
@@ -1735,6 +1778,8 @@ grammar input(default):
         | 'Uncompressed configuration' nonl nl
         | 'writeNet' nl:
         do.skip()
+    match 'alias' fs name fs name fs nonl nl:
+        out.add('$0?mode="$2"&name="$4"', '$6')
     match 'arp' fs ipv4_ip fs nows fs nows nl:
         out.add('$0?ip_address="$2"/mac-address', '$4')
         out.add('$0?ip_address="$2"/type', '$6')
@@ -1920,6 +1965,9 @@ grammar input(default):
         out.add('vtp/domain', '$4')
     match 'vtp' fs 'mode' fs nows nl:
         out.add('vtp/mode', '$4')
+    match 'vlan' fs nows / */ nl:
+        out.enter('$0?number="$2"')
+        vlan_statements()
     match 'vlan' fs 'access-log' fs 'ratelimit' fs number nl:
         out.add('$0/$2/$4', '$6')
     match 'vlan' fs 'dot1q tag' fs nows / */ nl:

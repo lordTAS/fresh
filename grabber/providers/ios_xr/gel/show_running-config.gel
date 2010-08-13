@@ -868,6 +868,8 @@ grammar ntp_statements(default):
         out.add('$0?address="$2"')
     match 'server' fs ipv4_ip fs 'source' fs nows nl:
         out.add('$0?address="$2"/$4', '$6')
+    match 'source' fs nows nl:
+        out.add('$0', '$2')
     match 'update-calendar' nl:
         out.add('$0')
     do.return()
@@ -1081,6 +1083,8 @@ grammar isis_interface_statements(default):
         out.add('$0?type="$2"', '$4')
     match 'lsp-interval' fs number nl:
         out.add('$0', '$2')
+    match 'mpls ldp' fs 'sync' nl:
+        out.add('$0/$2')
     match 'passive' nl:
         out.add('$0')
     match 'point-to-point' nl:
@@ -1088,6 +1092,8 @@ grammar isis_interface_statements(default):
     do.return()
 
 grammar isis_af_statements(default):
+    match 'adjacency-check' fs 'disable' nl:
+        out.add('$0/$2')
     match 'interface' fs if_name nl:
         out.enter('$0?name="$2"')
         isis_interface_statements()
@@ -1227,6 +1233,19 @@ grammar mpls_traffic_eng_statements(default):
 grammar mpls_ldp_interface_statements(default):
     do.return()
 
+grammar mpls_ldp_label_advertise_statements(default):
+    match 'disable' nl:
+        out.add('$0')
+    match 'for' fs nows nl:
+        out.add('$0', '$2')
+    do.return()
+
+grammar mpls_ldp_label_statements(default):
+    match 'advertise' nl:
+        out.enter('$0')
+        mpls_ldp_label_advertise_statements()
+    do.return()
+
 grammar mpls_ldp_log_statements(default):
     match 'neighbor' nl:
         out.add('$0')
@@ -1236,6 +1255,9 @@ grammar mpls_ldp_statements(default):
     match 'interface' fs if_name nl:
         out.enter('$0?name="$2"')
         mpls_ldp_interface_statements()
+    match 'label' nl:
+        out.enter('label')
+        mpls_ldp_label_statements()
     match 'log' nl:
         out.enter('log')
         mpls_ldp_log_statements()
@@ -1472,6 +1494,8 @@ grammar input(default):
         out.add('$0')
     match 'mpls label range table' fs nonl nl:
         out.add('$0', '$2')
+    match 'ssh client' fs 'source-interface' fs nows nl:
+        out.add('$0/$2', '$4')
     match 'ssh server' fs nows nl:
         out.add('$0?version="$2"')
     match 'tacacs-server' fs 'timeout' fs number nl:
