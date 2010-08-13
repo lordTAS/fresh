@@ -17,10 +17,10 @@ The API for updating the list of collected hosts.
 """
 
 import os
-from sqlalchemy     import create_engine
-from lxml           import etree
-from Exscriptd.util import resolve_variables
-from seed.HostDB    import HostDB
+from sqlalchemy        import create_engine
+from lxml              import etree
+from Exscriptd.util    import resolve_variables
+from fresh.seed.HostDB import HostDB
 
 __dirname__ = os.path.dirname(__file__)
 

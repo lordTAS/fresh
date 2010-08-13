@@ -13,8 +13,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import os
-from seed.Config import Config
-from functools   import partial
+from fresh.seed.Config import Config
+from functools         import partial
 
 config = Config(__service__.config_file('config.xml'))
 hostdb = config.get_hostdb()
