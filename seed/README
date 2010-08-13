@@ -1,1 +1,4 @@
-The seed tool is used to update the list of hosts contacted by Fresh.
+Seed updates the list of hosts that are contacted by Fresh.
+
+Seed is implemented as a service that is loaded by an Exscript
+daemon.
