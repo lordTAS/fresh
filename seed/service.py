@@ -20,7 +20,7 @@ config = Config(__service__.config_file('config.xml'))
 hostdb = config.get_hostdb()
 
 def run(service, order):
-    service.daemon.set_order_status(order, 'running')
+    service.set_order_status(order, 'running')
 
     # Delete all hosts.
     hostdb.delete_host()
@@ -29,8 +29,7 @@ def run(service, order):
     hostdb.save_host(order.get_hosts())
 
 def enter(service, order):
-    task = service.enqueue(partial(run, service, order),
-                           'Update the host list')
-    task.signal_connect('done', service.daemon.order_done, order.id)
-    service.daemon.set_order_status(order, 'queued')
+    callback = partial(run, service, order)
+    service.enqueue(order, callback, 'update')
+    service.set_order_status(order, 'queued')
     return True # No validation needed
