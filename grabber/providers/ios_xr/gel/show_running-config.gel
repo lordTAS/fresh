@@ -1504,7 +1504,7 @@ grammar input(default):
         out.enter('$0/host?name="$4"&port="$8"')
         tacacs_server_statements()
     match 'tacacs-server' fs 'key' fs number fs nonl nl:
-        out.enter('$0/key?type="$4"', '$6')
+        out.enter('$0/key?type="$4"&string="$6"')
         tacacs_server_statements()
     match 'tacacs' fs 'source-interface' fs nows nl:
         out.add('$0/$2', '$4')
