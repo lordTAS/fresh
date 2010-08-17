@@ -28,8 +28,10 @@ def run(service, order):
     # Import new hosts.
     hostdb.save_host(order.get_hosts())
 
+def check(service, order):
+    return True # No validation needed
+
 def enter(service, order):
     callback = partial(run, service, order)
     service.enqueue(order, callback, 'update')
     service.set_order_status(order, 'queued')
-    return True # No validation needed

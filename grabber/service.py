@@ -26,11 +26,11 @@ def run(conn, logger):
         logger.info('%s: Exception: %s' % (conn.get_host().get_name(), e))
         raise
 
+def check(service, order):
+    return order.get_hosts() and True or False
+
 def enter(service, order):
-    if not order.get_hosts():
-        return False
     logger   = service.create_logger(order, 'command.log')
     callback = bind(run, logger)
     service.enqueue_hosts(order, order.get_hosts(), callback)
     service.set_order_status(order, 'queued')
-    return True
