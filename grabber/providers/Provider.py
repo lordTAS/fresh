@@ -49,14 +49,24 @@ class Execute(object):
                 raise Exception('Invalid XML tag: %s' % element.tag)
 
     def do(self, conn):
-        conn.get_host().set('__last_command__', self.command)
-        if self.ignore_error:
-            try:
-                conn.execute(self.command)
-            except TransportException, e:
-                pass
-        else:
+        host   = conn.get_host()
+        label  = host.get('__label__')
+        logger = host.get('__logger__')
+        cmd    = repr(self.command)
+        host.set('__last_command__', self.command)
+        try:
             conn.execute(self.command)
+        except TransportException, e:
+            err = repr(str(e))
+            if self.ignore_error:
+                msg = '%s: Ignored %s during %s' % (label, err, cmd)
+                logger.info(msg)
+            else:
+                msg = '%s: Exception %s during %s' % (label, err, cmd)
+                logger.info(msg)
+                raise
+        else:
+            logger.info('%s: Command succeeded: %s' % (label, cmd))
         for child in self.children:
             child.do(conn)
 
