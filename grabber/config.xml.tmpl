@@ -72,7 +72,7 @@
             syntax="ios/gel/show_interface.gel"
             filename="show_interface.xml"/>
       </execute>
-      <execute command="show inventory">
+      <execute command="show inventory" ignore_error="1">
           <store filename="show_inventory.txt"/>
           <post-process
             processor="gelatin"
