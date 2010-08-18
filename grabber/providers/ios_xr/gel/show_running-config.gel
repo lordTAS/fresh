@@ -535,6 +535,8 @@ grammar interface_statements(default):
         out.add('$2/$4')
     match /ipv[46]/ fs 'verify unicast source' fs 'reachable-via' fs nows nl:
         out.add('$0/$2?$4="$6"')
+    match 'ipv6' fs 'nd' fs 'suppress-ra' nl:
+        out.add('ipv6/$2/$4')
     match 'ipv6' fs 'address' fs ipv6_ip '/' number nl:
         out.add('ipv6/$2?address="$4"&prefixlen="$6"')
     match 'ipv6' fs 'enable' nl:

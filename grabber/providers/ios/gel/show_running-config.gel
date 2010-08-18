@@ -1081,7 +1081,7 @@ grammar interface(default):
         interface_statements()
     do.return()
 
-grammar ip_route_statements(default):
+grammar ip_route_statements:
     match if_name fs ipvx_ip fs number:
         out.add('destination?interface="$0"&address="$2"&metric="$4"')
     match if_name fs ipvx_ip:
