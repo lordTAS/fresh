@@ -4,7 +4,7 @@ define ws /\s+/
 define nows /\S+/
 define nl /[\r\n]+/
 define nonl /[^\r\n]+/
-define comment /![^\r\n]*/
+define comment /![^\r\n]*[\r\n]/
 define number /\d+/
 define word /\w+/
 define name /\w[0-9a-zA-Z_\-]*/
@@ -29,7 +29,7 @@ define async_line_name /\w+/
 
 # Grammar.
 grammar default:
-    match ws
+    match / +/
         | comment:
         do.skip()
     match 'no' fs:
@@ -447,10 +447,10 @@ grammar bgp_statements(default):
         redistribute_statements()
     match 'synchronization' nl:
         out.add('$0')
-    match 'template' fs 'peer-policy' fs nows:
+    match 'template' fs 'peer-policy' fs nows nl:
         out.enter('template/peer-policy?name="$4"')
         bgp_template_statements()
-    match 'template' fs 'peer-session' fs nows:
+    match 'template' fs 'peer-session' fs nows nl:
         out.enter('template/peer-session?name="$4"')
         bgp_template_statements()
     do.return()
@@ -929,7 +929,7 @@ grammar interface_statements(default):
     match 'pvc' fs nows fs nonl nl:
         out.enter('$0?name="$2"&number="$4"')
         interface_pvc_statements()
-    match 'pvc' fs nows fs:
+    match 'pvc' fs nows fs nl:
         out.enter('$0?number="$2"')
         interface_pvc_statements()
     match 'rate-limit' fs /(?:in|out)put/ fs:
@@ -1081,7 +1081,7 @@ grammar interface(default):
         interface_statements()
     do.return()
 
-grammar ip_route_statements:
+grammar ip_route_statements(default):
     match if_name fs ipvx_ip fs number:
         out.add('destination?interface="$0"&address="$2"&metric="$4"')
     match if_name fs ipvx_ip:
@@ -1578,6 +1578,8 @@ grammar policy_map_class_police_statements(default):
         out.add('$0?unit="percent"', '$4')
     match /[a-z]+-action/ fs nows:
         out.add('$0', '$2')
+    match / */ nl:
+        do.skip()
     do.return()
 
 grammar policy_map_class_statements(default):
