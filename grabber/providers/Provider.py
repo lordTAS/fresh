@@ -75,6 +75,7 @@ class Execute(object):
             if self.ignore_error:
                 msg = '%s: Ignored %s during %s' % (label, err, cmd)
                 logger.info(msg)
+                return
             else:
                 msg = '%s: Exception %s during %s' % (label, err, cmd)
                 logger.info(msg)
