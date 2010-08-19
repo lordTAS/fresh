@@ -121,6 +121,11 @@ grammar redistribute_statements:
         do.return()
     do.return()
 
+grammar bfd_statements(default):
+    match 'echo' fs 'disable' nl:
+        out.add('echo/disable')
+    do.return()
+
 grammar bgp_af_statements(default):
     match 'as-override' nl:
         out.add('$0')
@@ -1467,6 +1472,9 @@ grammar input(default):
         do.skip()
     match 'alias' fs name fs nonl nl:
         out.add('aliases/alias?name="$2"', '$4')
+    match 'bfd' nl:
+        out.add('$0')
+        bfd_statements()
     match 'cdp' nl:
         out.add('$0')
     match 'control-plane' nl:
