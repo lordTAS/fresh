@@ -194,7 +194,7 @@
       <execute command="show mem summary">
           <store filename="show_mem_summary.txt"/>
       </execute>
-      <execute command="show ip route summary">
+      <execute command="show ip route summary" ignore_error="1">
           <store filename="show_ip_route_summary.txt"/>
       </execute>
       <execute command="show processes cpu">
