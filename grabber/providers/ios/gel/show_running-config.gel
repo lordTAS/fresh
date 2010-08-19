@@ -661,6 +661,8 @@ grammar interface_rate_limit_statements(default):
         out.add('$0/action/$3', '$5')
     match /[a-z]+/ '-action' fs nows:
         out.add('$0/action', '$3')
+    match / */ nl:
+        do.return()
     do.return()
 
 grammar interface_statements(default):
