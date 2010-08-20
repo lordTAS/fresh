@@ -20,10 +20,15 @@ config  = Config(__service__.config_file('config.xml'))
 grabber = config.get_grabber()
 
 def run(conn, logger):
+    host    = conn.get_host()
+    address = host.get_address()
+    alias   = host.get('alias')[0]
+    label   = address + '/' + alias
+
     try:
-        grabber.grab(conn, logger)
+        grabber.grab(conn, logger, label)
     except Exception, e:
-        logger.info('%s: Exception: %s' % (conn.get_host().get_name(), e))
+        logger.info('%s: Exception: %s' % (label, repr(str(e))))
         raise
 
 def check(service, order):

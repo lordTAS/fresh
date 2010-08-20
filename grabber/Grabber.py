@@ -25,11 +25,7 @@ class Grabber(object):
             raise Exception('unknown host: %s' % address)
         return host.get('path')
 
-    def grab(self, conn, logger):
-        host    = conn.get_host()
-        address = host.get_address()
-        alias   = host.get('alias')[0]
-        label   = address + '/' + alias
+    def grab(self, conn, logger, label):
         logger.info('%s: Connecting...' % label)
 
         # Open the connection.
@@ -50,9 +46,9 @@ class Grabber(object):
             raise Exception('Error: No provider for %s found.' % repr(os))
         logger.info('%s: Initializing command line.' % label)
         provider.init(conn)
-        logger.info('%s: Initialization complete.' % label)
 
         # Init default variables.
+        host    = conn.get_host()
         address = host.get_address()
         host.set('__path__',          self.get_path_from_address(address))
         host.set('__real_hostname__', hostname or host.get_name())
@@ -60,6 +56,6 @@ class Grabber(object):
         host.set('__logger__',        logger)
 
         # Run.
-        logger.info('%s: start.' % label)
+        logger.info('%s: Starting.' % label)
         provider.start(conn)
-        logger.info('%s: completed.' % label)
+        logger.info('%s: Completed.' % label)
