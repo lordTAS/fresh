@@ -21,8 +21,13 @@ class ExistDBStore(object):
 
     def start(self, provider, conn, **kwargs):
         host     = conn.get_host()
+        address  = host.get_address()
+        alias    = host.get('alias')[0]
         hostname = host.get('__real_hostname__')
         filename = kwargs.get('filename')
-        document = kwargs.get('document').replace('{hostname}', hostname)
+        document = kwargs.get('document')
+        document = document.replace('{hostname}', hostname)
+        document = document.replace('{address}',  address)
+        document = document.replace('{alias}',    alias)
         content  = provider.store.get(conn, filename)
         self.db.store(document, content)
