@@ -249,7 +249,7 @@
             syntax="ios_xr/gel/show_interface.gel"
             filename="show_interface.xml"/>
       </execute>
-      <execute command="admin show diag">
+      <execute command="admin show diag" timeout="180">
           <store filename="admin_show_diag.txt"/>
           <post-process
             processor="gelatin"

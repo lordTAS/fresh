@@ -70,6 +70,9 @@ class Execute(Action):
         self.command      = xml.get('command')
         self.ignore_error = bool(xml.get('ignore_error', False))
         self.children     = []
+        self.timeout      = xml.get('timeout')
+        if self.timeout is not None:
+            self.timeout = int(self.timeout)
 
         for child in xml:
             if child.tag == 'post-process':
@@ -83,6 +86,11 @@ class Execute(Action):
         host = conn.get_host()
         cmd  = repr(self.command)
         host.set('__last_command__', self.command)
+
+        old_timeout = conn.get_timeout()
+        if self.timeout is not None:
+            conn.set_timeout(self.timeout)
+
         try:
             conn.execute(self.command)
         except TransportException, e:
@@ -95,6 +103,9 @@ class Execute(Action):
                 raise
         else:
             self.log(conn, 'Command succeeded: %s' % cmd)
+        finally:
+            conn.set_timeout(old_timeout)
+
         for child in self.children:
             child.do(conn)
 
