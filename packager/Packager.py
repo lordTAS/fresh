@@ -12,9 +12,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-import os
+import os, tarfile
 from tempfile import mkdtemp
-from tarfile  import TarFile
 from shutil   import move, rmtree
 
 class Packager(object):
@@ -37,13 +36,13 @@ class Packager(object):
     def _mktar(self, dirname, basename):
         if self.format == 'tar':
             filename = os.path.join(self.out_dir, basename + '.tar')
-            tar      = TarFile(filename, 'w', dereference = True)
+            tar      = tarfile.open(filename, 'w', dereference = True)
         elif self.format == 'gzip':
             filename = os.path.join(self.out_dir, basename + '.tar.gz')
-            tar      = TarFile(filename, 'w:gz', dereference = True)
+            tar      = tarfile.open(filename, 'w:gz', dereference = True)
         elif self.format == 'bz2':
             filename = os.path.join(self.out_dir, basename + '.tar.bz2')
-            tar      = TarFile(filename, 'w:bz2', dereference = True)
+            tar      = tarfile.open(filename, 'w:bz2', dereference = True)
         else:
             raise Exception('unknown tar format: %s' % self.format)
 
