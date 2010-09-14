@@ -1,0 +1,4 @@
+Packager builds a package using the data that was previously
+collected using Grabber. It stores the result on the file system.
+
+Packager is a service that is loaded by an Exscript daemon.

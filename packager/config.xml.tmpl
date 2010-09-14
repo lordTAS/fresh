@@ -1,0 +1,22 @@
+<xml>
+  <variables>
+    <sourceDir>/my/input/dir</sourceDir>
+    <packageDir>/my/package/dir</packageDir>
+  </variables>
+
+  <database name="default">
+    <dbn>sqlite:///etc/fresh/seeddb.sqlite</dbn>
+  </database>
+
+  <profile name="default">
+    <link name="{hostname}">show_running_config.txt</link>
+  </profile>
+
+  <packager>
+    <database>default</database>
+    <input-dir>$sourceDir</input-dir>
+    <package-dir>$packageDir</package-dir>
+    <format>bz2</format>
+    <profile>default</profile>
+  </packager>
+</xml>
