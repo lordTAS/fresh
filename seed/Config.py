@@ -18,38 +18,15 @@ The API for updating the list of collected hosts.
 
 import os
 from sqlalchemy        import create_engine
-from lxml              import etree
-from Exscriptd.util    import resolve_variables
+from Exscriptd         import ConfigReader
 from fresh.seed.HostDB import HostDB
 
-__dirname__ = os.path.dirname(__file__)
-
-class Config(object):
+class Config(ConfigReader):
     def __init__(self, filename):
-        self.cfgtree   = etree.parse(filename)
-        self.variables = {}
-        self.seed      = None
-        self._clean_tree()
-        self._init()
-
-    def _resolve(self, text):
-        if text is None:
-            return None
-        return resolve_variables(self.variables, text.strip())
-
-    def _clean_tree(self):
-        # Read all variables.
-        for element in self.cfgtree.find('variables'):
-            varname = element.tag.strip()
-            value   = resolve_variables(self.variables, element.text)
-            self.variables[varname] = value
-
-        # Resolve variables everywhere.
-        for element in self.cfgtree.iter():
-            element.text = self._resolve(element.text)
-            for attr in element.attrib:
-                value                = element.attrib[attr]
-                element.attrib[attr] = self._resolve(value)
+        ConfigReader.__init__(self, filename)
+        element     = self.cfgtree.find('seed')
+        db_name     = element.find('database').text
+        self.hostdb = self.init_database_from_name(db_name)
 
     def init_database_from_name(self, name):
         element = self.cfgtree.find('database[@name="%s"]' % name)
@@ -60,11 +37,6 @@ class Config(object):
         print 'Initializing database tables...'
         db.install()
         return db
-
-    def _init(self):
-        element     = self.cfgtree.find('seed')
-        db_name     = element.find('database').text
-        self.hostdb = self.init_database_from_name(db_name)
 
     def get_hostdb(self):
         return self.hostdb
