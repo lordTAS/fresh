@@ -8,8 +8,16 @@
     <dbn>sqlite:///etc/fresh/seeddb.sqlite</dbn>
   </database>
 
-  <profile name="default">
-    <link name="{hostname}">show_running_config.txt</link>
+  <profile name="ios">
+    <link name="{hostname}">show_running-config.txt</link>
+  </profile>
+
+  <profile name="ios_xr">
+    <link name="{hostname}">show_run_formal.txt</link>
+  </profile>
+
+  <profile name="junos">
+    <link name="{hostname}">show_configuration_display_set.txt</link>
   </profile>
 
   <packager>
@@ -17,6 +25,8 @@
     <input-dir>$sourceDir</input-dir>
     <package-dir>$packageDir</package-dir>
     <format>bz2</format>
-    <profile>default</profile>
+    <profile if="os == 'ios'">ios</profile>
+    <profile if="os == 'ios_xr'">ios_xr</profile>
+    <profile if="os == 'junos'">junos</profile>
   </packager>
 </xml>

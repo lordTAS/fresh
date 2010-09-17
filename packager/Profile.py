@@ -15,7 +15,16 @@
 
 class Profile(object):
     def __init__(self):
-        self.files = []
+        self.condition = None
+        self.files     = []
+
+    def set_condition(self, cond):
+        self.condition = compile(cond, 'config', 'eval')
+
+    def test_condition(self, vars):
+        if not self.condition:
+            return True
+        return eval(self.condition, vars)
 
     def add_file(self, name, from_name):
         self.files.append((name, from_name))

@@ -54,6 +54,12 @@ class Config(ConfigReader):
         format        = element.find('format').text
         dbname        = element.find('database').text
         db            = self._init_seeddb_from_name(dbname)
-        profile_names = [e.text for e in element.iterfind('profile')]
-        profiles      = [self.init_profile_from_name(n) for n in profile_names]
+        profiles      = []
+        for profile_elem in element.iterfind('profile'):
+            profile_name = profile_elem.text
+            profile      = self.init_profile_from_name(profile_name)
+            profile_cond = profile_elem.get('if')
+            if profile_cond is not None:
+                profile.set_condition(profile_cond)
+            profiles.append(profile)
         return Packager(in_dir, out_dir, db, profiles, format = format)

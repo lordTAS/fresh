@@ -27,11 +27,11 @@ class Packager(object):
         if format not in ('directory', 'tar', 'gzip', 'bz2'):
             raise Exception('unknown format: %s' % self.format)
 
-    def get_source_path_from_address(self, address):
+    def get_seedhost_from_address(self, address):
         host = self.seeddb.get_host(address = address)
         if not host:
-            return None
-        return host.get('path')
+            raise Exception('unknown host: %s' % address)
+        return host
 
     def _mktar(self, dirname, basename):
         if self.format == 'tar':
@@ -55,20 +55,29 @@ class Packager(object):
         tmp_dir = mkdtemp()
 
         for host in order.get_hosts():
-            src_path = self.get_source_path_from_address(host.get_address())
+            seedhost = self.get_seedhost_from_address(host.get_address())
+            src_path = seedhost.get('path')
             dst_path = host.get('path')[0]
+            dst_dir  = os.path.join(tmp_dir, dst_path)
+            vars     = {'os': seedhost.get('os')}
+            hostname = host.get_name()
 
-            for name, from_name in self.profiles[0].files:  #FIXME: select profile
-                src = os.path.join(self.in_dir, src_path, from_name)
-                dst = os.path.join(tmp_dir,     dst_path, name)
-                dst = dst.replace('{hostname}', host.get_name())
-                #print "ADDING", src, dst
-                if os.path.exists(src):
-                    os.makedirs(os.path.join(tmp_dir, dst_path))
-                    os.symlink(src, dst)
+            for profile in self.profiles:
+                if not profile.test_condition(vars):
+                    continue
+                for name, from_name in profile.files:
+                    src = os.path.join(self.in_dir, src_path, from_name)
+                    dst = os.path.join(dst_dir, name)
+                    dst = dst.replace('{hostname}', hostname)
+                    if os.path.exists(src):
+                        if not os.path.exists(dst_dir):
+                            os.makedirs(os.path.join(dst_dir))
+                        os.symlink(src, dst)
 
         if self.format == 'directory':
-            move(tmp_dir, self.out_dir)
+            for file in os.listdir(tmp_dir):
+                file = os.path.join(tmp_dir, file)
+                move(file, self.out_dir)
         else:
             self._mktar(tmp_dir, str(order.id))
-            rmtree(tmp_dir)
+        rmtree(tmp_dir)
