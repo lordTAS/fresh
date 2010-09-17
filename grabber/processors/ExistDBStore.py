@@ -22,7 +22,7 @@ class ExistDBStore(object):
     def start(self, provider, conn, **kwargs):
         host     = conn.get_host()
         address  = host.get_address()
-        alias    = host.get('alias')[0]
+        alias    = host.get('__alias__')
         hostname = host.get('__real_hostname__')
         filename = kwargs.get('filename')
         document = kwargs.get('document')

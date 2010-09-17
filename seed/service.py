@@ -25,6 +25,9 @@ def run(service, order):
     hostdb.delete_host()
 
     # Import new hosts.
+    for host in order.get_hosts():
+        for key, value in host.get_all().iteritems():
+            host.set(key, value[0])
     hostdb.save_host(order.get_hosts())
 
 def check(service, order):
