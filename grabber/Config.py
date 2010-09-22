@@ -35,7 +35,7 @@ class Config(ConfigReader):
     def init_database_from_name(self, name):
         element = self.cfgtree.find('database[@name="%s"]' % name)
         dbn     = element.find('dbn').text
-        print 'Creating database connection for', dbn
+        #print 'Creating database connection for', dbn
         engine  = create_engine(dbn)
         return HostDB(engine)
 
@@ -43,7 +43,7 @@ class Config(ConfigReader):
         for element in self.cfgtree.iterfind('file-store'):
             name    = element.get('name')
             basedir = element.find('basedir').text
-            print 'Creating file store "%s".' % name
+            #print 'Creating file store "%s".' % name
             self.stores[name] = FileStore(basedir)
 
     def _init_gelatin(self):
@@ -53,7 +53,7 @@ class Config(ConfigReader):
             format     = element.find('format').text
             if not syntax_dir.startswith('/'):
                 syntax_dir = os.path.join(__dirname__, syntax_dir)
-            print 'Creating Gelatin processor "%s".' % name
+            #print 'Creating Gelatin processor "%s".' % name
             self.processors[name] = GelatinProcessor(syntax_dir, format)
 
     def _init_xsltproc(self):
@@ -63,7 +63,7 @@ class Config(ConfigReader):
             timestamp = element.find('add-timestamp') is not None
             if not xsl_dir.startswith('/'):
                 xsl_dir = os.path.join(__dirname__, xsl_dir)
-            print 'Creating XSLT processor "%s".' % name
+            #print 'Creating XSLT processor "%s".' % name
             self.processors[name] = XsltProcessor(xsl_dir, timestamp)
 
     def _init_existdb(self):
@@ -74,7 +74,7 @@ class Config(ConfigReader):
             user       = element.find('user').text
             password   = element.find('password').text
             collection = element.find('collection').text
-            print 'Creating eXist-db processor "%s".' % name
+            #print 'Creating eXist-db processor "%s".' % name
             self.processors[name] = ExistDBStore(host,
                                                  port,
                                                  user,
@@ -90,7 +90,7 @@ class Config(ConfigReader):
             if not filename.startswith('/'):
                 filename = os.path.join(__dirname__, filename)
 
-            print 'Loading provider "%s" (%s).' % (name, modname)
+            #print 'Loading provider "%s" (%s).' % (name, modname)
             themodule            = imp.load_source(modname, filename)
             theclass             = getattr(themodule, modname)
             self.providers[name] = theclass(element,

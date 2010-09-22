@@ -31,10 +31,10 @@ class Config(ConfigReader):
     def _init_seeddb_from_name(self, name):
         element = self.cfgtree.find('database[@name="%s"]' % name)
         dbn     = element.find('dbn').text
-        print 'Creating database connection for', dbn
+        #print 'Creating database connection for', dbn
         engine  = create_engine(dbn)
         db      = HostDB(engine)
-        print 'Initializing database tables...'
+        #print 'Initializing database tables...'
         db.install()
         return db
 
