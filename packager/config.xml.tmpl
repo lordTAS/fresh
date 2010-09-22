@@ -29,4 +29,15 @@
     <profile if="os == 'ios_xr'">ios_xr</profile>
     <profile if="os == 'junos'">junos</profile>
   </packager>
+
+  <!--
+  You can use one or more service sections in this file.
+  The daemon and the queue that are referenced herend must exist
+  in the Exscriptd config file.
+  -->
+  <service name="mypackager">
+      <daemon>rest-daemon</daemon>
+      <path>$FRESH_DIR/packager</path>
+      <queue>default-queue</queue>
+  </service>
 </xml>

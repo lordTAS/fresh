@@ -1,4 +1,11 @@
 <xml>
+  <!--
+  You may either define your own variables, or use environment variables
+  in this file.
+  Examples:
+    <fileStoreDir>/my/output/dir</fileStoreDir>
+    <fileStoreDir>$TESTVAR</fileStoreDir>
+  -->
   <variables>
     <fileStoreDir>/my/output/dir</fileStoreDir>
   </variables>
@@ -454,4 +461,15 @@
       <provider name="ios"/>
       <provider name="ios_xr"/>
   </grabber>
+
+  <!--
+  You can use one or more service sections in this file.
+  The daemon and the queue that are referenced herend must exist
+  in the Exscriptd config file.
+  -->
+  <service name="mygrabber">
+      <daemon>rest-daemon</daemon>
+      <path>$FRESH_DIR/grabber</path>
+      <queue>grabber-queue</queue>
+  </service>
 </xml>
