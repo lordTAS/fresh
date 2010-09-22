@@ -33,5 +33,8 @@ def check(service, order):
 def enter(service, order):
     logger   = service.create_logger(order, 'command.log')
     callback = bind(run, logger)
-    service.enqueue_hosts(order, order.get_hosts(), callback)
+    service.enqueue_hosts(order,
+                          order.get_hosts(),
+                          callback,
+                          handle_duplicates = True)
     service.set_order_status(order, 'queued')
