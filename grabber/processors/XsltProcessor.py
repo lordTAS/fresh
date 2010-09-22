@@ -17,8 +17,9 @@ from StringIO import StringIO
 from lxml     import etree
 
 class XsltProcessor(object):
-    def __init__(self, xsl_dir, add_timestamp = False):
+    def __init__(self, xsl_dir, add_address = False, add_timestamp = False):
         self.xsl_dir       = xsl_dir
+        self.add_address   = add_address
         self.add_timestamp = add_timestamp
 
     def start(self, provider, conn, **kwargs):
@@ -39,7 +40,11 @@ class XsltProcessor(object):
         doc       = etree.parse(StringIO(input), base_url = path)
         result    = transform(doc)
 
-        # Add a timestamp field to the root node in the resulting XML.
+        # Add the address and a timestamp field to the root node in the resulting
+        # XML.
+        if self.add_address:
+            address = conn.get_host().get_address()
+            etree.SubElement(result.getroot(), 'address').text = address
         if self.add_timestamp:
             ts = time.asctime()
             etree.SubElement(result.getroot(), 'last-update').text = ts

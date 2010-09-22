@@ -144,6 +144,7 @@
       <xs:element name="model" type="nonEmptyString"/>
       <xs:element name="chassis" type="chassisType" minOccurs="1" maxOccurs="unbounded"/>
       <xs:element name="unit-list" type="unitListType" minOccurs="0"/>
+      <xs:element name="address" type="nonEmptyString"/>
       <xs:element name="last-update" type="nonEmptyString"/>
     </xs:sequence>
     <xs:attribute name="name"   type="Hostname" use="required"/>
