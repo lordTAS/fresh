@@ -23,7 +23,13 @@ def run(service, order):
     packager.run(order)
 
 def check(service, order):
-    return order.get_hosts() and True or False
+    hosts = order.get_hosts()
+    if not hosts:
+        return False
+    for host in hosts:
+        if len(host.get('path')) == 0:
+            return False
+    return True
 
 def enter(service, order):
     callback = partial(run, service, order)
