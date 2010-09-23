@@ -48,13 +48,14 @@ class Config(ConfigReader):
         return profile
 
     def get_packager(self):
-        element       = self.cfgtree.find('packager')
-        in_dir        = element.find('input-dir').text
-        out_dir       = element.find('package-dir').text
-        format        = element.find('format').text
-        dbname        = element.find('database').text
-        db            = self._init_seeddb_from_name(dbname)
-        profiles      = []
+        element    = self.cfgtree.find('packager')
+        in_dir     = element.find('input-dir').text
+        out_dir    = element.find('package-dir').text
+        format     = element.find('format').text
+        delete_dir = element.find('delete-dir') is not None
+        dbname     = element.find('database').text
+        db         = self._init_seeddb_from_name(dbname)
+        profiles   = []
         for profile_elem in element.iterfind('profile'):
             profile_name = profile_elem.text
             profile      = self.init_profile_from_name(profile_name)
@@ -62,4 +63,9 @@ class Config(ConfigReader):
             if profile_cond is not None:
                 profile.set_condition(profile_cond)
             profiles.append(profile)
-        return Packager(in_dir, out_dir, db, profiles, format = format)
+        return Packager(in_dir,
+                        out_dir,
+                        db,
+                        profiles,
+                        format     = format,
+                        delete_dir = delete_dir)

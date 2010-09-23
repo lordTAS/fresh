@@ -17,12 +17,19 @@ from tempfile import mkdtemp
 from shutil   import move, rmtree
 
 class Packager(object):
-    def __init__(self, in_dir, out_dir, db, profiles, format = 'bz2'):
-        self.in_dir   = in_dir
-        self.out_dir  = out_dir
-        self.format   = format
-        self.seeddb   = db
-        self.profiles = profiles
+    def __init__(self,
+                 in_dir,
+                 out_dir,
+                 db,
+                 profiles,
+                 format     = 'bz2',
+                 delete_dir = False):
+        self.in_dir     = in_dir
+        self.out_dir    = out_dir
+        self.format     = format
+        self.delete_dir = delete_dir
+        self.seeddb     = db
+        self.profiles   = profiles
 
         if format not in ('directory', 'tar', 'gzip', 'bz2'):
             raise Exception('unknown format: %s' % self.format)
@@ -75,6 +82,10 @@ class Packager(object):
                         os.symlink(src, dst)
 
         if self.format == 'directory':
+            if self.delete_dir:
+                for file in os.listdir(self.out_dir):
+                    file = os.path.join(self.out_dir, file)
+                    rmtree(file)
             for file in os.listdir(tmp_dir):
                 file = os.path.join(tmp_dir, file)
                 move(file, self.out_dir)
