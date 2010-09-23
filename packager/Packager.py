@@ -64,10 +64,11 @@ class Packager(object):
         for host in order.get_hosts():
             seedhost = self.get_seedhost_from_address(host.get_address())
             src_path = seedhost.get('path')
+            alias    = seedhost.get('alias')
             dst_path = host.get('path')[0]
             dst_dir  = os.path.join(tmp_dir, dst_path)
             vars     = {'os': seedhost.get('os')}
-            hostname = host.get_name()
+            address  = host.get_address()
 
             for profile in self.profiles:
                 if not profile.test_condition(vars):
@@ -75,7 +76,8 @@ class Packager(object):
                 for name, from_name in profile.files:
                     src = os.path.join(self.in_dir, src_path, from_name)
                     dst = os.path.join(dst_dir, name)
-                    dst = dst.replace('{hostname}', hostname)
+                    dst = dst.replace('{address}',  address)
+                    dst = dst.replace('{hostname}', alias)
                     if os.path.exists(src):
                         if not os.path.exists(dst_dir):
                             os.makedirs(dst_dir)
