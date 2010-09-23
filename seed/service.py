@@ -31,7 +31,15 @@ def run(service, order):
     hostdb.save_host(order.get_hosts())
 
 def check(service, order):
-    return True # No validation needed
+    hosts = order.get_hosts()
+    if not hosts:
+        return False
+    for host in hosts:
+        if len(host.get('path')) == 0:
+            return False
+        if len(host.get('alias')) == 0:
+            return False
+    return True
 
 def enter(service, order):
     callback = partial(run, service, order)
