@@ -78,10 +78,12 @@ class Packager(object):
                     dst = dst.replace('{hostname}', hostname)
                     if os.path.exists(src):
                         if not os.path.exists(dst_dir):
-                            os.makedirs(os.path.join(dst_dir))
+                            os.makedirs(dst_dir)
                         os.symlink(src, dst)
 
         if self.format == 'directory':
+            if not os.path.exists(self.out_dir):
+                os.makedirs(self.out_dir)
             if self.delete_dir:
                 for file in os.listdir(self.out_dir):
                     file = os.path.join(self.out_dir, file)
