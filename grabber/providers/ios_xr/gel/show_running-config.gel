@@ -1282,11 +1282,17 @@ grammar mpls_ldp_statements(default):
         out.add('$0')
     do.return()
 
-grammar router_pim_statements(default):
+grammar router_pim_af_statements(default):
     match 'rp-address' fs ipv4_ip fs name fs 'override' nl:
         out.add('$0?acl="$4"&override="1"')
     match 'accept-register' fs nows nl:
         out.add('$0', '$2')
+    do.return()
+
+grammar router_pim_statements(default):
+    match 'address-family' fs nows nl:
+        out.enter('address-family?name="$2"')
+        router_pim_af_statements()
     do.return()
 
 grammar multicast_routing_interface_statements(default):
@@ -1398,12 +1404,17 @@ grammar protocols(default):
         mpls_ldp_statements()
     match 'mpls oam' nl:
         out.add('$0')
+    match 'router pim' nl:
+        out.enter('$0')
+        router_pim_statements()
     match 'router pim' fs 'address-family' fs nows nl:
-        out.enter('$0?address-family="$4"')
-        router_pim_statements()
+        out.enter('$0')
+        out.enter('address-family?name="$4"')
+        router_pim_af_statements()
     match 'router pim' fs 'vrf' fs name fs 'address-family' fs nows nl:
-        out.enter('$0?vrf="$4"&address-family="$8"')
-        router_pim_statements()
+        out.enter('$0?vrf="$4"')
+        out.enter('address-family?name="$8"')
+        router_pim_af_statements()
     match 'multicast-routing' fs 'address-family' fs nows nl:
         out.enter('$0/address-family?name="$4"')
         multicast_routing_af_statements()
