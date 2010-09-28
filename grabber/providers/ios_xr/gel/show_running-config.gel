@@ -530,6 +530,8 @@ grammar interface_statements(default):
         out.add('$0?address="$2"&mask="$4"')
     match 'ipv4 address' fs ipv4_ip fs ipv4_mask fs 'secondary' nl:
         out.add('$0?address="$2"&mask="$4"/$6')
+    match 'ipv4 helper-address' fs 'vrf' fs nows fs ipv4_ip nl:
+        out.add('$0?address="$6"&vrf="$4"')
     match /ipv[46]/ fs 'access-group' fs nows fs nows nl:
         out.add('$0/$2?name="$4"&direction="$6"')
     match /ipv[46]/ fs 'access-group' fs nows fs nows fs nows nl:
