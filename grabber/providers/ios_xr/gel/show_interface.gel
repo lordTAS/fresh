@@ -135,6 +135,8 @@ grammar interface_block(default):
         out.add('$0', '$2')
         out.add('$5', '$7')
         out.add('$10', '$12')
+    match 'Control parent:' ws nows nl:
+        out.add('$0', '$2')
     match 'Encapsulation' ws field field_end:
         out.enter('$0?protocol="$2"')
         encapsulation()

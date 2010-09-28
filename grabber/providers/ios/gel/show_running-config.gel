@@ -585,7 +585,7 @@ grammar crypto_pki_statements(default):
 grammar crypto_ca_certificate_statements(default):
     match 'quit' nl:
         do.return()
-    match /[A-F0-9]+[ \n]/:
+    match /[A-F0-9]+[ \n]+/:
         out.add('.', '$0')
     do.return()
 
@@ -830,6 +830,8 @@ grammar interface_statements(default):
         out.add('$0/$2')
     match 'isdn' fs /(?:switch-type|spid\d+)/ fs nonl nl:
         out.add('$0/$2', '$4')
+    match 'ipv6' fs 'traffic-filter' fs nows fs acl_direction nl:
+        out.add('$0/$2?name="$4"&direction="$6"')
     match 'isis' fs 'advertise prefix' / */ nl:
         out.add('$0/$2')
     match 'isis' fs 'authentication' fs 'key-chain' fs nows nl:
@@ -1923,6 +1925,8 @@ grammar input(default):
         out.add('$0/$2/$4', '$6')
     match 'sensor' fs name fs nonl nl:
         out.add('$0/$2/option?string="$4"')
+    match 'slave default-slot' fs number nl:
+        out.add('$0', '$2')
     match 'spanning-tree' fs 'backbonefast' nl:
         out.add('$0/$2')
     match 'spanning-tree' fs /(?:mode|extend)/ fs nows nl:
