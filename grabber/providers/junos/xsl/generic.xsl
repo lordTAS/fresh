@@ -122,7 +122,7 @@
       <xsl:value-of select="normalize-space($first-ver/host-name)" />
     </xsl:attribute>
     <xsl:attribute name="domain">
-      <xsl:value-of select="normalize-space(//system/domain-name)" />
+      <xsl:value-of select="cfggrab:lower-case(normalize-space(//system/domain-name))" />
     </xsl:attribute>
     <os>
       <system><xsl:text>JunOS</xsl:text></system>

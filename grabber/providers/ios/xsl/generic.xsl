@@ -82,7 +82,7 @@
       <xsl:value-of select="normalize-space(hostname)" />
     </xsl:attribute>
     <xsl:attribute name="domain">
-      <xsl:value-of select="normalize-space(options/ip/domain)" />
+      <xsl:value-of select="cfggrab:lower-case(normalize-space(options/ip/domain))" />
     </xsl:attribute>
     <os>
       <system><xsl:text>IOS</xsl:text></system>

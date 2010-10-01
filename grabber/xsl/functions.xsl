@@ -6,6 +6,18 @@
  xmlns:cfggrab="localhost"
  extension-element-prefixes="str func">
 
+<func:function name="cfggrab:lower-case">
+  <xsl:param name="str"/>
+  <func:result select="translate($str, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                                       'abcdefghijklmnopqrstuvwxyz')"/>
+</func:function>
+
+<func:function name="cfggrab:upper-case">
+  <xsl:param name="str"/>
+  <func:result select="translate($str, 'abcdefghijklmnopqrstuvwxyz',
+                                       'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>
+</func:function>
+
 <func:function name="cfggrab:ends-with">
   <xsl:param name="str"/>
   <xsl:param name="tail"/>
