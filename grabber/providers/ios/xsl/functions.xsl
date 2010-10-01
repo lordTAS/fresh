@@ -12,6 +12,24 @@
   <func:result select="str:tokenize($interfaceName, '.:')[1]"/>
 </func:function>
 
+<func:function name="cfggrab:isPhysicalInterface">
+  <xsl:param name="interfaceName"/>
+  <xsl:variable
+    name="physical"
+    select="cfggrab:getInterfaceName($interfaceName)"/>
+
+  <xsl:choose>
+    <xsl:when test="starts-with(cfggrab:lower-case($interfaceName), 'vlan')
+                 or starts-with(cfggrab:lower-case($interfaceName), 'lo')">
+      <func:result select="false()"/>
+    </xsl:when>
+
+    <xsl:otherwise>
+      <func:result select="$physical = $interfaceName"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</func:function>
+
 <func:function name="cfggrab:getInterfacePosition">
   <xsl:param name="interfaceName"/>
   <xsl:variable
