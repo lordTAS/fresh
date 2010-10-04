@@ -39,6 +39,8 @@ grammar encapsulation(default):
         out.add('$0', '$2')
     match 'VLAN' ws nows ws num field_end:
         out.add('$0-$2', '$4')
+    match '2nd VLAN Id' ws num field_end:
+        out.add('second-vlan-id', '$2')
 
 grammar counters(default):
     match num ws 'packets' ws /input|output/ ',' ws num ws 'bytes' nl:
