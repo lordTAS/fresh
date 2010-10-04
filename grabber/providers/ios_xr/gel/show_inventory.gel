@@ -3,6 +3,7 @@ define nows   /\S+/
 define fs     /[\t ]*,[\t ]*/
 define field1 /[^"]*/
 define field2 /\S+/
+define field3 /(\S+|[^,]*?)/
 define nl     /[ \t]*\r?\n/
 
 grammar element:
@@ -10,7 +11,7 @@ grammar element:
         out.add('description', '$3')
     match 'PID:' fs:
         do.skip()
-    match 'PID:' ws field2 fs:
+    match 'PID:' ws field3 fs:
         out.add('pid', '$2')
     match 'VID:' ws field2 fs:
         out.add('hardware-version', '$2')
