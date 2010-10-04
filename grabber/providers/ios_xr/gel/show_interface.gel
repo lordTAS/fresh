@@ -146,6 +146,8 @@ grammar interface_block(default):
         out.add('$0', '$2')
     match nows ':' nonl nl:
         out.add('protocols-$0', '$2')
+    match 'Timeslot(s) Used:' ws nows nl:
+        out.add('timeslots', '$2')
     match 'Scrambling' ws 'is' ws nows ',' ws 'Invert data' ws 'is' ws nows nl:
         out.add('$0', '$4')
         out.add('$7', '$11')
