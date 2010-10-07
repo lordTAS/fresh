@@ -30,6 +30,14 @@
   <func:result select="$thetail = $tail"/>
 </func:function>
 
+<!--
+Remove the given tail from the given string.
+Does nothing if the given string does not end with the given tail.
+
+@str:  The string from which the tail should be removed.
+@tail: The tail that is removed from str.
+@return: The string with the tail removed, or the original string.
+-->
 <func:function name="cfggrab:rstrip">
   <xsl:param name="str"/>
   <xsl:param name="tail"/>
