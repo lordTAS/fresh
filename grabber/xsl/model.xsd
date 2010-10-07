@@ -10,13 +10,19 @@
 
 <xs:simpleType name='domainName'>
   <xs:restriction base='xs:token'>
-    <xs:pattern value="[a-z][a-z0-9\-\.]*"/>
+    <xs:pattern value="[a-zA-Z][a-zA-Z0-9\-\.]*"/>
   </xs:restriction>
 </xs:simpleType>
 
 <xs:simpleType name='Hostname'>
   <xs:restriction base='xs:token'>
     <xs:pattern value="[a-zA-Z][a-zA-Z0-9\-]*[a-zA-Z0-9]"/>
+  </xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name='dnsName'>
+  <xs:restriction base='xs:token'>
+    <xs:pattern value="[a-zA-Z][a-zA-Z0-9\-\.]*[a-zA-Z0-9]"/>
   </xs:restriction>
 </xs:simpleType>
 
@@ -146,15 +152,16 @@
 <xs:element name="host">
   <xs:complexType>
     <xs:sequence>
+      <xs:element name="configured-hostname" type="Hostname"/>
+      <xs:element name="configured-domain" type="domainName"/>
       <xs:element name="os" type="operatingSystem"/>
       <xs:element name="model" type="nonEmptyString"/>
       <xs:element name="chassis" type="chassisType" minOccurs="1" maxOccurs="unbounded"/>
       <xs:element name="unit-list" type="unitListType" minOccurs="0"/>
-      <xs:element name="address" type="nonEmptyString"/>
       <xs:element name="last-update" type="nonEmptyString"/>
     </xs:sequence>
-    <xs:attribute name="name"   type="Hostname" use="required"/>
-    <xs:attribute name="domain" type="domainName" use="required"/>
+    <xs:attribute name="name" type="dnsName" use="required"/>
+    <xs:attribute name="address" type="nonEmptyString"/>
   </xs:complexType>
 </xs:element>
 

@@ -118,12 +118,12 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:noNamespaceSchemaLocation="model.xsd">
     <!-- General host specific fields. -->
-    <xsl:attribute name="name">
+    <configured-hostname>
       <xsl:value-of select="normalize-space($first-ver/host-name)" />
-    </xsl:attribute>
-    <xsl:attribute name="domain">
-      <xsl:value-of select="cfggrab:lower-case(normalize-space(//system/domain-name))" />
-    </xsl:attribute>
+    </configured-hostname>
+    <configured-domain>
+      <xsl:value-of select="normalize-space(//system/domain-name)" />
+    </configured-domain>
     <os>
       <system><xsl:text>JunOS</xsl:text></system>
       <version>

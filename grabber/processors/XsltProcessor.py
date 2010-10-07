@@ -17,8 +17,13 @@ from StringIO import StringIO
 from lxml     import etree
 
 class XsltProcessor(object):
-    def __init__(self, xsl_dir, add_address = False, add_timestamp = False):
+    def __init__(self,
+                 xsl_dir,
+                 add_hostname  = False,
+                 add_address   = False,
+                 add_timestamp = False):
         self.xsl_dir       = xsl_dir
+        self.add_hostname  = add_hostname
         self.add_address   = add_address
         self.add_timestamp = add_timestamp
 
@@ -44,7 +49,10 @@ class XsltProcessor(object):
         # XML.
         if self.add_address:
             address = conn.get_host().get_address()
-            etree.SubElement(result.getroot(), 'address').text = address
+            result.getroot().set('address', address)
+        if self.add_hostname:
+            hostname = conn.get_host().get_name()
+            result.getroot().set('name', hostname)
         if self.add_timestamp:
             ts = time.asctime()
             etree.SubElement(result.getroot(), 'last-update').text = ts

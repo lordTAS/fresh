@@ -78,12 +78,12 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:noNamespaceSchemaLocation="model.xsd">
     <!-- General host specific fields. -->
-    <xsl:attribute name="name">
+    <configured-hostname>
       <xsl:value-of select="normalize-space(hostname)" />
-    </xsl:attribute>
-    <xsl:attribute name="domain">
-      <xsl:value-of select="cfggrab:lower-case(normalize-space(options/ip/domain))" />
-    </xsl:attribute>
+    </configured-hostname>
+    <configured-domain>
+      <xsl:value-of select="normalize-space(options/ip/domain)" />
+    </configured-domain>
     <os>
       <system><xsl:text>IOS</xsl:text></system>
       <version><xsl:value-of select="$ver/version"/></version>
