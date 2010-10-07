@@ -57,7 +57,7 @@ class HostDB(object):
         pfx = self._table_prefix
         self.__add_table(sa.Table(pfx + 'host', self.metadata,
             sa.Column('address',   sa.String(50), primary_key = True),
-            sa.Column('alias',     sa.String(50)),
+            sa.Column('name',      sa.String(50)),
             sa.Column('path',      sa.String(50)),
             sa.Column('os',        sa.String(50)),
             sa.Column('timestamp',
@@ -132,7 +132,7 @@ class HostDB(object):
 
     def __host2dict(self, host):
         return dict(address = host.get_address(),
-                    alias   = host.get('alias'),
+                    name    = host.get_name(),
                     path    = host.get('path'),
                     os      = host.get('os'))
 
@@ -177,9 +177,9 @@ class HostDB(object):
         assert row is not None
         tbl_h = self._table_map['host']
         host  = Host(row[tbl_h.c.address])
-        host.set('alias', row[tbl_h.c.alias])
-        host.set('path',  row[tbl_h.c.path])
-        host.set('os',    row[tbl_h.c.os])
+        host.set_name(row[tbl_h.c.name])
+        host.set('path', row[tbl_h.c.path])
+        host.set('os',   row[tbl_h.c.os])
         return host
 
     def __get_hosts_from_query(self, query):
@@ -201,7 +201,7 @@ class HostDB(object):
         tbl_h = self._table_map['host']
         where = None
 
-        for field in ('address', 'alias', 'path', 'os'):
+        for field in ('address', 'name', 'path', 'os'):
             if kwargs.has_key(field):
                 cond = None
                 for value in to_list(kwargs.get(field)):

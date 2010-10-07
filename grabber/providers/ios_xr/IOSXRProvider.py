@@ -19,10 +19,12 @@ from Exscript.util.match import first_match
 class IOSXRProvider(Provider):
     def get_hostname(self, conn):
         host = conn.get_host()
-        if host.get('__real_hostname__'):
-            return host.get('__real_hostname__')
+        if host.get('__cfg_hostname__'):
+            return host.get('__cfg_hostname__')
         conn.execute('show configuration running-config | i ^hostname')
-        return first_match(conn, r'hostname (\S+)')
+        hostname = first_match(conn, r'hostname (\S+)')
+        host.set('__cfg_hostname__', hostname)
+        return hostname
 
     def init(self, conn):
         # Init the connection.

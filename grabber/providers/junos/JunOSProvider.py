@@ -19,10 +19,12 @@ from Exscript.util.match import first_match
 class JunOSProvider(Provider):
     def get_hostname(self, conn):
         host = conn.get_host()
-        if host.get('__real_hostname__'):
-            return host.get('__real_hostname__')
+        if host.get('__cfg_hostname__'):
+            return host.get('__cfg_hostname__')
         conn.execute('show version | match ^Hostname')
-        return first_match(conn, r'Hostname: (\S+)')
+        hostname = first_match(conn, r'Hostname: (\S+)')
+        host.set('__cfg_hostname__', hostname)
+        return hostname
 
     def _cleanup_xml(self, xml):
         ns_url  = 'http://xml.juniper.net/junos/'

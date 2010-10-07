@@ -22,19 +22,31 @@ def run(conn, logger):
     try:
         grabber.grab(conn, logger)
     except Exception, e:
-        host    = conn.get_host()
-        address = host.get_address()
-        logger.info('%s: Exception: %s' % (address, repr(str(e))))
+        host  = conn.get_host()
+        label = grabber.get_label_from_host(host)
+        logger.info('%s: Exception: %s' % (label, repr(str(e))))
         raise
 
 def check(service, order):
     return order.get_hosts() and True or False
 
 def enter(service, order):
-    logger   = service.create_logger(order, 'command.log')
-    callback = bind(run, logger)
+    logger = service.create_logger(order, 'command.log')
+
+    # Since the order only contains a list of hostnames without any
+    # other info (such as the address or path), we need to load the
+    # additional attributes from the database.
+    hosts = []
+    for host in order.get_hosts():
+        seedhost = grabber.get_seedhost_from_name(host.get_name())
+        if not seedhost:
+            hostname = host.get_name()
+            logger.info('%s: Error: Address for host %s not found.' % hostname)
+        else:
+            hosts.append(seedhost)
+
     service.enqueue_hosts(order,
-                          order.get_hosts(),
-                          callback,
+                          hosts,
+                          bind(run, logger),
                           handle_duplicates = True)
     service.set_order_status(order, 'queued')

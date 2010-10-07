@@ -34,10 +34,10 @@ class Packager(object):
         if format not in ('directory', 'tar', 'gzip', 'bz2'):
             raise Exception('unknown format: %s' % self.format)
 
-    def get_seedhost_from_address(self, address):
-        host = self.seeddb.get_host(address = address)
+    def get_seedhost_from_name(self, name):
+        host = self.seeddb.get_host(name = name)
         if not host:
-            raise Exception('unknown host: %s' % address)
+            raise Exception('unknown host: %s' % name)
         return host
 
     def _mktar(self, dirname, basename):
@@ -62,13 +62,13 @@ class Packager(object):
         tmp_dir = mkdtemp()
 
         for host in order.get_hosts():
-            seedhost = self.get_seedhost_from_address(host.get_address())
+            seedhost = self.get_seedhost_from_name(host.get_name())
+            address  = seedhost.get_address()
+            hostname = seedhost.get_name()
             src_path = seedhost.get('path')
-            alias    = seedhost.get('alias')
             dst_path = host.get('path')[0]
             dst_dir  = os.path.join(tmp_dir, dst_path)
             vars     = {'os': seedhost.get('os')}
-            address  = host.get_address()
 
             for profile in self.profiles:
                 if not profile.test_condition(vars):
@@ -77,7 +77,7 @@ class Packager(object):
                     src = os.path.join(self.in_dir, src_path, from_name)
                     dst = os.path.join(dst_dir, name)
                     dst = dst.replace('{address}',  address)
-                    dst = dst.replace('{hostname}', alias)
+                    dst = dst.replace('{hostname}', hostname)
                     if os.path.exists(src):
                         if not os.path.exists(dst_dir):
                             os.makedirs(dst_dir)
