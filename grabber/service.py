@@ -41,7 +41,7 @@ def enter(service, order):
         seedhost = grabber.get_seedhost_from_name(host.get_name())
         if not seedhost:
             hostname = host.get_name()
-            logger.info('%s: Error: Address for host %s not found.' % hostname)
+            logger.info('%s: Error: Address for host not found.' % hostname)
         else:
             hosts.append(seedhost)
 
