@@ -22,7 +22,6 @@ class FileStore(object):
 
     def get_path(self, conn, filename = None):
         host     = conn.get_host()
-        hostname = host.get('__real_hostname__')
         path     = host.get('__path__')
         host_dir = os.path.join(self.base_dir, path)
         if filename:
