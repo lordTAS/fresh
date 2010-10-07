@@ -59,6 +59,8 @@ class HostDB(object):
             sa.Column('address',   sa.String(50), primary_key = True),
             sa.Column('name',      sa.String(50)),
             sa.Column('path',      sa.String(50)),
+            sa.Column('country',   sa.String(50)),
+            sa.Column('city',      sa.String(50)),
             sa.Column('os',        sa.String(50)),
             sa.Column('timestamp',
                       sa.DateTime,
@@ -134,6 +136,8 @@ class HostDB(object):
         return dict(address = host.get_address(),
                     name    = host.get_name(),
                     path    = host.get('path'),
+                    country = host.get('country'),
+                    city    = host.get('city'),
                     os      = host.get('os'))
 
     def __add_host(self, host):
@@ -178,8 +182,10 @@ class HostDB(object):
         tbl_h = self._table_map['host']
         host  = Host(row[tbl_h.c.address])
         host.set_name(row[tbl_h.c.name])
-        host.set('path', row[tbl_h.c.path])
-        host.set('os',   row[tbl_h.c.os])
+        host.set('path',    row[tbl_h.c.path])
+        host.set('country', row[tbl_h.c.country])
+        host.set('city',    row[tbl_h.c.city])
+        host.set('os',      row[tbl_h.c.os])
         return host
 
     def __get_hosts_from_query(self, query):
@@ -201,7 +207,7 @@ class HostDB(object):
         tbl_h = self._table_map['host']
         where = None
 
-        for field in ('address', 'name', 'path', 'os'):
+        for field in ('address', 'name', 'path', 'country', 'city', 'os'):
             if kwargs.has_key(field):
                 cond = None
                 for value in to_list(kwargs.get(field)):
@@ -242,6 +248,8 @@ class HostDB(object):
                          - hostname - the hostname (str)
                          - address - the host address (str)
                          - path - the path (str)
+                         - country - the country (str)
+                         - city - the city (str)
                          - os - the operation system (str)
                        All values may also be lists (logical OR).
         @rtype:  list[Host]

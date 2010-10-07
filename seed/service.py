@@ -37,6 +37,10 @@ def check(service, order):
     for host in hosts:
         if len(host.get('path')) == 0:
             return False
+        if len(host.get('country')) == 0:
+            return False
+        if len(host.get('city')) == 0:
+            return False
     return True
 
 def enter(service, order):
