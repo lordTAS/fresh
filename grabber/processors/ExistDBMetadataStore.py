@@ -16,50 +16,54 @@ from lxml         import etree
 from ExistDBStore import ExistDBStore
 
 update_query = '''
-let $docname := '/db/%{collection}/%{docname}'
-let $doc     := doc($docname)
+(: Creates a document if it does not exist. :)
+declare function local:create-document($collection, $name, $xml)
+{
+  let $fullname := concat($collection, '/', $name)
+  let $doc      := doc($fullname)
+  return
+  if ($doc) then
+    $doc
+  else
+    let $status := xmldb:store($collection, $name, $xml)
+    return doc($fullname)
+};
+
+let $coll    := '/db/%{collection}'
+let $docname := '%{docname}'
 let $country := <country>%{country}</country>
 let $city    := <city>%{city}</city>
+let $doc     := local:create-document($coll,
+                                      $docname,
+                                      <metadata hostname="%{hostname}"></metadata>)
 
 return
 <result>
     <document>
-    {
-      (: Create the metadata document if it does not exist. :)
-      if ($doc) then (
-        <status>exists</status>
-      ) else (
-        let $xml    := <metadata hostname="%{hostname}"></metadata>
-        let $status := xmldb:store('/db/%{collection}', '%{docname}', $xml)
-        let $doc    := doc($docname)
-        return <status>inserted</status>
-      )
-    }
+    {if ($doc) then <status>ok</status> else <status>failed</status>}
     </document>
 
     <country>
     {
       (: Insert or update the country tag. :)
-      if (empty($doc//country)) then (
+      if (empty($doc//country)) then
         let $status := update insert $country into $doc/metadata
         return <status>inserted</status>
-      ) else (
+      else
         let $status := update replace $doc//country with $country
         return <status>updated</status>
-      )
     }
     </country>
 
     <city>
     {
       (: Insert or update the city tag. :)
-      if (empty($doc//city)) then (
+      if (empty($doc//city)) then
         let $status := update insert $city into $doc/metadata
         return <status>inserted</status>
-      ) else (
+      else
         let $status := update replace $doc//city with $city
         return <status>updated</status>
-      )
     }
     </city>
 </result>
@@ -98,7 +102,7 @@ class ExistDBMetadataStore(ExistDBStore):
             except AttributeError, e:
                 err = str(e) + '\n' + etree.tostring(result)
                 raise AttributeError(err)
-            if doc_result not in ('exists', 'inserted'):
+            if doc_result != 'ok':
                 err = 'error storing document %s: %s' % (document, doc_result)
                 raise Exception(err)
             if country_result not in ('inserted', 'updated'):
@@ -107,3 +111,8 @@ class ExistDBMetadataStore(ExistDBStore):
             if city_result not in ('inserted', 'updated'):
                 err = 'error updating country: %s' % country_result
                 raise Exception(err)
+
+        # Create a log entry.
+        logger = host.get('__logger__')
+        label  = host.get('__label__')
+        logger.info('%s: Metadata %s updated.' % (label, document))
