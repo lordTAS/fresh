@@ -74,7 +74,7 @@ class Execute(Action):
         if self.timeout is not None:
             self.timeout = int(self.timeout)
 
-        if self.on_error not in ('skip', 'raise'):
+        if self.on_error not in ('skip', 'continue', 'raise'):
             raise TypeError('Invalid value for on_error: %s' % self.on_error)
 
         for child in xml:
@@ -99,8 +99,10 @@ class Execute(Action):
         except TransportException, e:
             err = repr(str(e))
             if self.on_error == 'skip':
-                self.log(conn, '%s during %s, skipping.' % (err, cmd))
+                self.log(conn, '%s during %s, skipping' % (err, cmd))
                 return
+            elif self.on_error == 'continue':
+                self.log(conn, '%s during %s, handling anyway' % (err, cmd))
             elif self.on_error == 'raise':
                 self.log(conn, 'Exception %s during %s' % (err, cmd))
                 raise

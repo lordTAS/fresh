@@ -103,7 +103,7 @@
             syntax="ios/gel/show_inventory.gel"
             filename="show_inventory.xml"/>
       </execute>
-      <execute command="show diag" on_error="skip">
+      <execute command="show diag" on_error="continue">
           <store filename="show_diag.txt"/>
           <post-process
             processor="gelatin"
