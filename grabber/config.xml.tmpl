@@ -60,6 +60,14 @@
   </processor>
 
   <!--
+  The xml-db-metadata processor stores metadata such as the country
+  and city name in an XML database.
+  -->
+  <processor type="xml-db-metadata" name="xml-db-metadata">
+    <xml-db>exist-db</xml-db>
+  </processor>
+
+  <!--
   Actions taken on hosts running IOS.
   -->
   <provider
@@ -232,9 +240,12 @@
         input="show_running-config.xml"
         output="generic.xml"/>
       <post-process
-        processor="exist-db"
+        processor="xml-db-store"
         filename="generic.xml"
-        document="{address}.xml"/>
+        document="generic/{address}.xml"/>
+      <post-process
+        processor="xml-db-metadata"
+        document="metadata/{hostname}.xml"/>
   </provider>
 
   <!--
@@ -361,9 +372,12 @@
         input="show_running-config.xml"
         output="generic.xml"/>
       <post-process
-        processor="exist-db"
+        processor="xml-db-store"
         filename="generic.xml"
-        document="{hostname}.xml"/>
+        document="generic/{hostname}.xml"/>
+      <post-process
+        processor="xml-db-metadata"
+        document="metadata/{hostname}.xml"/>
   </provider>
 
   <!--
@@ -450,9 +464,12 @@
         input="show_configuration.xml"
         output="generic.xml"/>
       <post-process
-        processor="exist-db"
+        processor="xml-db-store"
         filename="generic.xml"
-        document="{hostname}.xml"/>
+        document="generic/{hostname}.xml"/>
+      <post-process
+        processor="xml-db-metadata"
+        document="metadata/{hostname}.xml"/>
   </provider>
 
   <!--

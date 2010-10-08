@@ -20,7 +20,10 @@ from pyexist    import ExistDB
 from Exscriptd  import ConfigReader
 from Grabber    import Grabber
 from FileStore  import FileStore
-from processors import GelatinProcessor, XsltProcessor, ExistDBStore
+from processors import GelatinProcessor, \
+                       XsltProcessor,    \
+                       ExistDBStore,     \
+                       ExistDBMetadataStore
 
 __dirname__ = os.path.dirname(__file__)
 
@@ -95,6 +98,14 @@ class Config(ConfigReader):
             db     = self.init_existdb_from_name(dbname)
             self.processors[name] = ExistDBStore(db)
 
+    def _init_xmldb_metadata(self):
+        path = 'processor[@type="xml-db-metadata"]'
+        for element in self.cfgtree.iterfind(path):
+            name   = element.get('name')
+            dbname = element.find('xml-db').text
+            db     = self.init_existdb_from_name(dbname)
+            self.processors[name] = ExistDBMetadataStore(db)
+
     def _init_providers(self):
         for element in self.cfgtree.iterfind('provider'):
             name     = element.get('name')
@@ -116,6 +127,7 @@ class Config(ConfigReader):
         self._init_gelatin()
         self._init_xsltproc()
         self._init_xmldb_store()
+        self._init_xmldb_metadata()
         self._init_providers()
         element      = self.cfgtree.find('grabber')
         seeddb_name  = element.find('seeddb').text
