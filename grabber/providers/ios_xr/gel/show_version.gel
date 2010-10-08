@@ -1,17 +1,34 @@
-define ws   /\s+/
-define nows /\S+/
-define fs   /[\t ]+/
-define nl   /[\r\n]+/
-define nonl /[^\r\n]+/
+define ws    /\s+/
+define nows  /\S+/
+define fs    /[\t ]*,[\t ]*/
+define nl    /[\r\n]+/
+define nonl  /[^\r\n]+/
+define field /[^,\r\n]+/
 
 grammar default:
     match ws:
         do.next()
+
+grammar package_list(default):
+    when /Boot|Package/:
+        do.return()
+    match field fs field fs field fs 'at ' nonl nl:
+        out.enter('package?name="$0"')
+        out.add('version',  '$2')
+        out.add('vendor',   '$4')
+        out.add('filename', '$7')
+    match nonl:
+        do.skip()
+    match nl:
+        do.skip()
 
 grammar input(default):
     match /Cisco IOS XR [^\r\n]+ Version / /[^\r\n\[]+/ /\[*\S*/ nl:
         out.add('version', '$1')
     match 'cisco ' /\S+/ nonl nl:
         out.add('model', '$1')
+    match 'Package active on node ' /\S+/ ':' nl:
+        out.enter('node?name="$1"')
+        package_list()
     match nonl nl:
         do.skip()
