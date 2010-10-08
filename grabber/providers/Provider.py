@@ -67,12 +67,15 @@ class Store(Action):
 
 class Execute(Action):
     def __init__(self, provider, xml):
-        self.command      = xml.get('command')
-        self.ignore_error = bool(xml.get('ignore_error', False))
-        self.children     = []
-        self.timeout      = xml.get('timeout')
+        self.command  = xml.get('command')
+        self.on_error = xml.get('on_error', 'raise')
+        self.children = []
+        self.timeout  = xml.get('timeout')
         if self.timeout is not None:
             self.timeout = int(self.timeout)
+
+        if self.on_error not in ('skip', 'raise'):
+            raise TypeError('Invalid value for on_error: %s' % self.on_error)
 
         for child in xml:
             if child.tag == 'post-process':
@@ -95,12 +98,14 @@ class Execute(Action):
             conn.execute(self.command)
         except TransportException, e:
             err = repr(str(e))
-            if self.ignore_error:
-                self.log(conn, 'Ignored %s during %s' % (err, cmd))
+            if self.on_error == 'skip':
+                self.log(conn, '%s during %s, skipping.' % (err, cmd))
                 return
-            else:
+            elif self.on_error == 'raise':
                 self.log(conn, 'Exception %s during %s' % (err, cmd))
                 raise
+            else:
+                raise Exception('BUG: on_error is %s' % self.on_error)
         else:
             self.log(conn, 'Command succeeded: %s' % cmd)
         finally:

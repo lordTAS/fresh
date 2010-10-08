@@ -96,24 +96,24 @@
             syntax="ios/gel/show_interface.gel"
             filename="show_interface.xml"/>
       </execute>
-      <execute command="show inventory" ignore_error="1">
+      <execute command="show inventory" on_error="skip">
           <store filename="show_inventory.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios/gel/show_inventory.gel"
             filename="show_inventory.xml"/>
       </execute>
-      <execute command="show diag" ignore_error="1">
+      <execute command="show diag" on_error="skip">
           <store filename="show_diag.txt"/>
           <post-process
             processor="gelatin"
             syntax="ios/gel/show_diag.gel"
             filename="show_diag.xml"/>
       </execute>
-      <execute command="show module" ignore_error="1">
+      <execute command="show module" on_error="skip">
           <store filename="show_module.txt"/>
       </execute>
-      <execute command="show cef linecard" ignore_error="1">
+      <execute command="show cef linecard" on_error="skip">
           <store filename="show_cef_linecard.txt"/>
       </execute>
       <execute command="who">
@@ -122,115 +122,115 @@
       <execute command="show clock">
           <store filename="show_clock.txt"/>
       </execute>
-      <execute command="show c7200" ignore_error="1">
+      <execute command="show c7200" on_error="skip">
           <store filename="show_c7200.txt"/>
       </execute>
-      <execute command="show gsr chassis-info" ignore_error="1">
+      <execute command="show gsr chassis-info" on_error="skip">
           <store filename="show_gsr_chassis-info.txt"/>
       </execute>
-      <execute command="show chassis eeprom" ignore_error="1">
+      <execute command="show chassis eeprom" on_error="skip">
           <store filename="show_chassis_eeprom.txt"/>
       </execute>
-      <execute command="show module" ignore_error="1">
+      <execute command="show module" on_error="skip">
           <store filename="show_module.txt"/>
       </execute>
-      <execute command="show idprom all" ignore_error="1">
+      <execute command="show idprom all" on_error="skip">
           <store filename="show_idprom_all.txt"/>
       </execute>
-      <execute command="show sprom chassis" ignore_error="1">
+      <execute command="show sprom chassis" on_error="skip">
           <store filename="show_sprom_chassis.txt"/>
       </execute>
       <execute command="show cdp nei">
           <store filename="show_cdp_nei.txt"/>
       </execute>
-      <execute command="show cdp nei detail" ignore_error="1">
+      <execute command="show cdp nei detail" on_error="skip">
           <store filename="show_cdp_nei_detail.txt"/>
       </execute>
-      <execute command="show slot0:" ignore_error="1">
+      <execute command="show slot0:" on_error="skip">
           <store filename="show_slot0.txt"/>
       </execute>
-      <execute command="show slot1:" ignore_error="1">
+      <execute command="show slot1:" on_error="skip">
           <store filename="show_slot1.txt"/>
       </execute>
-      <execute command="show disk0:" ignore_error="1">
+      <execute command="show disk0:" on_error="skip">
           <store filename="show_disk0.txt"/>
       </execute>
-      <execute command="show disk1:" ignore_error="1">
+      <execute command="show disk1:" on_error="skip">
           <store filename="show_disk1.txt"/>
       </execute>
-      <execute command="show disk2:" ignore_error="1">
+      <execute command="show disk2:" on_error="skip">
           <store filename="show_disk2.txt"/>
       </execute>
-      <execute command="show bootflash:" ignore_error="1">
+      <execute command="show bootflash:" on_error="skip">
           <store filename="show_bootflash.txt"/>
       </execute>
-      <execute command="show slaveslot0:" ignore_error="1">
+      <execute command="show slaveslot0:" on_error="skip">
           <store filename="show_slaveslot0.txt"/>
       </execute>
-      <execute command="show slaveslot1:" ignore_error="1">
+      <execute command="show slaveslot1:" on_error="skip">
           <store filename="show_slaveslot1.txt"/>
       </execute>
-      <execute command="show slavedisk0:" ignore_error="1">
+      <execute command="show slavedisk0:" on_error="skip">
           <store filename="show_slavedisk0.txt"/>
       </execute>
-      <execute command="show slavedisk1:" ignore_error="1">
+      <execute command="show slavedisk1:" on_error="skip">
           <store filename="show_slavedisk1.txt"/>
       </execute>
-      <execute command="show slavedisk2:" ignore_error="1">
+      <execute command="show slavedisk2:" on_error="skip">
           <store filename="show_slavedisk2.txt"/>
       </execute>
-      <execute command="show slavebootflash:" ignore_error="1">
+      <execute command="show slavebootflash:" on_error="skip">
           <store filename="show_slavebootflash.txt"/>
       </execute>
-      <execute command="show sec-slot0:" ignore_error="1">
+      <execute command="show sec-slot0:" on_error="skip">
           <store filename="show_sec-slot0.txt"/>
       </execute>
-      <execute command="show sec-slot1:" ignore_error="1">
+      <execute command="show sec-slot1:" on_error="skip">
           <store filename="show_sec-slot1.txt"/>
       </execute>
-      <execute command="show sec-disk0:" ignore_error="1">
+      <execute command="show sec-disk0:" on_error="skip">
           <store filename="show_sec-disk0.txt"/>
       </execute>
-      <execute command="show sec-disk1:" ignore_error="1">
+      <execute command="show sec-disk1:" on_error="skip">
           <store filename="show_sec-disk1.txt"/>
       </execute>
-      <execute command="show sec-disk2:" ignore_error="1">
+      <execute command="show sec-disk2:" on_error="skip">
           <store filename="show_sec-disk2.txt"/>
       </execute>
-      <execute command="show sec-bootflash:" ignore_error="1">
+      <execute command="show sec-bootflash:" on_error="skip">
           <store filename="show_sec-bootflash.txt"/>
       </execute>
       <execute command="show file system">
           <store filename="show_file_system.txt"/>
       </execute>
-      <execute command="show rsp chassis-info" ignore_error="1">
+      <execute command="show rsp chassis-info" on_error="skip">
           <store filename="show_rsp_chassis-info.txt"/>
       </execute>
-      <execute command="show redundancy" ignore_error="1">
+      <execute command="show redundancy" on_error="skip">
           <store filename="show_redundancy.txt"/>
       </execute>
-      <execute command="show redundancy all" ignore_error="1">
+      <execute command="show redundancy all" on_error="skip">
           <store filename="show_redundancy_all.txt"/>
       </execute>
-      <execute command="show environment all" ignore_error="1">
+      <execute command="show environment all" on_error="skip">
           <store filename="show_environment_all.txt"/>
       </execute>
-      <execute command="show controller fia" ignore_error="1">
+      <execute command="show controller fia" on_error="skip">
           <store filename="show_controller_fia.txt"/>
       </execute>
       <execute command="show mem summary">
           <store filename="show_mem_summary.txt"/>
       </execute>
-      <execute command="show ip route summary" ignore_error="1">
+      <execute command="show ip route summary" on_error="skip">
           <store filename="show_ip_route_summary.txt"/>
       </execute>
       <execute command="show processes cpu">
           <store filename="show_processes_cpu.txt"/>
       </execute>
-      <execute command="show ip cef 0.0.0.0 0.0.0.0 internal" ignore_error="1">
+      <execute command="show ip cef 0.0.0.0 0.0.0.0 internal" on_error="skip">
           <store filename="show_ip_cef_0.0.0.0_0.0.0.0_internal.txt"/>
       </execute>
-      <execute command="execute-on standby show gsr" ignore_error="1">
+      <execute command="execute-on standby show gsr" on_error="skip">
           <store filename="execute-on_standby_show_gsr.txt"/>
       </execute>
       <post-process
@@ -356,13 +356,13 @@
       <execute command="show platform">
           <store filename="show_platform.txt"/>
       </execute>
-      <execute command="admin show controllers fabric clock" ignore_error="1">
+      <execute command="admin show controllers fabric clock" on_error="skip">
           <store filename="admin_show_controllers_fabric_clock.txt"/>
       </execute>
-      <execute command="admin show controllers fabric bundle all detail" ignore_error="1">
+      <execute command="admin show controllers fabric bundle all detail" on_error="skip">
           <store filename="admin_show_controllers_fabric_budle_all_detail.txt"/>
       </execute>
-      <execute command="admin show controllers fabric fab-control" ignore_error="1">
+      <execute command="admin show controllers fabric fab-control" on_error="skip">
           <store filename="admin_show_controllers_fabric_fab-control.txt"/>
       </execute>
       <post-process
