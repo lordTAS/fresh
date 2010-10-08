@@ -12,12 +12,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-from pyexist import ExistDB
 
 class ExistDBStore(object):
-    def __init__(self, host, port, user, password, collection):
-        uri     = user + ':' + password + '@' + host + ':' + port
-        self.db = ExistDB(uri, collection)
+    def __init__(self, db):
+        self.db = db
 
     def _replace_vars(self, conn, string):
         host        = conn.get_host()

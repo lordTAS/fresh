@@ -41,15 +41,22 @@
   </processor>
 
   <!--
-  The exist-db processor takes an XML file and sends it to an
-  eXist-db XML database.
+  This section creates a connection to an eXist XML database.
   -->
-  <processor type="exist-db" name="exist-db">
+  <exist-db name="exist-db">
     <host>localhost</host>
     <port>6949</port>
-    <user>import-user</user>
-    <password>import-user</password>
+    <user>ips-import</user>
+    <password>ips-import</password>
     <collection>/exist/rest/ips</collection>
+  </exist-db>
+
+  <!--
+  The xml-db-store processor takes an XML file and sends it to an
+  eXist-db XML database.
+  -->
+  <processor type="xml-db-store" name="xml-db-store">
+    <xml-db>exist-db</xml-db>
   </processor>
 
   <!--

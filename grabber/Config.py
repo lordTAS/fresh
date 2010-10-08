@@ -16,6 +16,7 @@ import os, base64, re, imp
 from sqlalchemy import create_engine
 from fresh.seed import HostDB
 from lxml       import etree
+from pyexist    import ExistDB
 from Exscriptd  import ConfigReader
 from Grabber    import Grabber
 from FileStore  import FileStore
@@ -29,6 +30,7 @@ class Config(ConfigReader):
         self.providers  = {}
         self.stores     = {}
         self.processors = {}
+        self.exist_dbs  = {}
         self.grabber    = None
         self._init()
 
@@ -71,20 +73,27 @@ class Config(ConfigReader):
                                                   address,
                                                   timestamp)
 
-    def _init_existdb(self):
-        for element in self.cfgtree.iterfind('processor[@type="exist-db"]'):
-            name       = element.get('name')
-            host       = element.find('host').text
-            port       = element.find('port').text
-            user       = element.find('user').text
-            password   = element.find('password').text
-            collection = element.find('collection').text
-            #print 'Creating eXist-db processor "%s".' % name
-            self.processors[name] = ExistDBStore(host,
-                                                 port,
-                                                 user,
-                                                 password,
-                                                 collection)
+    def init_existdb_from_name(self, name):
+        if self.exist_dbs.has_key(name):
+            return self.exist_dbs[name]
+        element    = self.cfgtree.find('exist-db[@name="%s"]' % name)
+        host       = element.find('host').text
+        port       = element.find('port').text
+        user       = element.find('user').text
+        password   = element.find('password').text
+        collection = element.find('collection').text
+        uri        = user + ':' + password + '@' + host + ':' + port
+        db         = ExistDB(uri, collection)
+        self.exist_dbs['name'] = db
+        return db
+
+    def _init_xmldb_store(self):
+        path = 'processor[@type="xml-db-store"]'
+        for element in self.cfgtree.iterfind(path):
+            name   = element.get('name')
+            dbname = element.find('xml-db').text
+            db     = self.init_existdb_from_name(dbname)
+            self.processors[name] = ExistDBStore(db)
 
     def _init_providers(self):
         for element in self.cfgtree.iterfind('provider'):
@@ -106,7 +115,7 @@ class Config(ConfigReader):
         self._init_file_stores()
         self._init_gelatin()
         self._init_xsltproc()
-        self._init_existdb()
+        self._init_xmldb_store()
         self._init_providers()
         element      = self.cfgtree.find('grabber')
         seeddb_name  = element.find('seeddb').text
