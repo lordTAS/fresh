@@ -19,15 +19,19 @@ class ExistDBStore(object):
         uri     = user + ':' + password + '@' + host + ':' + port
         self.db = ExistDB(uri, collection)
 
-    def start(self, provider, conn, **kwargs):
+    def _replace_vars(self, conn, string):
         host        = conn.get_host()
         address     = host.get_address()
         hostname    = host.get_name()
         cfghostname = host.get('__cfg_hostname__')
-        filename    = kwargs.get('filename')
-        document    = kwargs.get('document')
-        document    = document.replace('{address}',     address)
-        document    = document.replace('{hostname}',    hostname)
-        document    = document.replace('{cfghostname}', cfghostname)
-        content     = provider.store.get(conn, filename)
+        string      = string.replace('{address}',     address)
+        string      = string.replace('{hostname}',    hostname)
+        string      = string.replace('{cfghostname}', cfghostname)
+        return string
+
+    def start(self, provider, conn, **kwargs):
+        filename = kwargs.get('filename')
+        document = kwargs.get('document')
+        document = self._replace_vars(conn, document)
+        content  = provider.store.get(conn, filename)
         self.db.store(document, content)
