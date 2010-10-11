@@ -11,9 +11,9 @@ grammar input:
         out.add('version', '$1')
     match /Cisco IOS [^\r\n]+ Version / /[^,]+/ nonl nl:
         out.add('version', '$1')
-    match /[Cc]isco / nonl ' processor ' nonl nl:
+    match /[Cc]isco (?:CISCO)?/ nonl ' processor ' nonl nl:
         out.add('model', '$1')
-    match /[Cc]isco / nonl / \(revision \S+\) with \S+ bytes of memory\./ nl:
+    match /[Cc]isco (?:CISCO)?/ nonl / \(revision \S+\) with \S+ bytes of memory\./ nl:
         out.add('model', '$1')
     match /Slave [^\Z]+/:
         do.skip()
