@@ -1,10 +1,16 @@
-define ws     /[\t ]+/
-define nows   /\S+/
-define fs     /[\t ]*,[\t ]*/
-define field1 /[^"]*/
-define field2 /\S+/
-define field3 /(\S+|[^,]*?)/
-define nl     /[ \t]*\r?\n/
+define ws      /[\t ]+/
+define nows    /\S+/
+define fs      /[\t ]*,[\t ]*/
+define card    /[A-Z0-9]+\/(?:[A-Z0-9]+\/\*|\d+\/[A-Z0-9]+)/
+define spa     /\d+\/\d+\/\d+/
+define port    /[a-zA-Z0-9]+\/[A-Z0-9]+\/[A-Z0-9*]+\/\d+/
+define power   /PEM\d+|[-a-zA-Z0-9_ \t]+Power[-a-zA-Z0-9_ \t]+/
+define fan     /[-a-zA-Z0-9_ \t]*Fan[-a-zA-Z0-9_ \t]+/
+define chassis /[-a-zA-Z0-9_ \t]*Chassis/
+define field1  /[^"]*/
+define field2  /\S+/
+define field3  /(\S+|[^,]*?)/
+define nl      /[ \t]*\r?\n/
 
 grammar element:
     match 'DESCR:' ws '"' field1 '"' nl:
@@ -23,10 +29,23 @@ grammar element:
         do.return()
 
 grammar input:
-    match /.* (?:UTC|MET)/ nl:
-        do.skip()
-    match 'NAME:' ws '"' field1 '"' fs:
-        out.enter('element?name="$3"')
+    match 'NAME:' ws '"' card  '"' fs:
+        out.enter('element?name="$3"&type="CARD"')
+        element()
+    match 'NAME:' ws '"' chassis  '"' fs:
+        out.enter('element?name="$3"&type="CHASSIS"')
+        element()
+    match 'NAME:' ws '"' power '"' fs:
+        out.enter('element?name="$3"&type="POWER"')
+        element()
+    match 'NAME:' ws '"' fan '"' fs:
+        out.enter('element?name="$3"&type="FAN"')
+        element()
+    match 'NAME:' ws '"' spa '"' fs:
+        out.enter('element?name="$3"&type="SPA"')
+        element()
+    match 'NAME:' ws '"' port '"' fs:
+        out.enter('element?name="$3"&type="PORT"')
         element()
     match nl:
         do.skip()
