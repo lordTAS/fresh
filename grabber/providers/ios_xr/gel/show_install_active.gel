@@ -33,6 +33,9 @@ grammar input(default):
         do.skip()
     match ws nl:
         do.skip()
+    match 'Active Packages:' nl:
+        out.enter('packages')
+        node_package_statements()
     match 'Node' fs nows fs '[' field ']' fs '[' field ']' nl:
         out.enter('node?name="$2"')
         out.add('type', '$5')
