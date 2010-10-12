@@ -307,6 +307,17 @@
       </execute>
       <execute command="show install active">
           <store filename="show_install_active.txt"/>
+          <post-process
+            processor="gelatin"
+            syntax="ios_xr/gel/show_install_active.gel"
+            filename="show_install_active.xml"/>
+      </execute>
+      <execute command="show install active summary">
+          <store filename="show_install_active_summary.txt"/>
+          <post-process
+            processor="gelatin"
+            syntax="ios_xr/gel/show_install_active.gel"
+            filename="show_install_active_summary.xml"/>
       </execute>
       <execute command="show cdp nei">
           <store filename="show_cdp_nei.txt"/>

@@ -14,6 +14,9 @@
  name="ver"
  select="document('show_version.xml', .)/xml"/>
 <xsl:variable
+ name="install-active"
+ select="document('show_install_active_summary.xml', .)/xml"/>
+<xsl:variable
  name="diag"
  select="document('admin_show_diag.xml', .)/xml"/>
 <xsl:variable
@@ -106,6 +109,15 @@
     <os>
       <system><xsl:text>IOS XR</xsl:text></system>
       <version><xsl:value-of select="normalize-space($ver/version)"/></version>
+      <patches>
+        <xsl:for-each select="$install-active//package">
+          <package>
+            <xsl:attribute name="name">
+              <xsl:value-of select="@name"/>
+            </xsl:attribute>
+          </package>
+        </xsl:for-each>
+      </patches>
     </os>
     <model>
       <xsl:value-of select="$ver/model"/>

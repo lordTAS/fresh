@@ -30,6 +30,7 @@
   <xs:sequence>
     <xs:element name="system" type="xs:normalizedString"/>
     <xs:element name="version" type="nonEmptyString"/>
+    <xs:element name="patches" type="softwareListType" minOccurs="0"/>
   </xs:sequence>
 </xs:complexType>
 
