@@ -9,12 +9,18 @@
 
 <func:function name="cfggrab:getChassisNumberFromCard">
   <xsl:param name="card"/>
-  <func:result select="substring-before($card/@slot, '/')"/>
+  <func:result select="substring-before($card/@name, '/')"/>
 </func:function>
 
 <func:function name="cfggrab:getSlotFromCard">
   <xsl:param name="card"/>
-  <func:result select="cfggrab:rstrip($card/@slot, '/*')"/>
+  <xsl:variable name="slot1" select="cfggrab:rstrip($card/@name, '/CPU0')"/>
+  <func:result select="cfggrab:rstrip($slot1, '/*')"/>
+</func:function>
+
+<func:function name="cfggrab:getDiagSlotFromInv">
+  <xsl:param name="card"/>
+  <func:result select="cfggrab:rstrip($card/@name, '/CPU0')"/>
 </func:function>
 
 <func:function name="cfggrab:onSlot">

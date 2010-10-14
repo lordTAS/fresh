@@ -20,29 +20,34 @@
  name="diag"
  select="document('admin_show_diag.xml', .)/xml"/>
 <xsl:variable
+ name="inv"
+ select="document('admin_show_inventory.xml', .)/xml"/>
+<xsl:variable
  name="shint"
  select="document('show_interface.xml', .)/xml"/>
 
-<xsl:variable name="cards" select="$diag/card[@type = 'CARD' or @type = 'SPA' or not(@type)]"/>
+<xsl:variable name="cards" select="$inv/element[@type != 'PORT' and @type != 'CHASSIS']"/>
 <xsl:variable name="interfaces" select="$shint/interface"/>
 
-<xsl:template match="card">
+<xsl:template match="element">
   <card>
     <!-- General card specific fields. -->
     <xsl:variable name="slotName" select="cfggrab:getSlotFromCard(.)"/>
     <xsl:attribute name="slot">
       <xsl:value-of select="$slotName"/>
     </xsl:attribute>
+    <xsl:variable name="diagSlotName" select="cfggrab:getDiagSlotFromInv(.)"/>
+    <xsl:variable name="diagSlot" select="$diag/card[@slot=$diagSlotName]"/>
     <name>
       <xsl:choose>
-        <xsl:when test="description">
-            <xsl:value-of select="description"/>
+        <xsl:when test="$diagSlot/description">
+          <xsl:value-of select="$diagSlot/description"/>
         </xsl:when>
-        <xsl:when test="main/partno">
-            <xsl:value-of select="main/partno"/>
+        <xsl:when test="$diagSlot/main/partno">
+            <xsl:value-of select="$diagSlot/main/partno"/>
         </xsl:when>
-        <xsl:when test="partno">
-            <xsl:value-of select="partno"/>
+        <xsl:when test="$diagSlot/partno">
+            <xsl:value-of select="$diagSlot/partno"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:text>unknown</xsl:text>
@@ -51,28 +56,28 @@
     </name>
     <type>
       <xsl:choose>
-        <xsl:when test="main/partno">
-            <xsl:value-of select="main/partno"/>
+        <xsl:when test="$diagSlot/main/partno">
+          <xsl:value-of select="$diagSlot/main/partno"/>
         </xsl:when>
-        <xsl:when test="pca/partno">
-            <xsl:value-of select="pca/partno"/>
+        <xsl:when test="$diagSlot/pca/partno">
+            <xsl:value-of select="$diagSlot/pca/partno"/>
         </xsl:when>
-        <xsl:when test="partno">
-            <xsl:value-of select="partno"/>
+        <xsl:when test="$diagSlot/partno">
+            <xsl:value-of select="$diagSlot/partno"/>
         </xsl:when>
         <xsl:otherwise>
           <xsl:text>unknown</xsl:text>
         </xsl:otherwise>
       </xsl:choose>
     </type>
-    <xsl:if test="main">
+    <xsl:if test="$diagSlot/main">
       <part-number>
-        <xsl:value-of select="main/partno"/>
+        <xsl:value-of select="$diagSlot/main/partno"/>
       </part-number>
-      <serial-number>
-        <xsl:value-of select="main/serialno | pca/serialno"/>
-      </serial-number>
     </xsl:if>
+    <serial-number>
+      <xsl:value-of select="serialno"/>
+    </serial-number>
 
     <!-- Submodules. -->
     <xsl:variable
@@ -146,7 +151,7 @@
     <!-- Multi Chassis. -->
     <xsl:variable
       name="routeProcessors"
-      select="$cards[contains(@slot, '/RP0/*')]"/>
+      select="$cards[contains(@name, '/RP0/*')]"/>
     <xsl:for-each select="$routeProcessors">
       <xsl:variable
         name="chassisNumber"
@@ -165,7 +170,7 @@
         </model>
 
         <equipment>
-          <xsl:apply-templates select="$cards[cfggrab:ends-with(@slot, '/*')
+          <xsl:apply-templates select="$cards[cfggrab:ends-with(@name, '/*')
                                        and
                                        cfggrab:onChassis(., $chassisNumber)]"/>
         </equipment>
