@@ -31,6 +31,7 @@ def run(service, order):
     hostdb.save_host(order.get_hosts())
 
 def check(service, order):
+    order.set_description('Update the host database')
     hosts = order.get_hosts()
     if not hosts:
         return False

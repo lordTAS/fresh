@@ -18,11 +18,13 @@ from functools             import partial
 config = Config(__service__.config_file('config.xml'))
 
 def run(service, order):
-    service.set_order_status(order, 'running')
     packager = config.get_packager()
+    order.set_description(packager.describe())
+    service.set_order_status(order, 'running')
     packager.run(order)
 
 def check(service, order):
+    order.set_description('Export to a directory or package')
     hosts = order.get_hosts()
     if not hosts:
         return False

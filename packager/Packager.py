@@ -34,6 +34,11 @@ class Packager(object):
         if format not in ('directory', 'tar', 'gzip', 'bz2'):
             raise Exception('unknown format: %s' % self.format)
 
+    def describe(self):
+        if self.format == 'directory':
+            return 'Export a directory to %s' % self.out_dir
+        return 'Create a %s package at %s' % (self.format, self.out_dir)
+
     def get_seedhost_from_name(self, name):
         host = self.seeddb.get_host(name = name)
         if not host:

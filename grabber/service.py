@@ -28,7 +28,14 @@ def run(conn, logger):
         raise
 
 def check(service, order):
-    return order.get_hosts() and True or False
+    hosts = order.get_hosts()
+    if not hosts:
+        return False
+    if len(hosts) == 1:
+        order.set_description('Update ' + hosts[0].get_name())
+    else:
+        order.set_description('Updating %d hosts' % len(hosts))
+    return True
 
 def enter(service, order):
     logger = service.create_logger(order, 'command.log')
