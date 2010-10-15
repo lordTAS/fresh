@@ -20,24 +20,27 @@ class Packager(object):
     def __init__(self,
                  in_dir,
                  out_dir,
+                 out_name,
                  db,
                  profiles,
-                 format     = 'bz2',
-                 delete_dir = False):
-        self.in_dir     = in_dir
-        self.out_dir    = out_dir
-        self.format     = format
-        self.delete_dir = delete_dir
-        self.seeddb     = db
-        self.profiles   = profiles
+                 format    = 'bz2',
+                 overwrite = False):
+        self.in_dir    = in_dir
+        self.out_dir   = out_dir
+        self.out_name  = out_name
+        self.format    = format
+        self.overwrite = overwrite
+        self.seeddb    = db
+        self.profiles  = profiles
 
         if format not in ('directory', 'tar', 'gzip', 'bz2'):
             raise Exception('unknown format: %s' % self.format)
 
     def describe(self):
+        outpath = os.path.join(self.out_dir, self.out_name)
         if self.format == 'directory':
-            return 'Export a directory to %s' % self.out_dir
-        return 'Create a %s package at %s' % (self.format, self.out_dir)
+            return 'Export a directory to %s' % outpath
+        return 'Create a %s package at %s' % (self.format, outpath)
 
     def get_seedhost_from_name(self, name):
         host = self.seeddb.get_host(name = name)
@@ -45,16 +48,16 @@ class Packager(object):
             raise Exception('unknown host: %s' % name)
         return host
 
-    def _mktar(self, dirname, basename):
+    def _mktar(self, dirname):
+        filename = os.path.join(self.out_dir, self.out_name)
+        if self.overwrite and os.path.exists(filename):
+            os.remove(filename)
         if self.format == 'tar':
-            filename = os.path.join(self.out_dir, basename + '.tar')
-            tar      = tarfile.open(filename, 'w', dereference = True)
+            tar = tarfile.open(filename, 'w', dereference = True)
         elif self.format == 'gzip':
-            filename = os.path.join(self.out_dir, basename + '.tar.gz')
-            tar      = tarfile.open(filename, 'w:gz', dereference = True)
+            tar = tarfile.open(filename, 'w:gz', dereference = True)
         elif self.format == 'bz2':
-            filename = os.path.join(self.out_dir, basename + '.tar.bz2')
-            tar      = tarfile.open(filename, 'w:bz2', dereference = True)
+            tar = tarfile.open(filename, 'w:bz2', dereference = True)
         else:
             raise Exception('unknown tar format: %s' % self.format)
 
@@ -89,15 +92,16 @@ class Packager(object):
                         os.symlink(src, dst)
 
         if self.format == 'directory':
-            if not os.path.exists(self.out_dir):
-                os.makedirs(self.out_dir)
-            if self.delete_dir:
-                for file in os.listdir(self.out_dir):
-                    file = os.path.join(self.out_dir, file)
+            path = os.path.join(self.out_dir, self.out_name)
+            if not os.path.exists(path):
+                os.makedirs(path)
+            if self.overwrite:
+                for file in os.listdir(path):
+                    file = os.path.join(path, file)
                     rmtree(file)
             for file in os.listdir(tmp_dir):
                 file = os.path.join(tmp_dir, file)
-                move(file, self.out_dir)
+                move(file, path)
         else:
-            self._mktar(tmp_dir, str(order.id))
+            self._mktar(tmp_dir)
         rmtree(tmp_dir)

@@ -24,10 +24,10 @@
     <database>default</database>
     <input-dir>$sourceDir</input-dir>
     <package-dir>$packageDir</package-dir>
+    <package-name>mypackage</package-name>
     <!-- Supported formats: directory, tar, gz, bz2 -->
     <format>directory</format>
-    <!-- Only has an effect when using the 'directory' format. -->
-    <delete-dir/>
+    <overwrite/>
     <profile if="os == 'ios'">ios</profile>
     <profile if="os == 'ios_xr'">ios_xr</profile>
     <profile if="os == 'junos'">junos</profile>
