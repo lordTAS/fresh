@@ -22,7 +22,7 @@ grammar element:
     match 'VID:' ws field2 fs:
         out.add('hardware-version', '$2')
     match 'SN:' ws nl:
-        do.skip()
+        out.add('serialno', 'N/A')
     match 'SN:' ws field2 nl:
         out.add('serialno', '$2')
     match nl:
