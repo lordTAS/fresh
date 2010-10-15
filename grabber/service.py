@@ -34,7 +34,7 @@ def check(service, order):
     if len(hosts) == 1:
         order.set_description('Update ' + hosts[0].get_name())
     else:
-        order.set_description('Updating %d hosts' % len(hosts))
+        order.set_description('Update %d hosts' % len(hosts))
     return True
 
 def enter(service, order):
