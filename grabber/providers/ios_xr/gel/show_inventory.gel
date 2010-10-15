@@ -1,7 +1,7 @@
 define ws      /[\t ]+/
 define nows    /\S+/
 define fs      /[\t ]*,[\t ]*/
-define card    /[A-Z0-9]+\/(?:[A-Z0-9]+\/\*|\d+\/[A-Z0-9]+)/
+define card    /[A-Z0-9]+\/(?:[A-Z0-9]+\/\*|\d+\/CPU[0-9]+)/
 define spa     /\d+\/\d+\/\d+/
 define port    /[a-zA-Z0-9]+\/[A-Z0-9]+\/[A-Z0-9*]+\/\d+/
 define power   /PEM\d+|[-a-zA-Z0-9_ \t]+Power[-a-zA-Z0-9_ \t]+/
