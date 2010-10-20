@@ -30,6 +30,15 @@
     <server>mailserver</server>
   </mailer>
 
+  <ftp name="ftp-server">
+    <address>ftp-server</address>
+    <user>anonymous</user>
+    <!-- Password must be base64 encoded. (hint: "user@" is "dXNlckA=") -->
+    <password>dXNlckA=</password>
+    <path>/out/directory</path>
+    <filename>outfilename.tbz2</filename>
+  </ftp>
+
   <packager>
     <database>default</database>
     <input-dir>$sourceDir</input-dir>
@@ -39,6 +48,7 @@
     <format>tar</format>
     <overwrite/>
     <send-to>mailer</send-to>
+    <send-to>ftp-server</send-to>
     <profile if="os == 'ios'">ios</profile>
     <profile if="os == 'ios_xr'">ios_xr</profile>
     <profile if="os == 'junos'">junos</profile>

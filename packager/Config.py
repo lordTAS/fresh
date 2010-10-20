@@ -15,7 +15,7 @@
 """
 The API for updating the list of collected hosts.
 """
-
+import base64
 from sqlalchemy              import create_engine
 from Exscript.util.mail      import Mail
 from Exscriptd               import ConfigReader
@@ -23,6 +23,7 @@ from fresh.seed.HostDB       import HostDB
 from fresh.packager.Profile  import Profile
 from fresh.packager.Packager import Packager
 from fresh.packager.Mailer   import Mailer
+from fresh.packager.FTPPush  import FTPPush
 
 class Config(ConfigReader):
     def __init__(self, filename):
@@ -52,7 +53,7 @@ class Config(ConfigReader):
     def init_mailer_from_name(self, name):
         element = self.cfgtree.find('mailer[@name="%s"]' % name)
         if element is None:
-            raise Exception('no such mailer: %s' % name)
+            return None
 
         mail = Mail()
         mail.set_sender(element.find('from').text)
@@ -62,6 +63,27 @@ class Config(ConfigReader):
 
         server = element.find('server').text
         return Mailer(server, mail)
+
+    def init_ftp_from_name(self, name):
+        element = self.cfgtree.find('ftp[@name="%s"]' % name)
+        if element is None:
+            return None
+
+        address  = element.find('address').text
+        path     = element.find('path').text
+        filename = element.find('filename').text
+        user     = element.find('user').text
+        password = base64.decodestring(element.find('password').text)
+        return FTPPush(address, path, filename, user, password)
+
+    def init_send_to_from_name(self, name):
+        mailer = self.init_mailer_from_name(name)
+        if mailer:
+            return mailer
+        ftp = self.init_ftp_from_name(name)
+        if ftp:
+            return ftp
+        raise Exception('send-to: no such element: %s' % name)
 
     def get_packager(self):
         element   = self.cfgtree.find('packager')
@@ -83,8 +105,8 @@ class Config(ConfigReader):
 
         send_to = []
         for item in element.iterfind('send-to'):
-            mailer = self.init_mailer_from_name(item.text)
-            send_to.append(mailer)
+            handler = self.init_send_to_from_name(item.text)
+            send_to.append(handler)
 
         return Packager(in_dir,
                         out_dir,
