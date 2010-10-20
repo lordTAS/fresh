@@ -21,6 +21,7 @@ class Packager(object):
                  in_dir,
                  out_dir,
                  out_name,
+                 send_to,
                  db,
                  profiles,
                  format    = 'bz2',
@@ -28,6 +29,7 @@ class Packager(object):
         self.in_dir    = in_dir
         self.out_dir   = out_dir
         self.out_name  = out_name
+        self.send_to   = send_to
         self.format    = format
         self.overwrite = overwrite
         self.seeddb    = db
@@ -39,8 +41,12 @@ class Packager(object):
     def describe(self):
         outpath = os.path.join(self.out_dir, self.out_name)
         if self.format == 'directory':
-            return 'Export a directory to %s' % outpath
-        return 'Create a %s package at %s' % (self.format, outpath)
+            descr = 'Export a directory to %s' % outpath
+        else:
+            descr = 'Create a %s package at %s' % (self.format, outpath)
+        for handler in self.send_to:
+            descr += '. ' + handler.describe()
+        return descr
 
     def get_seedhost_from_name(self, name):
         host = self.seeddb.get_host(name = name)
@@ -91,8 +97,8 @@ class Packager(object):
                             os.makedirs(dst_dir)
                         os.symlink(src, dst)
 
+        path = os.path.join(self.out_dir, self.out_name)
         if self.format == 'directory':
-            path = os.path.join(self.out_dir, self.out_name)
             if not os.path.exists(path):
                 os.makedirs(path)
             if self.overwrite:
@@ -105,3 +111,6 @@ class Packager(object):
         else:
             self._mktar(tmp_dir)
         rmtree(tmp_dir)
+
+        for handler in self.send_to:
+            handler.send(path)

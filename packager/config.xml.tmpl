@@ -20,14 +20,25 @@
     <link name="{hostname}">show_configuration_display_set.txt</link>
   </profile>
 
+  <mailer name="mailer">
+    <from>me@home.com</from>
+    <to>receipient@home.com</to>
+    <subject>My subject</subject>
+    <body>
+    Please note the attached file.
+    </body>
+    <server>mailserver</server>
+  </mailer>
+
   <packager>
     <database>default</database>
     <input-dir>$sourceDir</input-dir>
     <package-dir>$packageDir</package-dir>
-    <package-name>mypackage</package-name>
+    <package-name>mypackage.tar</package-name>
     <!-- Supported formats: directory, tar, gz, bz2 -->
-    <format>directory</format>
+    <format>tar</format>
     <overwrite/>
+    <send-to>mailer</send-to>
     <profile if="os == 'ios'">ios</profile>
     <profile if="os == 'ios_xr'">ios_xr</profile>
     <profile if="os == 'junos'">junos</profile>

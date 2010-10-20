@@ -17,10 +17,12 @@ The API for updating the list of collected hosts.
 """
 
 from sqlalchemy              import create_engine
+from Exscript.util.mail      import Mail
 from Exscriptd               import ConfigReader
 from fresh.seed.HostDB       import HostDB
 from fresh.packager.Profile  import Profile
 from fresh.packager.Packager import Packager
+from fresh.packager.Mailer   import Mailer
 
 class Config(ConfigReader):
     def __init__(self, filename):
@@ -47,6 +49,20 @@ class Config(ConfigReader):
             profile.add_file(child.get('name'), child.text)
         return profile
 
+    def init_mailer_from_name(self, name):
+        element = self.cfgtree.find('mailer[@name="%s"]' % name)
+        if element is None:
+            raise Exception('no such mailer: %s' % name)
+
+        mail = Mail()
+        mail.set_sender(element.find('from').text)
+        mail.set_to(element.find('to').text)
+        mail.set_subject(element.find('subject').text)
+        mail.set_body(element.find('body').text)
+
+        server = element.find('server').text
+        return Mailer(server, mail)
+
     def get_packager(self):
         element   = self.cfgtree.find('packager')
         in_dir    = element.find('input-dir').text
@@ -64,9 +80,16 @@ class Config(ConfigReader):
             if profile_cond is not None:
                 profile.set_condition(profile_cond)
             profiles.append(profile)
+
+        send_to = []
+        for item in element.iterfind('send-to'):
+            mailer = self.init_mailer_from_name(item.text)
+            send_to.append(mailer)
+
         return Packager(in_dir,
                         out_dir,
                         out_name,
+                        send_to,
                         db,
                         profiles,
                         format    = format,
