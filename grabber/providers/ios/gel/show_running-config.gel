@@ -64,6 +64,8 @@ grammar aaa(default):
     match 'aaa group server' fs nows fs nows nl:
         out.enter('aaa/group?type="$2"&name="$4"')
         aaa_group_statements()
+    match 'aaa authentication' fs /\w+-prompt/ fs '"' nonl '"' nl:
+        out.add('aaa/$2', '$4')
     match 'aaa' fs nonl nl:
         out.add('aaa/option?string="$2"')
     do.return()
@@ -198,6 +200,8 @@ grammar async_line_statements(default):
     match 'login authentication' fs nows nl:
         out.add('$0', '$2')
     match 'logout-warning' fs number nl:
+        out.add('$0', '$2')
+    match 'modem' fs nows nl:
         out.add('$0', '$2')
     match 'password' fs number fs nows nl:
         out.add('$0?type="$2"', '$4')
@@ -1095,6 +1099,8 @@ grammar ip_route_statements(default):
     match if_name nl:
         out.add('destination?interface="$0"')
         do.return()
+    match 'name' fs nows:
+        out.add('name', '$2')
     match 'tag' fs number:
         out.add('tag', '$2')
     match 'track' fs number:
@@ -1354,6 +1360,8 @@ grammar ip_statements(default):
         out.add('$0/$2', '$4')
     match 'ssh' fs 'source-interface' fs nows nl:
         out.add('$0/$2', '$4')
+    match 'ssh' fs 'time-out' fs number nl:
+        out.add('$0/$2', '$4')
     match 'ssh' fs 'logging' fs nows nl:
         out.add('$0/$2/$4')
     match 'ssh' fs 'version' fs number nl:
@@ -1384,6 +1392,8 @@ grammar ip(default):
 grammar isis_statements(default):
     match 'authentication' fs 'key-chain' fs nows nl:
         out.add('$0/$2', '$4')
+    match 'authentication' fs 'key-chain' fs nows fs 'level-' number nl:
+        out.add('$0/$2?level="$7"', '$4')
     match 'authentication' fs 'mode' fs nows fs nows nl:
         out.add('$0/$6/$2', '$4')
     match 'default-information' fs 'originate' nl:
@@ -1396,6 +1406,8 @@ grammar isis_statements(default):
     match /(?:domain|area)-password/ fs nonl nl:
         out.add('$0', '$2')
     match 'external overload signalling' nl:
+        out.add('$0')
+    match 'fast-flood' nl:
         out.add('$0')
     match 'fast-flood' fs nonl nl:
         out.add('$0', '$2')
@@ -1410,6 +1422,8 @@ grammar isis_statements(default):
     match 'lsp-refresh-interval' fs number nl:
         out.add('$0', '$2')
     match 'max-lsp-lifetime' fs number nl:
+        out.add('$0', '$2')
+    match 'metric' fs number nl:
         out.add('$0', '$2')
     match 'metric-style' fs nonl nl:
         out.add('$0', '$2')
@@ -1430,6 +1444,8 @@ grammar isis_statements(default):
         redistribute_statements()
     match 'set-overload-bit' nl:
         out.add('$0')
+    match 'set-overload-bit' fs 'on-startup' fs number nl:
+        out.add('$0/$2', '$4')
     match /[\w\-]+-interval/ fs nows fs nonl nl:
         out.add('$0?level="$2"', '$4')
     match /(?:prc|spf|lsp-gen)-interval/ fs number fs number fs number nl:
@@ -1525,6 +1541,21 @@ grammar mpls(default):
         mpls_statements()
     match 'tag-switching' fs 'ip' fs nonl nl:
         out.add('mpls/$4')
+    do.return()
+
+grammar ntp(default):
+    match 'ntp' fs 'access-group' fs 'peer' fs number nl:
+        out.add('$0/$2/$4', '$6')
+    match 'ntp' fs 'peer' fs nows fs nows fs nows nl:
+        out.add('$0/$2?address="$4"/$6', '$8')
+    match 'ntp' fs 'server' fs nows fs nows fs nows nl:
+        out.add('$0/$2?address="$4"/$6', '$8')
+    match 'ntp' fs 'server' fs nows nl:
+        out.add('$0/$2?address="$4"')
+    match 'ntp' fs nows fs nows nl:
+        out.add('$0/$2', '$4')
+    match 'ntp' fs nows nl:
+        out.add('$0/$2')
     do.return()
 
 grammar ospf_statements(default):
@@ -1883,16 +1914,6 @@ grammar input(default):
         out.add('$0')
     match 'network-clock-participate' fs nonl nl:
         out.add('$0?slot="$2"')
-    match 'ntp' fs 'peer' fs nows fs nows fs nows nl:
-        out.add('$0/$2?address="$4"/$6', '$8')
-    match 'ntp' fs 'server' fs nows fs nows fs nows nl:
-        out.add('$0/$2?address="$4"/$6', '$8')
-    match 'ntp' fs 'server' fs nows nl:
-        out.add('$0/$2?address="$4"')
-    match 'ntp' fs nows fs nows nl:
-        out.add('$0/$2', '$4')
-    match 'ntp' fs nows nl:
-        out.add('$0/$2')
     match 'partition' fs name fs nonl nl:
         out.add('$0?name="$2"', '$4')
     match 'parser cache' nl:
@@ -2004,6 +2025,7 @@ grammar input(default):
     key_chain()
     logging()
     mpls()
+    ntp()
     ospf()
     policy_maps()
     redundancy()
