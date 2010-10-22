@@ -3,18 +3,25 @@ define fs     /[\t ]+/
 define nl     /[\r\n]+/
 define nonl   /[^\r\n]+/
 define number /\d+/
+define slot   /\d+(?:\/\d+)*/
 
 grammar default:
     match fs:
         do.skip()
 
 grammar pa_bay(default):
+    match 'Port adapter is analyzed' / */ nl:
+        do.skip()
+    match 'Port adapter insertion time' nonl nl:
+        do.skip()
     match /[^\r\n]*(?:PA, |Port Adapter|, \d+ ports)[^\r\n]*/ nl:
         out.add('description', '$0')
     match /Serial number:?/ fs nows fs /Part number:?/ fs nows / */ nl:
         out.add('serialno', '$2')
         out.add('partno', '$6')
     match /EEPROM|HW/ nonl nl:
+        do.skip()
+    match /Hardware revision/ nonl nl:
         do.skip()
     do.return()
 
@@ -24,8 +31,19 @@ grammar ignore_block(default):
     match nonl nl:
         do.skip()
 
+grammar pa_bay_7300(default):
+    pa_bay()
+    match 'PA Carrier Card State Information':
+        out.enter('..')
+        slot_7xxx()
+        do.return()
+    when 'Slot' fs number ':' nl:
+        do.return()
+    match nonl nl:
+        do.skip()
+
 grammar slot_7xxx(default):
-    when /Slot/ fs number /\s*[^:]*:/ nl:
+    when /Slot/ fs slot /\s*[^:]*:[^\r\n]*/ nl:
         do.return()
     match /WIC Slot/ fs nonl nl:
         ignore_block()
@@ -109,10 +127,16 @@ grammar slot(default):
         do.skip()
 
 grammar input(default):
-    match /Slot/ fs number /\s*[^:]*:/ nl:
+    match 'Slot' fs slot ':'
+        fs 'is a PA CC with the following PA in its slot' number ':' nl
+        'Slot' fs slot ':' nl:
+        out.enter('card?slot="$2"')
+        out.enter('subslot?slot="$6"')
+        pa_bay_7300()
+    match /Slot/ fs slot /\s*[^:]*:/ nl:
         out.enter('card?slot="$2"')
         slot_7xxx()
-    match /Slot|SLOT|PEM/ fs number /\s*[^:]*:\s+/ nonl nl:
+    match /Slot|SLOT|PEM/ fs slot /\s*[^:]*:\s+/ nonl nl:
         out.enter('card?slot="$2"')
         out.add('description', '$4')
         slot()
