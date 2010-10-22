@@ -35,6 +35,7 @@ grammar pa_bay_7300(default):
     pa_bay()
     match 'PA Carrier Card State Information':
         out.enter('..')
+        out.add('description', 'PA Carrier Card')
         slot_7xxx()
         do.return()
     when 'Slot' fs number ':' nl:
@@ -47,6 +48,8 @@ grammar slot_7xxx(default):
         do.return()
     match /WIC Slot/ fs nonl nl:
         ignore_block()
+    match /[^\r\n]+ Card/ nl:
+        out.add('description', '$0')
     match /C2[68]\d+ .*/ nl:
         out.add('description', '$0')
     match /PCB Serial Number *:/ fs nows nl:
@@ -55,8 +58,12 @@ grammar slot_7xxx(default):
         out.add('serialno', '$2')
     match /Part Number *:/ fs nows nl:
         out.add('partno', '$2')
+    match /PCB Part Number *:/ fs nows nl:
+        out.add('partno', '$2')
     match /Top Assy. Part Number *:/ fs nows nl:
         out.add('top-assy-partno', '$2')
+    match /Product Identifier \(PID\) *:/ fs nows /\s*/ nl:
+        out.add('type', '$2')
     match /Route.*Processor .*/ nl:
         out.add('description', '$0')
     match /Chassis Interface.*/ nl:
@@ -133,10 +140,13 @@ grammar input(default):
         out.enter('card?slot="$2"')
         out.enter('subslot?slot="$6"')
         pa_bay_7300()
-    match /Slot/ fs slot /\s*[^:]*:/ nl:
+    match /Slot/ fs number '/' number /\s*[^:]*:/ nl:
+        out.enter('card?slot="$2-$4"')
+        slot_7xxx()
+    match /Slot/ fs number /\s*[^:]*:/ nl:
         out.enter('card?slot="$2"')
         slot_7xxx()
-    match /Slot|SLOT|PEM/ fs slot /\s*[^:]*:\s+/ nonl nl:
+    match /Slot|SLOT|PEM/ fs number /\s*[^:]*:\s+/ nonl nl:
         out.enter('card?slot="$2"')
         out.add('description', '$4')
         slot()
