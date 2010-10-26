@@ -402,6 +402,19 @@ grammar control_plane_statements(default):
         control_plane_management_plane_statements()
     do.return()
 
+grammar dhcp_profile_statements(default):
+    match 'helper-address' fs 'vrf' fs nows fs ipvx_ip nl:
+        out.add('$0?vrf="$4"', '$6')
+    do.return()
+
+grammar dhcp_statements(default):
+    match 'interface' fs if_name fs 'relay profile' fs nows nl:
+        out.add('$0?name="$2"/relay-profile', '$6')
+    match 'profile' fs nows fs 'relay' nl:
+        out.enter('$0?name="$2"')
+        dhcp_profile_statements()
+    do.return()
+
 grammar event(default):
     match 'event manager' fs 'environment' fs nonl nl:
         out.add('$0/$2', '$4')
@@ -1500,6 +1513,9 @@ grammar input(default):
     match 'banner' fs word fs multi_line_str_start:
         out.enter('banner/$2')
         banner_statements()
+    match 'dhcp' fs 'ipv4' nl:
+        out.enter('dhcp?protocol="$2"')
+        dhcp_statements()
     match 'domain lookup' fs nows nl:
         out.add('domain-lookup', '$2')
     match 'domain name-server' fs nonl nl:
