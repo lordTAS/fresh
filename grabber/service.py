@@ -18,14 +18,23 @@ from Exscript.util.decorator import bind
 config  = Config(__service__.config_file('config.xml'))
 grabber = config.get_grabber()
 
-def run(conn, logger):
+def run(conn, service, order, logger):
+    host = conn.get_host()
+    task = host.get('__task__')
+    task.set_status('in-progress')
+    service.save_task(order, task)
+
     try:
-        grabber.grab(conn, logger)
+        grabber.grab(conn, service, order, logger)
     except Exception, e:
-        host  = conn.get_host()
         label = grabber.get_label_from_host(host)
         logger.info('%s: Exception: %s' % (label, repr(str(e))))
+        task.close('error')
         raise
+    else:
+        task.completed()
+    finally:
+        service.save_task(order, task)
 
 def check(service, order):
     hosts = order.get_hosts()
@@ -45,15 +54,20 @@ def enter(service, order):
     # additional attributes from the database.
     hosts = []
     for host in order.get_hosts():
+        task     = service.create_task(order, 'Update %s' % host.get_name())
         seedhost = grabber.get_seedhost_from_name(host.get_name())
+
         if not seedhost:
             hostname = host.get_name()
             logger.info('%s: Error: Address for host not found.' % hostname)
+            task.close('address-not-found')
+            service.save_task(order, task)
         else:
             hosts.append(seedhost)
+            seedhost.set('__task__', task)
 
     service.enqueue_hosts(order,
                           hosts,
-                          bind(run, logger),
+                          bind(run, service, order, logger),
                           handle_duplicates = True)
     service.set_order_status(order, 'queued')

@@ -28,9 +28,10 @@ class Grabber(object):
     def get_label_from_host(self, host):
         return host.get_address() + '/' + host.get_name()
 
-    def grab(self, conn, logger):
+    def grab(self, conn, service, order, logger):
         # Initial log message.
         host  = conn.get_host()
+        task  = host.get('__task__')
         label = self.get_label_from_host(host)
         logger.info('%s: Connecting...' % label)
 
