@@ -30,6 +30,34 @@
   </xsl:choose>
 </func:function>
 
+<!--
+Given a string, this function looks for the LAST occurence of
+char in it, and crops string1 at that position. Examples:
+
+  string, n = stri
+  string, g = strin
+  string, x = string
+-->
+<func:function name="cfggrab:cropAt">
+  <xsl:param name="string"/>
+  <xsl:param name="char"/>
+
+  <xsl:choose>
+    <xsl:when test="not(contains($string, $char))">
+      <func:result select="$string"/>
+    </xsl:when>
+
+    <xsl:otherwise>
+      <xsl:variable name="tail" select="str:tokenize($string, $char)[last()]"/>
+      <func:result select="cfggrab:rstrip($string, $tail)"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</func:function>
+
+<!--
+Given an interface name (such as POS1/0, Loopback0, or POS2/0:0),
+this function returns the position, e.g. 1/0, 0, or 2/0.
+-->
 <func:function name="cfggrab:getInterfacePosition">
   <xsl:param name="interfaceName"/>
   <xsl:variable
@@ -40,17 +68,29 @@
     select="cfggrab:rstrip($interfaceName, $position)"/>
 
   <xsl:choose>
+    <!-- This happens when the given interface contained no type. -->
     <xsl:when test="contains($type, '/')">
       <func:result select="$interfaceName"/>
     </xsl:when>
 
-    <xsl:when test="contains($position, '/')">
-      <xsl:variable name="tail" select="str:tokenize($position, '/')[last()]"/>
-      <func:result select="cfggrab:rstrip(cfggrab:rstrip($position, $tail), '/')"/>
+    <!-- Interface names that have no '/' in them, such as 'Serial0'. -->
+    <xsl:when test="not(contains($position, '/'))">
+      <func:result select="$interfaceName"/>
     </xsl:when>
 
+    <!-- Logical interface names. -->
+    <xsl:when test="contains($position, '.')">
+      <func:result select="cfggrab:cropAt($position, '.')"/>
+    </xsl:when>
+
+    <!-- Other logical interface names. -->
+    <xsl:when test="contains($position, ':')">
+      <func:result select="cfggrab:cropAt($position, ':')"/>
+    </xsl:when>
+
+    <!-- "Normal" interface names. -->
     <xsl:otherwise>
-      <func:result select="$interfaceName"/>
+      <func:result select="$position"/>
     </xsl:otherwise>
   </xsl:choose>
 </func:function>
@@ -76,7 +116,7 @@
   <xsl:param name="interfaceName"/>
   <xsl:variable name="slot1" select="cfggrab:getSlotNameFromCard($card)"/>
   <xsl:variable name="slot2" select="cfggrab:getInterfacePosition($interfaceName)"/>
-  <func:result select="concat($slot1, '$') = concat($slot2, '$')"/>
+  <func:result select="$slot1 = $slot2 or starts-with($slot2, concat($slot1, '/'))"/>
 </func:function>
 
 <func:function name="cfggrab:onInterface">

@@ -60,15 +60,17 @@
     <xsl:apply-templates select="subslot"/>
 
     <!-- Physical interfaces on this card. -->
-    <xsl:variable name="card" select="."/>
+    <xsl:if test="not(subslot)">
+      <xsl:variable name="card" select="."/>
 
-    <xsl:for-each select="$interfaces">
-      <xsl:variable name="physical"   select="cfggrab:getInterfaceName(@name)"/>
-      <xsl:variable name="isphysical" select="cfggrab:isPhysicalInterface(@name)"/>
-      <xsl:if test="$isphysical and cfggrab:onSlot($card, $physical)">
-        <xsl:apply-templates mode="physical" select="."/>
-      </xsl:if>
-    </xsl:for-each>
+      <xsl:for-each select="$interfaces">
+        <xsl:variable name="physical"   select="cfggrab:getInterfaceName(@name)"/>
+        <xsl:variable name="isphysical" select="cfggrab:isPhysicalInterface(@name)"/>
+        <xsl:if test="$isphysical and cfggrab:onSlot($card, $physical)">
+          <xsl:apply-templates mode="physical" select="."/>
+        </xsl:if>
+      </xsl:for-each>
+    </xsl:if>
   </card>
 </xsl:template>
 
