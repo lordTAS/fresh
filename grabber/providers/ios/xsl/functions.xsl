@@ -73,11 +73,6 @@ this function returns the position, e.g. 1/0, 0, or 2/0.
       <func:result select="$interfaceName"/>
     </xsl:when>
 
-    <!-- Interface names that have no '/' in them, such as 'Serial0'. -->
-    <xsl:when test="not(contains($position, '/'))">
-      <func:result select="$interfaceName"/>
-    </xsl:when>
-
     <!-- Logical interface names. -->
     <xsl:when test="contains($position, '.')">
       <func:result select="grabber:cropAt($position, '.')"/>
@@ -116,7 +111,7 @@ this function returns the position, e.g. 1/0, 0, or 2/0.
   <xsl:param name="interfaceName"/>
   <xsl:variable name="slot1" select="grabber:getSlotNameFromCard($card)"/>
   <xsl:variable name="slot2" select="grabber:getInterfacePosition($interfaceName)"/>
-  <func:result select="$slot1 = $slot2 or starts-with($slot2, concat($slot1, '/'))"/>
+  <func:result select="str:tokenize($slot1, '-')[. = $slot2 or starts-with($slot2, concat(., '/'))]"/>
 </func:function>
 
 <func:function name="grabber:onInterface">
