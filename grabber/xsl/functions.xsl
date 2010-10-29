@@ -3,22 +3,22 @@
  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
  xmlns:str="http://exslt.org/strings"
  xmlns:func="http://exslt.org/functions"
- xmlns:cfggrab="localhost"
+ xmlns:grabber="localhost"
  extension-element-prefixes="str func">
 
-<func:function name="cfggrab:lower-case">
+<func:function name="grabber:lower-case">
   <xsl:param name="str"/>
   <func:result select="translate($str, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
                                        'abcdefghijklmnopqrstuvwxyz')"/>
 </func:function>
 
-<func:function name="cfggrab:upper-case">
+<func:function name="grabber:upper-case">
   <xsl:param name="str"/>
   <func:result select="translate($str, 'abcdefghijklmnopqrstuvwxyz',
                                        'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>
 </func:function>
 
-<func:function name="cfggrab:ends-with">
+<func:function name="grabber:ends-with">
   <xsl:param name="str"/>
   <xsl:param name="tail"/>
 
@@ -38,7 +38,7 @@ Does nothing if the given string does not end with the given tail.
 @tail: The tail that is removed from str.
 @return: The string with the tail removed, or the original string.
 -->
-<func:function name="cfggrab:rstrip">
+<func:function name="grabber:rstrip">
   <xsl:param name="str"/>
   <xsl:param name="tail"/>
 
@@ -57,7 +57,7 @@ Does nothing if the given string does not end with the given tail.
   </xsl:choose>
 </func:function>
 
-<func:function name="cfggrab:netmask">
+<func:function name="grabber:netmask">
   <xsl:param name="pfxlen"/>
   <xsl:choose>
     <xsl:when test="$pfxlen = 32">

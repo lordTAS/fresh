@@ -3,7 +3,7 @@
  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
  xmlns:str="http://exslt.org/strings"
  xmlns:func="http://exslt.org/functions"
- xmlns:cfggrab="localhost"
+ xmlns:grabber="localhost"
  extension-element-prefixes="str func">
 <xsl:import href="functions.xsl"/>
 <xsl:import href="types.xsl"/>
@@ -32,11 +32,11 @@
 <xsl:template match="element">
   <card>
     <!-- General card specific fields. -->
-    <xsl:variable name="slotName" select="cfggrab:getSlotFromCard(.)"/>
+    <xsl:variable name="slotName" select="grabber:getSlotFromCard(.)"/>
     <xsl:attribute name="slot">
       <xsl:value-of select="$slotName"/>
     </xsl:attribute>
-    <xsl:variable name="diagSlotName" select="cfggrab:getDiagSlotFromInv(.)"/>
+    <xsl:variable name="diagSlotName" select="grabber:getDiagSlotFromInv(.)"/>
     <xsl:variable name="diagSlot" select="$diag/card[@slot=$diagSlotName]"/>
     <name>
       <xsl:choose>
@@ -82,16 +82,16 @@
     <!-- Submodules. -->
     <xsl:variable
         name="subslots"
-        select="$cards[cfggrab:onSlot(., $slotName)]"/>
+        select="$cards[grabber:onSlot(., $slotName)]"/>
     <xsl:apply-templates select="$subslots"/>
 
     <!-- Physical interfaces on this card. -->
     <xsl:variable name="card" select="."/>
     <xsl:if test="not($subslots)">
       <xsl:for-each select="$interfaces">
-        <xsl:variable name="physical"   select="cfggrab:getInterfaceName(@name)"/>
-        <xsl:variable name="isphysical" select="cfggrab:isPhysicalInterface(@name)"/>
-        <xsl:if test="$isphysical and cfggrab:interfaceIsOnSlot($card, .)">
+        <xsl:variable name="physical"   select="grabber:getInterfaceName(@name)"/>
+        <xsl:variable name="isphysical" select="grabber:isPhysicalInterface(@name)"/>
+        <xsl:if test="$isphysical and grabber:interfaceIsOnSlot($card, .)">
           <xsl:apply-templates mode="physical" select="."/>
         </xsl:if>
       </xsl:for-each>
@@ -155,7 +155,7 @@
     <xsl:for-each select="$routeProcessors">
       <xsl:variable
         name="chassisNumber"
-        select="cfggrab:getChassisNumberFromCard(.)"/>
+        select="grabber:getChassisNumberFromCard(.)"/>
       <chassis>
         <xsl:attribute name="name">
             <xsl:text>Chassis </xsl:text>
@@ -170,9 +170,9 @@
         </model>
 
         <equipment>
-          <xsl:apply-templates select="$cards[cfggrab:ends-with(@name, '/*')
+          <xsl:apply-templates select="$cards[grabber:ends-with(@name, '/*')
                                        and
-                                       cfggrab:onChassis(., $chassisNumber)]"/>
+                                       grabber:onChassis(., $chassisNumber)]"/>
         </equipment>
       </chassis>
     </xsl:for-each>

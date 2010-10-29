@@ -3,7 +3,7 @@
  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
  xmlns:str="http://exslt.org/strings"
  xmlns:func="http://exslt.org/functions"
- xmlns:cfggrab="localhost"
+ xmlns:grabber="localhost"
  extension-element-prefixes="str func">
 
 <xsl:template match="interface" mode="logical">
@@ -60,7 +60,7 @@
 
 <xsl:template match="interface" mode="physical">
   <interface>
-    <xsl:variable name="name" select="cfggrab:getInterfaceName(@name)"/>
+    <xsl:variable name="name" select="grabber:getInterfaceName(@name)"/>
 
     <!-- Interface attributes. -->
     <xsl:attribute name="name">

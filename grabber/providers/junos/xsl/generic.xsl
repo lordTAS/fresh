@@ -3,7 +3,7 @@
  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
  xmlns:str="http://exslt.org/strings"
  xmlns:func="http://exslt.org/functions"
- xmlns:cfggrab="localhost"
+ xmlns:grabber="localhost"
  xmlns:ch="http://xml.juniper.net/junos/VERSION/junos-chassis"
  xmlns:shint="http://xml.juniper.net/junos/VERSION/junos-interface"
  extension-element-prefixes="str func"
@@ -64,7 +64,7 @@
 <xsl:template match="ch:chassis-module | ch:chassis-sub-module">
   <card>
     <!-- General card specific fields. -->
-    <xsl:variable name="slotName" select="cfggrab:getSlotNameFromCard(.)"/>
+    <xsl:variable name="slotName" select="grabber:getSlotNameFromCard(.)"/>
     <xsl:attribute name="slot">
       <xsl:value-of select="$slotName"/>
     </xsl:attribute>
@@ -105,7 +105,7 @@
     <!-- Physical interfaces on this card. -->
     <xsl:if test="count(ch:chassis-sub-module) = 0">
       <xsl:variable name="card" select="."/>
-      <xsl:apply-templates select="$interfaces[cfggrab:onSlot($card, $nSlotsPerChassis, shint:name)]"/>
+      <xsl:apply-templates select="$interfaces[grabber:onSlot($card, $nSlotsPerChassis, shint:name)]"/>
     </xsl:if>
   </card>
 </xsl:template>
@@ -143,7 +143,7 @@
         <os>
           <system><xsl:text>JunOS</xsl:text></system>
           <version>
-            <xsl:value-of select="cfggrab:getJunOSVersionFromDescription($first-ver/package-information[1]/comment)"/>
+            <xsl:value-of select="grabber:getJunOSVersionFromDescription($first-ver/package-information[1]/comment)"/>
           </version>
         </os>
         <model>
@@ -167,7 +167,7 @@
         <os>
           <system><xsl:text>JunOS</xsl:text></system>
           <version>
-            <xsl:value-of select="cfggrab:getJunOSVersionFromDescription($sh-ver-re/software-information/package-information[1]/comment)"/>
+            <xsl:value-of select="grabber:getJunOSVersionFromDescription($sh-ver-re/software-information/package-information[1]/comment)"/>
           </version>
         </os>
         <model>
@@ -214,7 +214,7 @@
                       <xsl:value-of select="shint:ifa-local" />
                     </xsl:attribute>
                     <xsl:attribute name="mask">
-                      <xsl:value-of select="cfggrab:netmask(str:tokenize(shint:ifa-destination, '/')[2])" />
+                      <xsl:value-of select="grabber:netmask(str:tokenize(shint:ifa-destination, '/')[2])" />
                     </xsl:attribute>
                   </ipv4-address>
                 </xsl:for-each>

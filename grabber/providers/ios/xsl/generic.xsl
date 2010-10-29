@@ -3,7 +3,7 @@
  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
  xmlns:str="http://exslt.org/strings"
  xmlns:func="http://exslt.org/functions"
- xmlns:cfggrab="localhost"
+ xmlns:grabber="localhost"
  extension-element-prefixes="str func">
 <xsl:import href="functions.xsl"/>
 <xsl:import href="types.xsl"/>
@@ -25,7 +25,7 @@
 <xsl:template match="card | subslot">
   <card>
     <!-- General card specific fields. -->
-    <xsl:variable name="slotName" select="cfggrab:getSlotNameFromCard(.)"/>
+    <xsl:variable name="slotName" select="grabber:getSlotNameFromCard(.)"/>
     <xsl:attribute name="slot">
       <xsl:value-of select="$slotName"/>
     </xsl:attribute>
@@ -64,9 +64,9 @@
       <xsl:variable name="card" select="."/>
 
       <xsl:for-each select="$interfaces">
-        <xsl:variable name="physical"   select="cfggrab:getInterfaceName(@name)"/>
-        <xsl:variable name="isphysical" select="cfggrab:isPhysicalInterface(@name)"/>
-        <xsl:if test="$isphysical and cfggrab:onSlot($card, $physical)">
+        <xsl:variable name="physical"   select="grabber:getInterfaceName(@name)"/>
+        <xsl:variable name="isphysical" select="grabber:isPhysicalInterface(@name)"/>
+        <xsl:if test="$isphysical and grabber:onSlot($card, $physical)">
           <xsl:apply-templates mode="physical" select="."/>
         </xsl:if>
       </xsl:for-each>
@@ -114,8 +114,8 @@
         <!-- Interfaces inserted directly into the chassis. -->
         <xsl:if test="not($diag/card)">
           <xsl:for-each select="$interfaces">
-            <xsl:variable name="physical"   select="cfggrab:getInterfaceName(@name)"/>
-            <xsl:variable name="isphysical" select="cfggrab:isPhysicalInterface(@name)"/>
+            <xsl:variable name="physical"   select="grabber:getInterfaceName(@name)"/>
+            <xsl:variable name="isphysical" select="grabber:isPhysicalInterface(@name)"/>
             <xsl:if test="$isphysical">
               <xsl:apply-templates mode="physical" select="."/>
             </xsl:if>
