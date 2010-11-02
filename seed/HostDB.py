@@ -36,7 +36,7 @@ class HostDB(object):
         """
         self.engine        = engine
         self.metadata      = sa.MetaData(self.engine)
-        self._table_prefix = 'seedb_'
+        self._table_prefix = 'seeddb_'
         self._table_map    = {}
         self.__update_table_names()
 
