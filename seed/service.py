@@ -16,19 +16,19 @@ from fresh.seed.Config import Config
 from functools         import partial
 
 config = Config(__service__.config_file('config.xml'))
-hostdb = config.get_hostdb()
+seeddb = config.get_seeddb()
 
 def run(service, order):
     service.set_order_status(order, 'running')
 
     # Delete all hosts.
-    hostdb.delete_host()
+    seeddb.delete_host()
 
     # Import new hosts.
     for host in order.get_hosts():
         for key, value in host.get_all().iteritems():
             host.set(key, value[0])
-    hostdb.save_host(order.get_hosts())
+    seeddb.save_host(order.get_hosts())
 
 def check(service, order):
     order.set_description('Update the host database')

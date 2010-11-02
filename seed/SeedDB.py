@@ -20,18 +20,18 @@ from Exscript.util.cast import to_list
 import sqlalchemy                 as sa
 import sqlalchemy.databases.mysql as mysql
 
-class HostDB(object):
+class SeedDB(object):
     """
     The main interface for accessing the database.
     """
 
     def __init__(self, engine):
         """
-        Instantiates a new HostDB.
+        Instantiates a new SeedDB.
         
         @type  engine: object
         @param engine: An sqlalchemy database connection.
-        @rtype:  HostDB
+        @rtype:  SeedDB
         @return: The new instance.
         """
         self.engine        = engine

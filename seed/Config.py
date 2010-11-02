@@ -19,24 +19,24 @@ The API for updating the list of collected hosts.
 import os
 from sqlalchemy        import create_engine
 from Exscriptd         import ConfigReader
-from fresh.seed.HostDB import HostDB
+from fresh.seed.SeedDB import SeedDB
 
 class Config(ConfigReader):
     def __init__(self, filename):
         ConfigReader.__init__(self, filename)
         element     = self.cfgtree.find('seed')
         db_name     = element.find('database').text
-        self.hostdb = self.init_database_from_name(db_name)
+        self.seeddb = self.init_database_from_name(db_name)
 
     def init_database_from_name(self, name):
         element = self.cfgtree.find('database[@name="%s"]' % name)
         dbn     = element.find('dbn').text
         #print 'Creating database connection for', dbn
         engine  = create_engine(dbn)
-        db      = HostDB(engine)
+        db      = SeedDB(engine)
         #print 'Initializing database tables...'
         db.install()
         return db
 
-    def get_hostdb(self):
-        return self.hostdb
+    def get_seeddb(self):
+        return self.seeddb

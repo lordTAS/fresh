@@ -19,7 +19,7 @@ import base64
 from sqlalchemy              import create_engine
 from Exscript.util.mail      import Mail
 from Exscriptd               import ConfigReader
-from fresh.seed.HostDB       import HostDB
+from fresh.seed.SeedDB       import SeedDB
 from fresh.packager.Profile  import Profile
 from fresh.packager.Packager import Packager
 from fresh.packager.Mailer   import Mailer
@@ -36,7 +36,7 @@ class Config(ConfigReader):
         dbn     = element.find('dbn').text
         #print 'Creating database connection for', dbn
         engine  = create_engine(dbn)
-        db      = HostDB(engine)
+        db      = SeedDB(engine)
         #print 'Initializing database tables...'
         db.install()
         return db

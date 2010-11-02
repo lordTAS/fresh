@@ -14,7 +14,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import os, re, imp
 from sqlalchemy import create_engine
-from fresh.seed import HostDB
+from fresh.seed import SeedDB
 from lxml       import etree
 from pyexist    import ExistDB
 from Exscriptd  import ConfigReader
@@ -42,7 +42,7 @@ class Config(ConfigReader):
         dbn     = element.find('dbn').text
         #print 'Creating database connection for', dbn
         engine  = create_engine(dbn)
-        return HostDB(engine)
+        return SeedDB(engine)
 
     def _init_file_stores(self):
         for element in self.cfgtree.iterfind('file-store'):
