@@ -62,6 +62,7 @@ class SeedDB(object):
             sa.Column('country',   sa.String(50)),
             sa.Column('city',      sa.String(50)),
             sa.Column('os',        sa.String(50)),
+            sa.Column('duration',  sa.Float),
             sa.Column('timestamp',
                       sa.DateTime,
                       default  = sa.func.now(),
@@ -133,12 +134,13 @@ class SeedDB(object):
         return self._table_prefix
 
     def __host2dict(self, host, fields = None):
-        all = dict(address = host.get_address(),
-                   name    = host.get_name(),
-                   path    = host.get('path'),
-                   country = host.get('country'),
-                   city    = host.get('city'),
-                   os      = host.get('os'))
+        all = dict(address  = host.get_address(),
+                   name     = host.get_name(),
+                   path     = host.get('path'),
+                   country  = host.get('country'),
+                   city     = host.get('city'),
+                   os       = host.get('os'),
+                   duration = host.get('duration'))
         if fields is None:
             return all
         return dict((k, v) for (k, v) in all.iteritems() if k in fields)
@@ -185,10 +187,11 @@ class SeedDB(object):
         tbl_h = self._table_map['host']
         host  = Host(row[tbl_h.c.address])
         host.set_name(row[tbl_h.c.name])
-        host.set('path',    row[tbl_h.c.path])
-        host.set('country', row[tbl_h.c.country])
-        host.set('city',    row[tbl_h.c.city])
-        host.set('os',      row[tbl_h.c.os])
+        host.set('path',     row[tbl_h.c.path])
+        host.set('country',  row[tbl_h.c.country])
+        host.set('city',     row[tbl_h.c.city])
+        host.set('os',       row[tbl_h.c.os])
+        host.set('duration', row[tbl_h.c.duration])
         return host
 
     def __get_hosts_from_query(self, query):
@@ -210,7 +213,13 @@ class SeedDB(object):
         tbl_h = self._table_map['host']
         where = None
 
-        for field in ('address', 'name', 'path', 'country', 'city', 'os'):
+        for field in ('address',
+                      'name',
+                      'path',
+                      'country',
+                      'city',
+                      'os',
+                      'duration'):
             if kwargs.has_key(field):
                 cond = None
                 for value in to_list(kwargs.get(field)):

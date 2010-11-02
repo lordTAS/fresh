@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-from datetime          import datetime
+from datetime          import datetime, timedelta
 from fresh.seed.Config import Config
 from functools         import partial
 
@@ -21,7 +21,8 @@ seeddb = config.get_seeddb()
 
 def run(service, order):
     service.set_order_status(order, 'running')
-    start = datetime.utcnow().replace(microsecond = 0)
+    sec   = timedelta(seconds = 1)
+    start = datetime.utcnow().replace(microsecond = 0) - sec
 
     # Variables in an order are always lists; expand those into
     # strings.
