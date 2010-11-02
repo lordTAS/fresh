@@ -132,13 +132,16 @@ class SeedDB(object):
         """
         return self._table_prefix
 
-    def __host2dict(self, host):
-        return dict(address = host.get_address(),
-                    name    = host.get_name(),
-                    path    = host.get('path'),
-                    country = host.get('country'),
-                    city    = host.get('city'),
-                    os      = host.get('os'))
+    def __host2dict(self, host, fields = None):
+        all = dict(address = host.get_address(),
+                   name    = host.get_name(),
+                   path    = host.get('path'),
+                   country = host.get('country'),
+                   city    = host.get('city'),
+                   os      = host.get('os'))
+        if fields is None:
+            return all
+        return dict((k, v) for (k, v) in all.iteritems() if k in fields)
 
     def __add_host(self, host):
         """
@@ -152,7 +155,7 @@ class SeedDB(object):
         result = insert.execute(**self.__host2dict(host))
         return result.last_inserted_ids()[0]
 
-    def __save_host(self, host):
+    def __save_host(self, host, fields):
         """
         Inserts or updates the given host into the database.
         """
@@ -163,7 +166,7 @@ class SeedDB(object):
         table   = self._table_map['host']
         where   = sa.and_(table.c.address == host.get_address())
         thehost = table.select(where).execute().fetchone()
-        fields  = self.__host2dict(host)
+        fields  = self.__host2dict(host, fields)
 
         # Insert or update it.
         if thehost is None:
@@ -275,10 +278,12 @@ class SeedDB(object):
             self.__add_host(host)
         return True
 
-    def save_host(self, hosts):
+    def save_host(self, hosts, fields = None):
         """
         Updates the given hosts in the database. Does nothing if
         the host doesn't exist.
+        If fields is a tuple of column names, only the fields with
+        the given names are updated.
 
         @type  hosts: Host|list[Host]
         @param hosts: The host to be saved.
@@ -288,7 +293,7 @@ class SeedDB(object):
         if hosts is None:
             raise AttributeError('hosts argument must not be None')
         for host in to_list(hosts):
-            self.__save_host(host)
+            self.__save_host(host, fields)
         return True
 
     def delete_host(self, **kwargs):
@@ -300,4 +305,16 @@ class SeedDB(object):
         """
         where  = self.__get_conditions(**kwargs)
         delete = self._table_map['host'].delete(where)
+        result = delete.execute()
+
+    def delete_old_hosts(self, timestamp):
+        """
+        Deletes all hosts that have a timestamp that is smaller than
+        the given value.
+
+        @type  timestamp: datetime.datetime
+        @param timestamp: A Python datetime object.
+        """
+        tbl_h  = self._table_map['host']
+        delete = tbl_h.delete(tbl_h.c.timestamp < timestamp)
         result = delete.execute()

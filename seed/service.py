@@ -12,6 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+from datetime          import datetime
 from fresh.seed.Config import Config
 from functools         import partial
 
@@ -20,15 +21,20 @@ seeddb = config.get_seeddb()
 
 def run(service, order):
     service.set_order_status(order, 'running')
+    start = datetime.utcnow().replace(microsecond = 0)
 
-    # Delete all hosts.
-    seeddb.delete_host()
-
-    # Import new hosts.
+    # Variables in an order are always lists; expand those into
+    # strings.
     for host in order.get_hosts():
         for key, value in host.get_all().iteritems():
             host.set(key, value[0])
-    seeddb.save_host(order.get_hosts())
+
+    # Import the hosts, while preserving the values in other columns.
+    fields = ('address', 'name', 'path', 'country', 'city')
+    seeddb.save_host(order.get_hosts(), fields)
+
+    # Get rid of all hosts that are no longer known.
+    seeddb.delete_old_hosts(start)
 
 def check(service, order):
     order.set_description('Update the host database')
