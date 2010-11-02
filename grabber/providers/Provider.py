@@ -141,6 +141,7 @@ class Provider(object):
     def get_store(self):
         return self.store
 
-    def start(self, conn):
+    def start(self, conn, update_progress_func):
         for task in self.tasks:
             task.do(conn)
+            update_progress_func()

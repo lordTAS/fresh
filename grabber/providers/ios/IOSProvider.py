@@ -53,6 +53,3 @@ class IOSProvider(Provider):
             conn.response = '\n'.join(response) + '\n'
 
         conn.execute = execute_wrapper
-
-    def start(self, conn):
-        Provider.start(self, conn)
