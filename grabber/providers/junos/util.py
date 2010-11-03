@@ -13,6 +13,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import re
+from lxml     import etree
+from StringIO import StringIO
 
 def remove_passwords_from_config(config):
     patterns = (re.compile(r'(.*authentication-key) (".+")'),
@@ -33,3 +35,19 @@ def remove_descriptions_from_config(config):
         lines.append(line)
     return '\n'.join(lines)
 
+def remove_passwords_from_xml(xml):
+    tree = etree.parse(StringIO(xml))
+    for elem in tree.iter():
+        if elem.tag in ('key',
+                        'password',
+                        'authentication-key',
+                        'encrypted-password'):
+            elem.text = 'REMOVED'
+    return etree.tostring(tree)
+
+def remove_descriptions_from_xml(xml):
+    tree = etree.parse(StringIO(xml))
+    for elem in tree.iter():
+        if elem.tag == 'description':
+            elem.text = 'REMOVED'
+    return etree.tostring(tree)

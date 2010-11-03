@@ -37,6 +37,7 @@ class FileStore(object):
               cleandesc = False):
         host_dir = self.get_path(conn)
         filename = self.get_path(conn, filename)
+        isxml    = filename.endswith('.xml')
 
         if not os.path.isdir(host_dir):
             os.makedirs(host_dir)
@@ -45,9 +46,13 @@ class FileStore(object):
         if os.path.isfile(filename):
             os.remove(filename)
         file = open(filename, 'w')
-        if cleanpass:
+        if cleanpass and isxml:
+            content = provider.remove_passwords_from_xml(content)
+        elif cleanpass:
             content = provider.remove_passwords_from_config(content)
-        if cleandesc:
+        if cleandesc and isxml:
+            content = provider.remove_descriptions_from_xml(content)
+        elif cleandesc:
             content = provider.remove_descriptions_from_config(content)
         file.write(content)
         file.close()

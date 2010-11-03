@@ -15,8 +15,10 @@
 import re
 from providers            import Provider
 from Exscript.util.match  import first_match
-from providers.junos.util import remove_passwords_from_config, \
-                                 remove_descriptions_from_config
+from providers.junos.util import remove_passwords_from_config,    \
+                                 remove_passwords_from_xml,       \
+                                 remove_descriptions_from_config, \
+                                 remove_descriptions_from_xml
 
 class JunOSProvider(Provider):
     def get_hostname(self, conn):
@@ -40,6 +42,12 @@ class JunOSProvider(Provider):
 
     def remove_descriptions_from_config(self, config):
         return remove_descriptions_from_config(config)
+
+    def remove_passwords_from_xml(self, xml):
+        return remove_passwords_from_xml(xml)
+
+    def remove_descriptions_from_xml(self, xml):
+        return remove_descriptions_from_xml(xml)
 
     def init(self, conn):
         # Init the connection.
