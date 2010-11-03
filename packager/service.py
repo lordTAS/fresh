@@ -17,13 +17,13 @@ from functools             import partial
 
 config = Config(__service__.config_file('config.xml'))
 
-def run(service, order):
+def run(order):
     packager = config.get_packager()
     order.set_description(packager.describe())
-    service.set_order_status(order, 'running')
+    __service__.set_order_status(order, 'running')
     packager.run(order)
 
-def check(service, order):
+def check(order):
     order.set_description('Export to a directory or package')
     hosts = order.get_hosts()
     if not hosts:
@@ -33,7 +33,7 @@ def check(service, order):
             return False
     return True
 
-def enter(service, order):
-    callback = partial(run, service, order)
-    service.enqueue(order, callback, 'update')
-    service.set_order_status(order, 'queued')
+def enter(order):
+    callback = partial(run, order)
+    __service__.enqueue(order, callback, 'update')
+    __service__.set_order_status(order, 'queued')

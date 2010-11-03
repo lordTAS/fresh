@@ -19,8 +19,8 @@ from functools         import partial
 config = Config(__service__.config_file('config.xml'))
 seeddb = config.get_seeddb()
 
-def run(service, order):
-    service.set_order_status(order, 'running')
+def run(order):
+    __service__.set_order_status(order, 'running')
     sec   = timedelta(seconds = 1)
     start = datetime.utcnow().replace(microsecond = 0) - sec
 
@@ -37,7 +37,7 @@ def run(service, order):
     # Get rid of all hosts that are no longer known.
     seeddb.delete_old_hosts(start)
 
-def check(service, order):
+def check(order):
     order.set_description('Update the host database')
     hosts = order.get_hosts()
     if not hosts:
@@ -51,7 +51,7 @@ def check(service, order):
             return False
     return True
 
-def enter(service, order):
-    callback = partial(run, service, order)
-    service.enqueue(order, callback, 'update')
-    service.set_order_status(order, 'queued')
+def enter(order):
+    callback = partial(run, order)
+    __service__.enqueue(order, callback, 'update')
+    __service__.set_order_status(order, 'queued')
