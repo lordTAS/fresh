@@ -26,6 +26,38 @@ class IOSXRProvider(Provider):
         host.set('__cfg_hostname__', hostname)
         return hostname
 
+    def remove_passwords_from_config(self, config):
+        """
+        Redacts the following lines in a config::
+
+            enable secret 5 xxxxxxxxxxxxxxxxxxxxxxxxxxx
+            username NIC password 7 xxxxxxxxxxxxxxxxxxxxx
+             domain-password xxxxxx
+             area-password xxxxx
+             set community xxxxxxxxx xxxxxxxxx
+             snmp-server community xxxxxx RO 10
+             snmp-server community xxxxxxxxxxxxxxxxxxx view writeNet RW 12
+             snmp-server host 153.17.105.9 xxxxxxxx
+             password 7 xxxxxxxxxxxxxxxxx
+             tacacs-server key xxxxxxxxxxxxxxxxxxxxxxxxx
+             radius-server key xxxxxxxxxxxxxxxxxxxxxxxxx
+        """
+        patterns = (re.compile(r'(.*username .+ password) (.+)'),
+                    re.compile(r'(.*password (encrypted|\d+)) (.+)'),
+                    re.compile(r'(.*\w+-server key) (.+)'),
+                    re.compile(r'(.*enable secret \d+) (.+)'),
+                    re.compile(r'(.*set community) (.+)'),
+                    re.compile(r'(.*snmp-server community) (.+)'),
+                    re.compile(r'(.*snmp-server host \S+) (.+)'),
+                    re.compile(r'(.*(area|lsp|domain)-password) (.+)'))
+
+        lines = []
+        for line in config.split('\n'):
+            for regex in patterns:
+                line = regex.sub(r'\1 REMOVED', line)
+            lines.append(line)
+        return '\n'.join(lines)
+
     def init(self, conn):
         # Init the connection.
         conn.execute('terminal len 0')

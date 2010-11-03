@@ -45,4 +45,4 @@ class GelatinProcessor(object):
         with self.conv_locks[syntax]:
             result = generate_string(converter, conn.response, self.format)
 
-        provider.store.store(conn, outfile, result)
+        provider.store.store(provider, conn, outfile, result)

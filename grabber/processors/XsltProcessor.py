@@ -64,4 +64,4 @@ class XsltProcessor(object):
             schema.assertValid(result)
 
         # Write.
-        provider.store.store(conn, outfile, str(result))
+        provider.store.store(provider, conn, outfile, str(result))

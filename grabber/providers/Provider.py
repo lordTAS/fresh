@@ -59,11 +59,17 @@ class AutoAuthorize(Action):
 
 class Store(Action):
     def __init__(self, provider, xml):
-        self.filename = xml.get('filename')
-        self.store    = provider.store
+        self.provider  = provider
+        self.filename  = xml.get('filename')
+        self.store     = provider.store
+        self.cleanpass = bool(int(xml.get('remove-passwords', False)))
 
     def do(self, conn):
-        self.store.store(conn, self.filename, conn.response)
+        self.store.store(self.provider,
+                         conn,
+                         self.filename,
+                         conn.response,
+                         cleanpass = self.cleanpass)
 
 class Execute(Action):
     def __init__(self, provider, xml):
