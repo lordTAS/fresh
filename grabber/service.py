@@ -21,6 +21,8 @@ grabber = config.get_grabber()
 def run(conn, service, order, logger):
     host = conn.get_host()
     task = host.get('__task__')
+    task.set_logfile(host.get_logname())
+    task.set_tracefile(host.get_logname() + '.error')
     task.set_status('in-progress')
     service.save_task(order, task)
 
