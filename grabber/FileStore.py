@@ -28,7 +28,13 @@ class FileStore(object):
             return os.path.join(host_dir, filename)
         return host_dir
 
-    def store(self, provider, conn, filename, content, cleanpass = False):
+    def store(self,
+              provider,
+              conn,
+              filename,
+              content,
+              cleanpass = False,
+              cleandesc = False):
         host_dir = self.get_path(conn)
         filename = self.get_path(conn, filename)
 
@@ -40,9 +46,10 @@ class FileStore(object):
             os.remove(filename)
         file = open(filename, 'w')
         if cleanpass:
-            file.write(provider.remove_passwords_from_config(content))
-        else:
-            file.write(content)
+            content = provider.remove_passwords_from_config(content)
+        if cleandesc:
+            content = provider.remove_descriptions_from_config(content)
+        file.write(content)
         file.close()
         return filename
 

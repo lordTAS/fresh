@@ -62,14 +62,16 @@ class Store(Action):
         self.provider  = provider
         self.filename  = xml.get('filename')
         self.store     = provider.store
-        self.cleanpass = bool(int(xml.get('remove-passwords', False)))
+        self.cleanpass = bool(int(xml.get('remove-passwords',    False)))
+        self.cleandesc = bool(int(xml.get('remove-descriptions', False)))
 
     def do(self, conn):
         self.store.store(self.provider,
                          conn,
                          self.filename,
                          conn.response,
-                         cleanpass = self.cleanpass)
+                         cleanpass = self.cleanpass,
+                         cleandesc = self.cleandesc)
 
 class Execute(Action):
     def __init__(self, provider, xml):
