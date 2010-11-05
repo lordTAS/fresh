@@ -67,4 +67,8 @@ doc-publish:
 
 .PHONY : publish-local
 publish-local:
-	git push
+	rm -Rf /nmc/code/fresh/
+	mkdir -p /nmc/code/fresh/
+	cp -r * /nmc/code/fresh/
+	chgrp nipscript /nmc/code/fresh/
+	chgrp -R nipscript /nmc/code/fresh/
