@@ -70,5 +70,5 @@ publish-local:
 	rm -Rf /nmc/code/fresh/
 	mkdir -p /nmc/code/fresh/
 	cp -r * /nmc/code/fresh/
-	chgrp nipscript /nmc/code/fresh/
 	chgrp -R nipscript /nmc/code/fresh/
+	chmod -R a+rX,g+rwX /nmc/code/fresh/
