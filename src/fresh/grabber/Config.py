@@ -108,16 +108,11 @@ class Config(ConfigReader):
 
     def _init_providers(self):
         for element in self.cfgtree.iterfind('provider'):
-            name     = element.get('name')
-            filename = element.get('filename')
-            basename = os.path.basename(filename)
-            modname  = os.path.splitext(basename)[0]
-            if not filename.startswith('/'):
-                filename = os.path.join(__dirname__, filename)
-
+            name    = element.get('name')
+            modname = element.get('module')
             #print 'Loading provider "%s" (%s).' % (name, modname)
-            themodule            = imp.load_source(modname, filename)
-            theclass             = getattr(themodule, modname)
+            themodule            = __import__(modname, fromlist = [modname])
+            theclass             = themodule.provider
             self.providers[name] = theclass(element,
                                             self.processors,
                                             self.stores)
