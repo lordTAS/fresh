@@ -6,3 +6,9 @@ the following components:
   seed - update the list of hosts known to Fresh
   grabber - update the inventory for one or more hosts
   packager - export data that was collected by the grabber service
+
+= Links =
+
+Project page:
+
+   https://github.com/knipknap/fresh
