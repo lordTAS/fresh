@@ -70,11 +70,22 @@
         </xsl:otherwise>
       </xsl:choose>
     </type>
-    <xsl:if test="$diagSlot/main">
-      <part-number>
-        <xsl:value-of select="$diagSlot/main/partno"/>
-      </part-number>
-    </xsl:if>
+    <part-number>
+      <xsl:choose>
+        <xsl:when test="$diagSlot/main/partno">
+          <xsl:value-of select="$diagSlot/main/partno"/>
+        </xsl:when>
+        <xsl:when test="$diagSlot/pca/partno">
+            <xsl:value-of select="$diagSlot/pca/partno"/>
+        </xsl:when>
+        <xsl:when test="$diagSlot/partno">
+            <xsl:value-of select="$diagSlot/partno"/>
+        </xsl:when>
+        <xsl:otherwise>
+          <xsl:text>unknown</xsl:text>
+        </xsl:otherwise>
+      </xsl:choose>
+    </part-number>
     <serial-number>
       <xsl:value-of select="serialno"/>
     </serial-number>
