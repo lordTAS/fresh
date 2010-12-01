@@ -160,6 +160,8 @@ grammar bgp_af_statements(default):
         out.add('$0')
     match 'send-community-ebgp' nl:
         out.add('$0')
+    match 'send-extended-community-ebgp' nl:
+        out.add('$0')
     match 'site-of-origin' fs nows nl:
         out.add('$0', '$2')
     match 'soft-reconfiguration' fs word nl:
