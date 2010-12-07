@@ -12,6 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+from Exscriptd.xml         import get_hosts_from_etree
 from fresh.packager.Config import Config
 from functools             import partial
 
@@ -25,7 +26,7 @@ def run(order):
 
 def check(order):
     order.set_description('Export to a directory or package')
-    hosts = order.get_hosts()
+    hosts = get_hosts_from_etree(order.xml)
     if not hosts:
         return False
     for host in hosts:

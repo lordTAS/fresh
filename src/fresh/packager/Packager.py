@@ -12,9 +12,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-import os, tarfile
-from tempfile import mkdtemp
-from shutil   import move, rmtree
+import os
+import tarfile
+from tempfile      import mkdtemp
+from shutil        import move, rmtree
+from Exscriptd.xml import get_hosts_from_etree
 
 class Packager(object):
     def __init__(self,
@@ -75,7 +77,7 @@ class Packager(object):
     def run(self, order):
         tmp_dir = mkdtemp()
 
-        for host in order.get_hosts():
+        for host in get_hosts_from_etree(order.xml):
             seedhost = self.get_seedhost_from_name(host.get_name())
             address  = seedhost.get_address()
             hostname = seedhost.get_name()

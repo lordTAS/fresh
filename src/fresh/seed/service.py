@@ -13,6 +13,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 from datetime          import datetime, timedelta
+from Exscriptd.xml     import get_hosts_from_etree
 from fresh.seed.Config import Config
 from functools         import partial
 
@@ -26,20 +27,21 @@ def run(order):
 
     # Variables in an order are always lists; expand those into
     # strings.
-    for host in order.get_hosts():
+    hosts = get_hosts_from_etree(order.xml)
+    for host in hosts:
         for key, value in host.get_all().iteritems():
             host.set(key, value[0])
 
     # Import the hosts, while preserving the values in other columns.
     fields = ('address', 'name', 'path', 'country', 'city')
-    seeddb.save_host(order.get_hosts(), fields)
+    seeddb.save_host(hosts, fields)
 
     # Get rid of all hosts that are no longer known.
     seeddb.delete_old_hosts(start)
 
 def check(order):
     order.set_description('Update the host database')
-    hosts = order.get_hosts()
+    hosts = get_hosts_from_etree(order.xml)
     if not hosts:
         return False
     for host in hosts:
