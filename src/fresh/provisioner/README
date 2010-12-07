@@ -1,0 +1,5 @@
+Provisioner takes an order containing a script, and executes the given
+script on a list of hosts.
+
+Provisioner is implemented as a service that is loaded by an Exscript
+daemon.

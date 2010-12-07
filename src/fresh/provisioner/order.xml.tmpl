@@ -1,0 +1,23 @@
+<xml>
+  <order service="provisioner">
+    <host-list>
+      <host address="s-ea1.nms">
+        <argument-list>
+          <variable name="interface">POS0/0/1/0</variable>
+        </argument-list>
+      </host>
+      <host address="f-sa1.nms">
+        <argument-list>
+          <variable name="interface">POS0/0/2/0</variable>
+        </argument-list>
+      </host>
+    </host-list>
+    <script type="text/exscript" name="whatever">
+      {fail "unsupported OS" if connection.guess_os() is not "ios_xr"}
+      {connection.autoinit()}
+      {try}show interface $interface{end}
+      show interface brief
+    </script>
+  </order>
+</xml>
+
