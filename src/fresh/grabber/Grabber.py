@@ -83,6 +83,7 @@ class Grabber(object):
         logger.info('%s: Starting.' % label)
         provider.start(conn, update_progress)
         logger.info('%s: Completed.' % label)
+        conn.close(True)
 
         # Save the time it took to complete the host.
         host.set('duration', time.time() - start)

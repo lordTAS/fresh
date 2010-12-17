@@ -23,3 +23,4 @@ class Provisioner(object):
         conn.open()
         conn.authenticate(wait = True)
         template.eval(conn, script, **host.get_all())
+        conn.close(True)
