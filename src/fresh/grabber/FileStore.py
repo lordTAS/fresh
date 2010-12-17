@@ -43,9 +43,6 @@ class FileStore(object):
             os.makedirs(host_dir)
 
         # Save to disk.
-        if os.path.isfile(filename):
-            os.remove(filename)
-        file = open(filename, 'w')
         if cleanpass and isxml:
             content = provider.remove_passwords_from_xml(content)
         elif cleanpass:
@@ -54,9 +51,12 @@ class FileStore(object):
             content = provider.remove_descriptions_from_xml(content)
         elif cleandesc:
             content = provider.remove_descriptions_from_config(content)
-        file.write(content)
-        file.close()
+        if os.path.isfile(filename):
+            os.remove(filename)
+        with open(filename, 'w') as file:
+            file.write(content)
         return filename
 
     def get(self, conn, filename):
-        return open(self.get_path(conn, filename)).read()
+        with open(self.get_path(conn, filename)) as file:
+            return file.read()
