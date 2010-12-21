@@ -74,3 +74,4 @@ def enter(order):
                               bind(run, order, logger),
                               handle_duplicates = True)
     __service__.set_order_status(order, 'queued')
+    return True

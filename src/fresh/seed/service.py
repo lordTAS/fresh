@@ -57,3 +57,4 @@ def enter(order):
     callback = partial(run, order)
     __service__.enqueue(order, callback, 'update')
     __service__.set_order_status(order, 'queued')
+    return True
