@@ -761,9 +761,14 @@ grammar logging_statements(default):
         out.add('$0', '$2')
     match 'severity debugging' nl:
         out.add('$0')
+    match 'pseudowire' nl:
+        out.add('$0')
     do.return()
 
 grammar logging(default):
+    match 'logging' nl:
+        out.enter('logging')
+        logging_statements()
     match 'logging archive' nl:
         out.enter('logging/option?string="archive"')
         logging_statements()

@@ -119,6 +119,8 @@ grammar interface_block(default):
         out.add('$0', '$4')
         out.add('$7', '$11')
         out.add('real-$7', '$15')
+    match 'Hardware' ws 'is' ws /[\w ]+/ ',' nl:
+        out.add('$0', '$4')
     match 'Description' ':' ws nonl nl:
         out.add('$0', '$3')
     match 'Layer 2 Transport' ws 'Mode' nl:
