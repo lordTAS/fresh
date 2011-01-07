@@ -63,15 +63,17 @@ class Grabber(object):
         host.set('os', os)
         update_progress()
 
-        # Find and init the provider.
-        provider    = self.providers.get(os)
-        cfghostname = provider.get_hostname(conn)
-        logger.info('%s: Prompt hostname is %s.' % (label, cfghostname))
+        # Find and the provider.
+        provider = self.providers.get(os)
         if provider is None:
             logger.info('%s: Detected OS is not supported.' % label)
             raise Exception('Error: No provider for %s found.' % repr(os))
-        logger.info('%s: Initializing command line.' % label)
+
+        # Init the command line.
+        cfghostname = provider.get_hostname(conn)
+        logger.info('%s: Prompt hostname is %s.' % (label, cfghostname))
         provider.init(conn)
+        logger.info('%s: Command line initialized.' % label)
         update_progress()
 
         # Init default variables.
