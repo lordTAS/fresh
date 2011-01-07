@@ -12,6 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+from functools               import partial
 from Exscriptd.xml           import get_hosts_from_etree
 from fresh.grabber.Config    import Config
 from Exscript.util.decorator import bind
@@ -39,14 +40,45 @@ def run(conn, order, logger):
     finally:
         __service__.save_task(order, task)
 
+def flush(order, task, logger):
+    task.set_logfile('flush.log')
+    task.set_tracefile('flush.log.error')
+    task.set_status('in-progress')
+    __service__.save_task(order, task)
+
+    try:
+        grabber.flush(__service__, order, logger)
+    except Exception, e:
+        logger.info('flush: Exception: %s' % repr(str(e)))
+        task.close('error')
+        raise
+    else:
+        task.completed()
+    finally:
+        __service__.save_task(order, task)
+
 def check(order):
     hosts = get_hosts_from_etree(order.xml)
+
     if not hosts:
-        return False
-    if len(hosts) == 1:
-        order.set_description('Update ' + hosts[0].get_name())
+        descr = ''
+    elif len(hosts) == 1:
+        descr = 'Update ' + hosts[0].get_name()
     else:
-        order.set_description('Update %d hosts' % len(hosts))
+        descr = 'Update %d hosts' % len(hosts)
+
+    if order.xml.find('flush') is not None:
+        if descr:
+            descr += ' and delete deactivated ones'
+        else:
+            descr = 'Delete deactivated hosts'
+
+    if not descr:
+        descr = 'Order did not contain any hosts'
+        order.set_description(descr)
+        return False
+
+    order.set_description(descr)
     return True
 
 def enter(order):
@@ -73,5 +105,12 @@ def enter(order):
                               hosts,
                               bind(run, order, logger),
                               handle_duplicates = True)
+
+    if order.xml.find('flush') is not None:
+        task = __service__.create_task(order, 'Delete obsolete hosts')
+        __service__.enqueue(order,
+                            partial(flush, order, task, logger),
+                            'flush')
+
     __service__.set_order_status(order, 'queued')
     return True

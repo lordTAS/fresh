@@ -90,3 +90,11 @@ class Grabber(object):
         # Save the time it took to complete the host.
         host.set('duration', time.time() - start)
         self.save_seedhost(host)
+
+    def flush(self, service, order, logger):
+        #FIXME: Get a list of existing hosts from the seeddb.
+
+        #FIXME: call FileStore.flush(hosts)
+        #FIXME: call ExistDBMetadataStore.flush(hosts)
+        #FIXME: call ExistDBStore.flush(hosts)
+        pass
