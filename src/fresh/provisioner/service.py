@@ -16,7 +16,7 @@ from Exscriptd.xml            import get_hosts_from_etree
 from fresh.provisioner.Config import Config
 from Exscript.util.decorator  import bind
 
-config = Config(__service__.config_file('config.xml'))
+config = __service__.config('config.xml', Config)
 prov   = config.get_provisioner()
 
 def run(conn, order, script):

@@ -17,8 +17,8 @@ from Exscriptd   import ConfigReader
 from Provisioner import Provisioner
 
 class Config(ConfigReader):
-    def __init__(self, filename):
-        ConfigReader.__init__(self, filename)
+    def __init__(self, filename, parent):
+        ConfigReader.__init__(self, filename, parent = parent)
         self.provisioner = None
         self._init()
 

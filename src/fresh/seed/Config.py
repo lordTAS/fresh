@@ -21,22 +21,20 @@ from sqlalchemy        import create_engine
 from Exscriptd         import ConfigReader
 from fresh.seed.SeedDB import SeedDB
 
+def get_seeddb_from_name(config, name):
+    element = config._findelem('database[@name="%s"]' % name)
+    dbn     = element.find('dbn').text
+    engine  = create_engine(dbn)
+    db      = SeedDB(engine)
+    db.install()
+    return db
+
 class Config(ConfigReader):
-    def __init__(self, filename):
-        ConfigReader.__init__(self, filename)
+    def __init__(self, filename, parent):
+        ConfigReader.__init__(self, filename, parent = parent)
         element     = self.cfgtree.find('seed')
         db_name     = element.find('database').text
-        self.seeddb = self.init_database_from_name(db_name)
-
-    def init_database_from_name(self, name):
-        element = self.cfgtree.find('database[@name="%s"]' % name)
-        dbn     = element.find('dbn').text
-        #print 'Creating database connection for', dbn
-        engine  = create_engine(dbn)
-        db      = SeedDB(engine)
-        #print 'Initializing database tables...'
-        db.install()
-        return db
+        self.seeddb = get_seeddb_from_name(self, db_name)
 
     def get_seeddb(self):
         return self.seeddb

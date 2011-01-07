@@ -17,7 +17,7 @@ from Exscriptd.xml     import get_hosts_from_etree
 from fresh.seed.Config import Config
 from functools         import partial
 
-config = Config(__service__.config_file('config.xml'))
+config = __service__.config('config.xml', Config)
 seeddb = config.get_seeddb()
 
 def run(order):

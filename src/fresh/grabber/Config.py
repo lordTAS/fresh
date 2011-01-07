@@ -13,36 +13,29 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import os, re, imp
-from sqlalchemy import create_engine
-from fresh.seed import SeedDB
-from lxml       import etree
-from pyexist    import ExistDB
-from Exscriptd  import ConfigReader
-from Grabber    import Grabber
-from FileStore  import FileStore
-from processors import GelatinProcessor, \
-                       XsltProcessor,    \
-                       ExistDBStore,     \
-                       ExistDBMetadataStore
+from sqlalchemy        import create_engine
+from fresh.seed.Config import get_seeddb_from_name
+from lxml              import etree
+from pyexist           import ExistDB
+from Exscriptd         import ConfigReader
+from Grabber           import Grabber
+from FileStore         import FileStore
+from processors        import GelatinProcessor, \
+                              XsltProcessor,    \
+                              ExistDBStore,     \
+                              ExistDBMetadataStore
 
 __dirname__ = os.path.dirname(__file__)
 
 class Config(ConfigReader):
-    def __init__(self, filename):
-        ConfigReader.__init__(self, filename)
+    def __init__(self, filename, parent):
+        ConfigReader.__init__(self, filename, parent = parent)
         self.providers  = {}
         self.stores     = {}
         self.processors = {}
         self.exist_dbs  = {}
         self.grabber    = None
         self._init()
-
-    def init_database_from_name(self, name):
-        element = self.cfgtree.find('database[@name="%s"]' % name)
-        dbn     = element.find('dbn').text
-        #print 'Creating database connection for', dbn
-        engine  = create_engine(dbn)
-        return SeedDB(engine)
 
     def _init_file_stores(self):
         for element in self.cfgtree.iterfind('file-store'):
@@ -126,7 +119,7 @@ class Config(ConfigReader):
         self._init_providers()
         element      = self.cfgtree.find('grabber')
         seeddb_name  = element.find('seeddb').text
-        seeddb       = self.init_database_from_name(seeddb_name)
+        seeddb       = get_seeddb_from_name(self, seeddb_name)
         self.grabber = Grabber(seeddb, self.processors, self.providers)
 
     def get_grabber(self):

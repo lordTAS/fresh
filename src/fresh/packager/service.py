@@ -16,7 +16,7 @@ from Exscriptd.xml         import get_hosts_from_etree
 from fresh.packager.Config import Config
 from functools             import partial
 
-config = Config(__service__.config_file('config.xml'))
+config = __service__.config('config.xml', Config)
 
 def run(order):
     packager = config.get_packager()

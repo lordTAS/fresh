@@ -19,27 +19,16 @@ import base64
 from sqlalchemy              import create_engine
 from Exscript.util.mail      import Mail
 from Exscriptd               import ConfigReader
-from fresh.seed.SeedDB       import SeedDB
+from fresh.seed.Config       import get_seeddb_from_name
 from fresh.packager.Profile  import Profile
 from fresh.packager.Packager import Packager
 from fresh.packager.Mailer   import Mailer
 from fresh.packager.FTPPush  import FTPPush
 
 class Config(ConfigReader):
-    def __init__(self, filename):
-        ConfigReader.__init__(self, filename)
-        element       = self.cfgtree.find('seed')
+    def __init__(self, filename, parent):
+        ConfigReader.__init__(self, filename, parent = parent)
         self.profiles = {}
-
-    def _init_seeddb_from_name(self, name):
-        element = self.cfgtree.find('database[@name="%s"]' % name)
-        dbn     = element.find('dbn').text
-        #print 'Creating database connection for', dbn
-        engine  = create_engine(dbn)
-        db      = SeedDB(engine)
-        #print 'Initializing database tables...'
-        db.install()
-        return db
 
     def init_profile_from_name(self, name):
         element = self.cfgtree.find('profile[@name="%s"]' % name)
@@ -93,7 +82,7 @@ class Config(ConfigReader):
         format    = element.find('format').text
         overwrite = element.find('overwrite') is not None
         dbname    = element.find('database').text
-        db        = self._init_seeddb_from_name(dbname)
+        db        = get_seeddb_from_name(self, dbname)
         profiles  = []
         for profile_elem in element.iterfind('profile'):
             profile_name = profile_elem.text
