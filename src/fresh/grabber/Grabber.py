@@ -13,6 +13,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import time
+from itertools import chain
 
 class Grabber(object):
     def __init__(self, seeddb, processors, stores, providers):
@@ -93,9 +94,19 @@ class Grabber(object):
         self.save_seedhost(host)
 
     def flush(self, service, order, logger):
-        #FIXME: Get a list of existing hosts from the seeddb.
+        # Pass each deleted host to it's provider to clean up the data.
+        for host in self.seeddb.get_hosts(deleted = True):
+            label = self.get_label_from_host(host)
+            logger.info(label + ': found dead')
+            host.set('__label__',  label)
+            host.set('__logger__', logger)
 
-        #FIXME: call FileStore.flush(hosts)
-        #FIXME: call ExistDBMetadataStore.flush(hosts)
-        #FIXME: call ExistDBStore.flush(hosts)
-        pass
+            os       = host.get('os')
+            provider = self.providers.get(os)
+            if provider is None:
+                logger.info(label + ': no provider found, cleanup skipped')
+                continue
+            provider.delete(host)
+
+        # Now drop the obsolete hosts from the seed database.
+        self.seeddb.delete_host(deleted = True)

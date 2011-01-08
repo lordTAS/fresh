@@ -20,5 +20,5 @@ class Processor(object):
     def start(self, provider, conn, **kwargs):
         pass
 
-    def delete(self, host, logger):
+    def delete(self, provider, host, **kwargs):
         pass

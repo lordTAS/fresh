@@ -18,19 +18,29 @@ class ExistDBStore(Processor):
     def __init__(self, db):
         self.db = db
 
-    def _replace_vars(self, conn, string):
-        host        = conn.get_host()
-        address     = host.get_address()
-        hostname    = host.get_name()
-        cfghostname = host.get('__cfg_hostname__')
-        string      = string.replace('{address}',     address)
-        string      = string.replace('{hostname}',    hostname)
-        string      = string.replace('{cfghostname}', cfghostname)
+    def _replace_vars(self, host, string):
+        address  = host.get_address()
+        hostname = host.get_name()
+        string   = string.replace('{address}',  address)
+        string   = string.replace('{hostname}', hostname)
         return string
 
     def start(self, provider, conn, **kwargs):
+        host     = conn.get_host()
         filename = kwargs.get('filename')
         document = kwargs.get('document')
-        document = self._replace_vars(conn, document)
+        document = self._replace_vars(host, document)
         content  = provider.store.get(conn, filename)
         self.db.store(document, content)
+
+    def delete(self, provider, host, **kwargs):
+        label    = host.get('__label__')
+        logger   = host.get('__logger__')
+        document = kwargs.get('document')
+        document = self._replace_vars(host, document)
+        try:
+            self.db.delete(document)
+        except Exception, e:
+            logger.error('%s: error during delete: %s' % (label, str(e)))
+        else:
+            logger.info('%s: deleted %s' % (label, document))

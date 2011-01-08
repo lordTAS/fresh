@@ -13,6 +13,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import os
+import shutil
 
 class FileStore(object):
     def __init__(self, base_dir):
@@ -60,3 +61,16 @@ class FileStore(object):
     def get(self, conn, filename):
         with open(self.get_path(conn, filename)) as file:
             return file.read()
+
+    def delete(self, host):
+        label    = host.get('__label__')
+        logger   = host.get('__logger__')
+        path     = host.get('path')
+        host_dir = os.path.join(self.base_dir, path)
+        if os.path.isdir(host_dir):
+            try:
+                shutil.rmtree(host_dir)
+            except Exception, e:
+                logger.error('%s: FileStore.delete(): %s' % (label, str(e)))
+            else:
+                logger.info('%s: FileStore: deleted %s' % (label, host_dir))

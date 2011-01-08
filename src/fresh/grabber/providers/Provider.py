@@ -20,11 +20,16 @@ class Action(object):
     def do(self, conn):
         raise NotImplementedError()
 
-    def log(self, conn, msg, level = logging.INFO):
-        host   = conn.get_host()
+    def cleanup(self, host):
+        pass
+
+    def hlog(self, host, msg, level = logging.INFO):
         label  = host.get('__label__')
         logger = host.get('__logger__')
         logger.log(level, label + ':' + msg)
+
+    def log(self, conn, msg, level = logging.INFO):
+        self.hlog(conn.get_host(), msg, level)
 
     def dbg(self, conn, msg):
         self.log(conn, msg, logging.DEBUG)
@@ -42,6 +47,12 @@ class PostProcess(Action):
         args = repr(self.args)
         self.dbg(conn, 'running post-processor %s with args %s' % (name, args))
         self.processor.start(self.provider, conn, **self.args)
+
+    def cleanup(self, host):
+        name = repr(self.processor_name)
+        args = repr(self.args)
+        self.hlog(host, 'running %s.delete() with args %s' % (name, args))
+        self.processor.delete(self.provider, host, **self.args)
 
 class Authenticate(Action):
     def __init__(self, provider, xml):
@@ -72,6 +83,9 @@ class Store(Action):
                          conn.response,
                          cleanpass = self.cleanpass,
                          cleandesc = self.cleandesc)
+
+    def cleanup(self, host):
+        self.store.delete(host)
 
 class Execute(Action):
     def __init__(self, provider, xml):
@@ -124,6 +138,10 @@ class Execute(Action):
         for child in self.children:
             child.do(conn)
 
+    def cleanup(self, host):
+        for child in self.children:
+            child.cleanup(host)
+
 class Provider(object):
     def __init__(self, xml, processors, stores):
         self.name       = xml.get('name')
@@ -153,3 +171,7 @@ class Provider(object):
         for task in self.tasks:
             task.do(conn)
             update_progress_func()
+
+    def delete(self, host):
+        for task in self.tasks:
+            task.cleanup(host)
