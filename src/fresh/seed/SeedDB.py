@@ -63,6 +63,7 @@ class SeedDB(object):
             sa.Column('city',      sa.String(50)),
             sa.Column('os',        sa.String(50)),
             sa.Column('duration',  sa.Float),
+            sa.Column('deleted',   sa.Boolean, default = False),
             sa.Column('timestamp',
                       sa.DateTime,
                       default  = sa.func.now(),
@@ -140,7 +141,8 @@ class SeedDB(object):
                    country  = host.get('country'),
                    city     = host.get('city'),
                    os       = host.get('os'),
-                   duration = host.get('duration'))
+                   duration = host.get('duration'),
+                   deleted  = host.get('deleted'))
         if fields is None:
             return all
         return dict((k, v) for (k, v) in all.iteritems() if k in fields)
@@ -192,9 +194,10 @@ class SeedDB(object):
         host.set('city',     row[tbl_h.c.city])
         host.set('os',       row[tbl_h.c.os])
         host.set('duration', row[tbl_h.c.duration])
+        host.set('deleted',  row[tbl_h.c.deleted])
         return host
 
-    def __get_hosts_from_query(self, query):
+    def __get_hosts_from_query(self, query, filter = None):
         """
         Returns a list of hosts.
         """
@@ -205,7 +208,8 @@ class SeedDB(object):
         host_list = []
         for row in result:
             host = self.__get_host_from_row(row)
-            host_list.append(host)
+            if filter is None or filter(host) is True:
+                host_list.append(host)
 
         return host_list
 
@@ -219,7 +223,8 @@ class SeedDB(object):
                       'country',
                       'city',
                       'os',
-                      'duration'):
+                      'duration',
+                      'deleted'):
             if kwargs.has_key(field):
                 cond = None
                 for value in to_list(kwargs.get(field)):
@@ -244,7 +249,7 @@ class SeedDB(object):
         if len(result) == 0:
             return None
         elif len(result) > 1:
-            raise Exception('Too many results')
+            raise ValueError('Too many results')
         return result[0]
 
     def get_hosts(self, offset = 0, limit = 0, **kwargs):
@@ -263,6 +268,7 @@ class SeedDB(object):
                          - country - the country (str)
                          - city - the city (str)
                          - os - the operation system (str)
+                         - deleted - the 'deleted' flag (bool)
                        All values may also be lists (logical OR).
         @rtype:  list[Host]
         @return: The list of hosts.
@@ -271,6 +277,24 @@ class SeedDB(object):
         where  = self.__get_conditions(**kwargs)
         select = tbl_h.select(where)
         return self.__get_hosts_from_query(select)
+
+    def get_hosts_from_filter(self, filter, **kwargs):
+        """
+        Iterates over all hosts, passing them to the given callback function.
+        If the callback returns True, the host is included in the returned
+        list.
+
+        @type  filter: function
+        @param filter: A callback function that is called once for each host.
+        @type  kwargs: dict
+        @param kwargs: See get_hosts()
+        @rtype:  list[Host]
+        @return: The list of hosts for which the callback returned True.
+        """
+        tbl_h  = self._table_map['host']
+        where  = self.__get_conditions(**kwargs)
+        select = tbl_h.select(where)
+        return self.__get_hosts_from_query(select, filter = filter)
 
     def add_host(self, hosts):
         """
@@ -316,14 +340,14 @@ class SeedDB(object):
         delete = self._table_map['host'].delete(where)
         result = delete.execute()
 
-    def delete_old_hosts(self, timestamp):
+    def mark_old_hosts(self, timestamp):
         """
-        Deletes all hosts that have a timestamp that is smaller than
-        the given value.
+        Marks all hosts that have a timestamp that is smaller than
+        the given value as deleted.
 
         @type  timestamp: datetime.datetime
         @param timestamp: A Python datetime object.
         """
         tbl_h  = self._table_map['host']
-        delete = tbl_h.delete(tbl_h.c.timestamp < timestamp)
-        result = delete.execute()
+        query  = tbl_h.update(tbl_h.c.timestamp < timestamp)
+        result = query.execute(deleted = True)

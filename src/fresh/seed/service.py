@@ -36,8 +36,8 @@ def run(order):
     fields = ('address', 'name', 'path', 'country', 'city')
     seeddb.save_host(hosts, fields)
 
-    # Get rid of all hosts that are no longer known.
-    seeddb.delete_old_hosts(start)
+    # Mark all hosts that are no longer known as 'deleted'.
+    seeddb.mark_old_hosts(start)
 
 def check(order):
     order.set_description('Update the host database')
