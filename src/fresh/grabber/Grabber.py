@@ -15,9 +15,10 @@
 import time
 
 class Grabber(object):
-    def __init__(self, seeddb, processors, providers):
+    def __init__(self, seeddb, processors, stores, providers):
         self.seeddb     = seeddb
         self.processors = processors
+        self.stores     = stores
         self.providers  = providers
 
     def get_seedhost_from_name(self, name):

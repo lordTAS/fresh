@@ -120,7 +120,10 @@ class Config(ConfigReader):
         element      = self.cfgtree.find('grabber')
         seeddb_name  = element.find('seeddb').text
         seeddb       = get_seeddb_from_name(self, seeddb_name)
-        self.grabber = Grabber(seeddb, self.processors, self.providers)
+        self.grabber = Grabber(seeddb,
+                               self.processors,
+                               self.stores,
+                               self.providers)
 
     def get_grabber(self):
         return self.grabber
