@@ -72,8 +72,9 @@ return
 class ExistDBMetadataStore(ExistDBStore):
     def start(self, provider, conn, **kwargs):
         # Get the collection and document name.
+        host       = conn.get_host()
         document   = kwargs.get('document')
-        document   = self._replace_vars(conn, document)
+        document   = self._replace_vars(host, document)
         collection = 'ips'  #FIXME: well this sucks
         if '/' in document:
             path, document = document.rsplit('/', 1)
