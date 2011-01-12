@@ -56,8 +56,8 @@ class SeedDB(object):
         """
         pfx = self._table_prefix
         self.__add_table(sa.Table(pfx + 'host', self.metadata,
-            sa.Column('address',   sa.String(50), primary_key = True),
-            sa.Column('name',      sa.String(50)),
+            sa.Column('name',      sa.String(50), primary_key = True),
+            sa.Column('address',   sa.String(50)),
             sa.Column('path',      sa.String(50)),
             sa.Column('country',   sa.String(50)),
             sa.Column('city',      sa.String(50)),
@@ -168,7 +168,7 @@ class SeedDB(object):
 
         # Check if the host already exists.
         table   = self._table_map['host']
-        where   = sa.and_(table.c.address == host.get_address())
+        where   = sa.and_(table.c.name == host.get_name())
         thehost = table.select(where).execute().fetchone()
         fields  = self.__host2dict(host, fields)
 
@@ -180,15 +180,15 @@ class SeedDB(object):
         else:
             query   = table.update(where)
             result  = query.execute(**fields)
-            host_id = thehost[table.c.address]
+            host_id = thehost[table.c.name]
 
         return host_id
 
     def __get_host_from_row(self, row):
         assert row is not None
         tbl_h = self._table_map['host']
-        host  = Host(row[tbl_h.c.address])
-        host.set_name(row[tbl_h.c.name])
+        host  = Host(row[tbl_h.c.name])
+        host.set_address(row[tbl_h.c.address])
         host.set('path',     row[tbl_h.c.path])
         host.set('country',  row[tbl_h.c.country])
         host.set('city',     row[tbl_h.c.city])
