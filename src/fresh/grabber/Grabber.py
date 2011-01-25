@@ -55,7 +55,7 @@ class Grabber(object):
         # Open the connection.
         logger.info('%s: Connecting...' % label)
         conn.open()
-        conn.authenticate(wait = True)
+        conn.login()
         logger.info('%s: Authentication succeeded.' % label)
         update_progress()
 

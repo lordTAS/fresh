@@ -54,19 +54,40 @@ class PostProcess(Action):
         self.hlog(host, 'running %s.delete() with args %s' % (name, args))
         self.processor.delete(self.provider, host, **self.args)
 
+class Login(Action):
+    def __init__(self, provider, xml):
+        self.flush = bool(xml.get('flush', True))
+
+    def do(self, conn):
+        conn.login(flush = self.flush)
+
 class Authenticate(Action):
     def __init__(self, provider, xml):
-        self.wait = bool(xml.get('wait', True))
+        self.flush = bool(xml.get('flush', True))
 
     def do(self, conn):
-        conn.authenticate(wait = self.wait)
+        conn.authenticate(flush = self.flush)
 
-class AutoAuthorize(Action):
+class AppAuthenticate(Action):
     def __init__(self, provider, xml):
-        self.wait = bool(xml.get('wait', True))
+        self.flush = bool(xml.get('flush', True))
 
     def do(self, conn):
-        conn.auto_authorize(wait = self.wait)
+        conn.app_authenticate(flush = self.flush)
+
+class AppAuthorize(Action):
+    def __init__(self, provider, xml):
+        self.flush = bool(xml.get('flush', True))
+
+    def do(self, conn):
+        conn.app_authorize(flush = self.flush)
+
+class AutoAppAuthorize(Action):
+    def __init__(self, provider, xml):
+        self.flush = bool(xml.get('flush', True))
+
+    def do(self, conn):
+        conn.auto_app_authorize(flush = self.flush)
 
 class Store(Action):
     def __init__(self, provider, xml):
@@ -151,10 +172,16 @@ class Provider(object):
         self.tasks      = []
 
         for element in xml:
-            if element.tag == 'authenticate':
+            if element.tag == 'login':
+                self.tasks.append(Login(self, element))
+            elif element.tag == 'authenticate':
                 self.tasks.append(Authenticate(self, element))
-            elif element.tag == 'auto_authorize':
-                self.tasks.append(AutoAuthorize(self, element))
+            elif element.tag == 'app-authenticate':
+                self.tasks.append(AppAuthenticate(self, element))
+            elif element.tag == 'app-authorize':
+                self.tasks.append(AppAuthorize(self, element))
+            elif element.tag == 'auto-app-authorize':
+                self.tasks.append(AutoAppAuthorize(self, element))
             elif element.tag == 'execute':
                 self.tasks.append(Execute(self, element))
             elif element.tag == 'post-process':

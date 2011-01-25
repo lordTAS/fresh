@@ -21,6 +21,6 @@ class Provisioner(object):
 
     def run(self, conn, service, order, host, script):
         conn.open()
-        conn.authenticate(wait = True)
+        conn.login()
         template.eval(conn, script, **host.get_all())
         conn.close(True)
