@@ -31,6 +31,16 @@ class Grabber(object):
     def get_label_from_host(self, host):
         return host.get_address() + '/' + host.get_name()
 
+    def get_provider_for_host(self, host):
+        vars = dict(os       = host.get('os'),
+                    hostname = host.get_name(),
+                    address  = host.get_address(),
+                    path     = host.get('path'))
+        for provider in self.providers:
+            if provider.test_condition(vars):
+                return provider
+        raise ValueError('no matching provider found for: ' + repr(vars))
+
     def grab(self, conn, service, order, logger):
         # Initial log message.
         host  = conn.get_host()
@@ -65,11 +75,9 @@ class Grabber(object):
         host.set('os', os)
         update_progress()
 
-        # Find and the provider.
-        provider = self.providers.get(os)
-        if provider is None:
-            logger.info('%s: Detected OS is not supported.' % label)
-            raise Exception('Error: No provider for %s found.' % repr(os))
+        # Find the provider.
+        provider = self.get_provider_for_host(host)
+        logger.info('%s: Selected provider is %s.' % (label, provider.name))
 
         # Init the command line.
         cfghostname = provider.get_hostname(conn)
@@ -101,9 +109,9 @@ class Grabber(object):
             host.set('__label__',  label)
             host.set('__logger__', logger)
 
-            os       = host.get('os')
-            provider = self.providers.get(os)
-            if provider is None:
+            try:
+                provider = self.get_provider_for_host(host)
+            except ValueError:
                 logger.info(label + ': no provider found, cleanup skipped')
                 continue
             provider.delete(host)

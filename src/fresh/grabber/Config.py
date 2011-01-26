@@ -30,7 +30,6 @@ __dirname__ = os.path.dirname(__file__)
 class Config(ConfigReader):
     def __init__(self, filename, parent):
         ConfigReader.__init__(self, filename, parent = parent)
-        self.providers  = {}
         self.stores     = {}
         self.processors = {}
         self.exist_dbs  = {}
@@ -99,16 +98,13 @@ class Config(ConfigReader):
             db     = self.init_existdb_from_name(dbname)
             self.processors[name] = ExistDBMetadataStore(db)
 
-    def _init_providers(self):
-        for element in self.cfgtree.iterfind('provider'):
-            name    = element.get('name')
-            modname = element.get('module')
-            #print 'Loading provider "%s" (%s).' % (name, modname)
-            themodule            = __import__(modname, fromlist = [modname])
-            theclass             = themodule.provider
-            self.providers[name] = theclass(element,
-                                            self.processors,
-                                            self.stores)
+    def _init_provider_from_name(self, name):
+        element = self.cfgtree.find('provider[@name="%s"]' % name)
+        modname = element.get('module')
+        #print 'Loading provider "%s" (%s).' % (name, modname)
+        themodule = __import__(modname, fromlist = [modname])
+        theclass  = themodule.provider
+        return theclass(element, self.processors, self.stores)
 
     def _init(self):
         self._init_file_stores()
@@ -116,14 +112,23 @@ class Config(ConfigReader):
         self._init_xsltproc()
         self._init_xmldb_store()
         self._init_xmldb_metadata()
-        self._init_providers()
-        element      = self.cfgtree.find('grabber')
-        seeddb_name  = element.find('seeddb').text
+
+        grabber_elem = self.cfgtree.find('grabber')
+        seeddb_name  = grabber_elem.find('seeddb').text
         seeddb       = get_seeddb_from_name(self, seeddb_name)
+        providers    = []
+        for provider_elem in grabber_elem.iterfind('provider'):
+            provider_name = provider_elem.text
+            provider      = self._init_provider_from_name(provider_name)
+            cond          = provider_elem.get('if')
+            if cond is not None:
+                provider.set_condition(cond)
+            providers.append(provider)
+
         self.grabber = Grabber(seeddb,
                                self.processors,
                                self.stores,
-                               self.providers)
+                               providers)
 
     def get_grabber(self):
         return self.grabber

@@ -498,8 +498,9 @@
   -->
   <grabber>
       <seeddb>seeddb</seeddb>
-      <provider name="ios"/>
-      <provider name="ios_xr"/>
+      <provider if="os == 'ios'">ios</provider>
+      <provider if="os == 'ios_xr'">ios_xr</provider>
+      <provider if="os == 'junos'">junos</provider>
   </grabber>
 
   <!--

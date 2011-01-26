@@ -26,7 +26,7 @@ class Action(object):
     def hlog(self, host, msg, level = logging.INFO):
         label  = host.get('__label__')
         logger = host.get('__logger__')
-        logger.log(level, label + ':' + msg)
+        logger.log(level, label + ': ' + msg)
 
     def log(self, conn, msg, level = logging.INFO):
         self.hlog(conn.get_host(), msg, level)
@@ -174,6 +174,7 @@ class Provider(object):
     def __init__(self, xml, processors, stores):
         self.name       = xml.get('name')
         store           = xml.get('store')
+        self.condition  = None
         self.processors = processors
         self.store      = stores[store]
         self.tasks      = []
@@ -199,6 +200,14 @@ class Provider(object):
                 pass
             else:
                 raise Exception('Invalid XML tag: %s' % element.tag)
+
+    def set_condition(self, cond):
+        self.condition = compile(cond, 'config', 'eval')
+
+    def test_condition(self, vars):
+        if not self.condition:
+            return True
+        return eval(self.condition, vars)
 
     def get_store(self):
         return self.store
