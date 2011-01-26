@@ -68,6 +68,13 @@ class Authenticate(Action):
     def do(self, conn):
         conn.authenticate(flush = self.flush)
 
+class ProtocolAuthenticate(Action):
+    def __init__(self, provider, xml):
+        pass
+
+    def do(self, conn):
+        conn.protocol_authenticate()
+
 class AppAuthenticate(Action):
     def __init__(self, provider, xml):
         self.flush = bool(xml.get('flush', True))
@@ -176,6 +183,8 @@ class Provider(object):
                 self.tasks.append(Login(self, element))
             elif element.tag == 'authenticate':
                 self.tasks.append(Authenticate(self, element))
+            elif element.tag == 'protocol-authenticate':
+                self.tasks.append(ProtocolAuthenticate(self, element))
             elif element.tag == 'app-authenticate':
                 self.tasks.append(AppAuthenticate(self, element))
             elif element.tag == 'app-authorize':
