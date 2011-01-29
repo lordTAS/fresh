@@ -23,8 +23,12 @@ class IOSProvider(Provider):
         host = conn.get_host()
         if host.get('__cfg_hostname__'):
             return host.get('__cfg_hostname__')
-        conn.execute('show configuration | i ^hostname')
-        hostname = first_match(conn, r'hostname (\S+)')
+
+        # We attempt to find the hostname by just sending a return keypress,
+        # and parsing the subsequent command line prompt.
+        index, match = conn.execute('')
+        prompt       = match.group(0).strip()
+        hostname     = prompt.rstrip('>').rstrip('#')
         host.set('__cfg_hostname__', hostname)
         return hostname
 
