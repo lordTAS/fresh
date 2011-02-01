@@ -14,7 +14,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import logging
 from lxml import etree
-from Exscript.protocols.Exception import TransportException
+from Exscript.protocols.Exception import ProtocolException
 
 class Action(object):
     def do(self, conn):
@@ -146,7 +146,7 @@ class Execute(Action):
 
         try:
             conn.execute(self.command)
-        except TransportException, e:
+        except ProtocolException, e:
             err = repr(str(e))
             if self.on_error == 'skip':
                 self.log(conn, '%s during %s, skipping' % (err, cmd))
