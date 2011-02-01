@@ -20,7 +20,7 @@ class Provisioner(object):
         pass
 
     def run(self, conn, service, order, host, script):
-        conn.open()
+        conn.connect()
         conn.login()
         template.eval(conn, script, **host.get_all())
         conn.close(True)
