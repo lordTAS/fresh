@@ -513,6 +513,10 @@ grammar interface_serial_statements(default):
 grammar interface_statements(default):
     match 'bandwidth' fs number nl:
         out.add('$0', '$2')
+    match 'bundle' fs 'id' fs number fs 'mode' fs nows nl:
+        out.add('$0?id="$4"/$6', '$8')
+    match 'bundle' fs 'minimum-active links' fs number nl:
+        out.add('$0/$2', '$4')
     match 'carrier-delay' fs 'up' fs number fs 'down' fs number nl:
         out.add('$0?up="$4"&down="$8"', '$8')
     match 'cdp' nl:

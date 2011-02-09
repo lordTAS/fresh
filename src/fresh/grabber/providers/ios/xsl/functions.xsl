@@ -20,6 +20,7 @@
 
   <xsl:choose>
     <xsl:when test="starts-with(grabber:lower-case($interfaceName), 'vlan')
+                 or starts-with(grabber:lower-case($interfaceName), 'bundle')
                  or starts-with(grabber:lower-case($interfaceName), 'lo')">
       <func:result select="false()"/>
     </xsl:when>
