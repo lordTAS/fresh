@@ -19,7 +19,9 @@
  select="document('show_version.xml', .)/rpc-reply/multi-routing-engine-results"/>
 <xsl:variable
  name="first-ver"
- select="$ver | $multi-ver/multi-routing-engine-item[starts-with(re-name, 'scc-re')][1]/software-information"/>
+ select="$ver | $multi-ver/multi-routing-engine-item[
+            starts-with(re-name, 'scc-re') or starts-with(re-name, 'sfc')
+         ][1]/software-information"/>
 <xsl:variable
  name="ch"
  select="document('show_chassis_hardware.xml', .)/rpc-reply/ch:chassis-inventory/ch:chassis"/>
