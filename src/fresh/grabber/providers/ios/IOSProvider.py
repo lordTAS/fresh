@@ -39,9 +39,7 @@ class IOSProvider(Provider):
         return remove_descriptions_from_config(config)
 
     def init(self, conn):
-        # Init the connection.
-        conn.execute('term len 0')
-        conn.execute('term width 0')
+        conn.autoinit()
         conn.set_timeout(15 * 60)
 
         # Define a more reliable prompt.

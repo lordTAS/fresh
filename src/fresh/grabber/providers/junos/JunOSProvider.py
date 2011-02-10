@@ -50,10 +50,7 @@ class JunOSProvider(Provider):
         return remove_descriptions_from_xml(xml)
 
     def init(self, conn):
-        # Init the connection.
-        conn.execute('set cli screen-length 0')
-        conn.execute('set cli screen-width 0')
-        conn.set_error_prompt(re.compile('^(unknown|invalid|error)', re.I))
+        conn.autoinit()
         conn.set_timeout(20 * 60)
 
         # Define a more reliable prompt.

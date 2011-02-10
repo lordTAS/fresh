@@ -35,10 +35,7 @@ class IOSXRProvider(Provider):
         return remove_descriptions_from_config(config)
 
     def init(self, conn):
-        # Init the connection.
-        conn.execute('terminal len 0')
-        conn.execute('terminal width 0')
-        conn.execute('terminal exec prompt no-timestamp')
+        conn.autoinit()
         conn.set_timeout(1 * 60)
 
         # Define a more reliable prompt.
