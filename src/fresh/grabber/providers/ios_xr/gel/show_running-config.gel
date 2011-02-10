@@ -478,6 +478,8 @@ grammar hw_module(default):
         out.add('$0/$2/$4/$6?name="$8"')
     match 'hw-module' fs 'qos' fs 'multicast' fs 'priorityq' fs 'disable' fs 'location' fs nonl nl:
         out.add('$0/$2/$4/$10?name="$12"/$6/$8')
+    match 'hw-module' fs 'service offline' fs 'location' fs nonl nl:
+        out.add('$0/$2/$4?name="$6"')
     do.return()
 
 grammar interface_l2transport_statements(default):
