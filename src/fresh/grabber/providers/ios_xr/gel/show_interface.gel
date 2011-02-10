@@ -15,6 +15,11 @@ grammar default:
     match ws:
         do.next()
 
+grammar bundle(default):
+    match nows ws /\w+\-duplex/ ws /\d+\S+\/s/ ws nonl nl:
+        out.add('interface?name="$0"/bandwidth', '$4')
+    do.return()
+
 grammar dampening(default):
     match 'half_life' ':' ws num ws 'reuse' ':' ws num nl:
         out.add('$0', '$3')
@@ -194,6 +199,10 @@ grammar interface_block(default):
     match 'ARP type' ws nows ',' ws 'ARP timeout' ws nows nl:
         out.add('$0', '$2')
         out.add('$5', '$7')
+    match 'No. of members in this bundle:' ws num nl:
+        out.enter('bundle')
+        out.add('size', '$2')
+        bundle()
     match 'Last clearing of' ws '"show interface"' ws 'counters' ws nows nl:
         out.enter('counters')
         out.add('$0-$4', '$6')
