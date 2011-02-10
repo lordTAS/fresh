@@ -72,7 +72,7 @@
   -->
   <provider
     name="ios"
-    filename="providers/ios/IOSProvider.py"
+    module="fresh.grabber.providers.ios"
     store="file-store">
       <execute command="show running-config">
           <store filename="show_running-config.txt"/>
@@ -252,7 +252,7 @@
   -->
   <provider
     name="ios_xr"
-    filename="providers/ios_xr/IOSXRProvider.py"
+    module="fresh.grabber.providers.ios_xr"
     store="file-store">
       <execute command="show running-config">
           <store filename="show_running-config.txt"/>
@@ -395,7 +395,7 @@
   -->
   <provider
     name="junos"
-    filename="providers/junos/JunOSProvider.py"
+    module="fresh.grabber.providers.junos"
     store="file-store">
       <!-- normal commands -->
       <execute command="show configuration">
@@ -487,6 +487,19 @@
   </provider>
 
   <!--
+  Actions taken on hosts running Arbor Peakflow OS.
+  -->
+  <provider
+    name="arbor_peakflow"
+    module="fresh.grabber.providers.arbor_peakflow"
+    store="file-store">
+      <execute command="edit"/>
+      <execute command="config show">
+          <store filename="config_show.txt"/>
+      </execute>
+  </provider>
+
+  <!--
   The seeddb is the database containing the list host hosts.
   -->
   <database name="seeddb">
@@ -501,6 +514,7 @@
       <provider if="os == 'ios'">ios</provider>
       <provider if="os == 'ios_xr'">ios_xr</provider>
       <provider if="os == 'junos'">junos</provider>
+      <provider if="os == 'arbor_peakflow'">arbor_peakflow</provider>
   </grabber>
 
   <!--
