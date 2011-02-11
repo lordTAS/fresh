@@ -33,7 +33,13 @@ def run(order):
             host.set(key, value[0])
 
     # Import the hosts, while preserving the values in other columns.
-    fields = ('address', 'name', 'path', 'country', 'city')
+    fields = ('address',
+              'name',
+              'protocol',
+              'tcp_port',
+              'path',
+              'country',
+              'city')
     seeddb.save_host(hosts, fields)
 
     # Mark all hosts that are no longer known as 'deleted'.

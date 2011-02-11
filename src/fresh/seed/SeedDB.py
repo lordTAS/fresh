@@ -58,6 +58,8 @@ class SeedDB(object):
         self.__add_table(sa.Table(pfx + 'host', self.metadata,
             sa.Column('name',      sa.String(50), primary_key = True),
             sa.Column('address',   sa.String(50)),
+            sa.Column('protocol',  sa.String(10)),
+            sa.Column('tcp_port',  sa.Integer),
             sa.Column('path',      sa.String(50)),
             sa.Column('country',   sa.String(50)),
             sa.Column('city',      sa.String(50)),
@@ -137,6 +139,8 @@ class SeedDB(object):
     def __host2dict(self, host, fields = None):
         all = dict(address  = host.get_address(),
                    name     = host.get_name(),
+                   protocol = host.get_protocol(),
+                   tcp_port = host.get_tcp_port(),
                    path     = host.get('path'),
                    country  = host.get('country'),
                    city     = host.get('city'),
@@ -189,6 +193,8 @@ class SeedDB(object):
         tbl_h = self._table_map['host']
         host  = Host(row[tbl_h.c.name])
         host.set_address(row[tbl_h.c.address])
+        host.set_protocol(row[tbl_h.c.protocol])
+        host.set_tcp_port(row[tbl_h.c.tcp_port])
         host.set('path',     row[tbl_h.c.path])
         host.set('country',  row[tbl_h.c.country])
         host.set('city',     row[tbl_h.c.city])
@@ -219,6 +225,8 @@ class SeedDB(object):
 
         for field in ('address',
                       'name',
+                      'protocol',
+                      'tcp_port',
                       'path',
                       'country',
                       'city',
@@ -264,6 +272,8 @@ class SeedDB(object):
         @param kwargs: The following keys may be used:
                          - hostname - the hostname (str)
                          - address - the host address (str)
+                         - protocol - the protocol name (str)
+                         - tcp_port - the TCP port number (int)
                          - path - the path (str)
                          - country - the country (str)
                          - city - the city (str)
