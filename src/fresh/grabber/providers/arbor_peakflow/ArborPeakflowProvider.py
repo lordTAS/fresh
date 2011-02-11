@@ -26,7 +26,7 @@ class ArborPeakflowProvider(Provider):
         # We attempt to find the hostname by just sending a return keypress,
         # and parsing the subsequent command line prompt.
         conn.send('\r')
-        index, match = conn.waitfor(_prompt_re)
+        index, match = conn.expect(_prompt_re)
         hostname     = match.group(1)
         host.set('__cfg_hostname__', hostname)
         return hostname
