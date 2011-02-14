@@ -73,6 +73,11 @@
         <xsl:value-of select="description"/>
       </description>
     </xsl:if>
+ 
+    <!-- Interface bandwidth. -->
+    <bandwidth>
+       <xsl:value-of select="bw"/>
+    </bandwidth>
 
     <!-- Layer 2 protocol status. -->
     <l2-status>

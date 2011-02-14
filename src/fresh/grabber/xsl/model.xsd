@@ -115,6 +115,7 @@
 <xs:complexType name="interfaceType">
   <xs:sequence>
     <xs:element name="description" type="xs:normalizedString" minOccurs="0"/>
+    <xs:element name="bandwidth" type="nonEmptyString"/>
     <xs:element name="l2-status" type="interfaceL2Status"/>
   </xs:sequence>
   <xs:attribute name="name" type="nonEmptyString" use="required"/>

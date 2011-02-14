@@ -47,6 +47,9 @@
         <xsl:value-of select="shint:description"/>
       </description>
     </xsl:if>
+    <bandwidth>
+      <xsl:value-of select="shint:speed"/>
+    </bandwidth>
     <l2-status>
       <xsl:variable
         name="protocol"
