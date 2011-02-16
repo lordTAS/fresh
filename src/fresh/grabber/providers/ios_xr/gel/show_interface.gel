@@ -139,7 +139,7 @@ grammar interface_block(default):
         out.add('$0', '$2')
         out.add('$6', '$8')
     match 'MTU Unknown,' ws 'BW' ws nows /\n| [^\r\n]+\n/:
-        out.add('BW', '$4')
+        out.add('$2', '$4')
     match 'reliability' ws nows ',' ws 'txload' ws nows ',' ws 'rxload' ws nows nl:
         out.add('$0', '$2')
         out.add('$5', '$7')
