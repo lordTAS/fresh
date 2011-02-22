@@ -116,7 +116,13 @@
 </xsl:template>
 
 <xsl:template match="/rpc-reply/configuration">
-  <xsl:variable name="units" select="$interfaces/shint:logical-interface[shint:name]"/>
+  <!--
+  Collect a list of logical interfaces. Interfaces ending with ".32767" are
+  internal interfaces created by JunOS automatically; we ignore them.
+  -->
+  <xsl:variable
+    name="units"
+    select="$interfaces/shint:logical-interface[not(grabber:ends-with(shint:name, '.32767'))]"/>
 
   <host
    xmlns=""
