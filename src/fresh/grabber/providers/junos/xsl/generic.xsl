@@ -122,7 +122,7 @@
   -->
   <xsl:variable
     name="units"
-    select="$interfaces/shint:logical-interface[not(grabber:ends-with(shint:name, '.32767'))]"/>
+    select="$interfaces/shint:logical-interface[shint:name and not(grabber:ends-with(shint:name, '.32767'))]"/>
 
   <host
    xmlns=""
