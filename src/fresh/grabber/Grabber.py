@@ -29,7 +29,12 @@ class Grabber(object):
         self.seeddb.save_host(host)
 
     def get_label_from_host(self, host):
-        return host.get_address() + '/' + host.get_name()
+        return host.get_name() \
+             + ' (' \
+                 + host.get_protocol() \
+                 + '://' + host.get_address() \
+                 + ':' + str(host.get_tcp_port()) \
+             + ')'
 
     def get_provider_for_host(self, host):
         vars = dict(os       = host.get('os'),
