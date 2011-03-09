@@ -47,9 +47,6 @@
         <xsl:value-of select="shint:description"/>
       </description>
     </xsl:if>
-    <bandwidth>
-      <xsl:value-of select="shint:speed"/>
-    </bandwidth>
     <l2-status>
       <xsl:variable
         name="protocol"
@@ -63,6 +60,11 @@
         </xsl:when>
       </xsl:choose>
     </l2-status>
+
+    <!-- Interface bandwidth. -->
+    <bandwidth>
+      <xsl:value-of select="grabber:bw2int(shint:speed)"/>
+    </bandwidth>
   </interface>
 </xsl:template>
 
@@ -212,6 +214,11 @@
                 </xsl:when>
               </xsl:choose>
             </description>
+
+            <!-- Interface bandwidth. -->
+            <bandwidth>
+                <xsl:value-of select="grabber:bw2int(../shint:speed)"/>
+            </bandwidth>
 
             <!-- IPv4 addresses. -->
             <xsl:variable

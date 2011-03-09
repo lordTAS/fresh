@@ -6,6 +6,8 @@
  xmlns:grabber="localhost"
  extension-element-prefixes="str func">
 
+ <xsl:decimal-format name="de" decimal-separator="," grouping-separator="." />
+
 <func:function name="grabber:lower-case">
   <xsl:param name="str"/>
   <func:result select="translate($str, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
@@ -55,6 +57,37 @@ Does nothing if the given string does not end with the given tail.
       <func:result select="$str"/>
     </xsl:otherwise>
   </xsl:choose>
+</func:function>
+
+<func:function name="grabber:bw2int">
+  <xsl:param name="bw"/>
+  <xsl:choose>
+    <xsl:when test="$bw = 'Unknown'">
+      <func:result></func:result>
+    </xsl:when>
+    <xsl:when test="$bw = 'Unlimited'">
+      <func:result></func:result>
+    </xsl:when>
+    <xsl:when test="grabber:ends-with($bw, 'mbps')">
+      <func:result select="concat(substring($bw, 1, string-length($bw)-4), '000')" />
+    </xsl:when>
+    <xsl:when test="grabber:ends-with($bw, 'Gbps')">
+      <func:result select="concat(substring($bw, 1, string-length($bw)-4), '000000')" />
+    </xsl:when>
+    <xsl:when test="starts-with($bw, 'OC')">
+      <func:result select="substring($bw, 3) * 1024 * 52" />
+    </xsl:when>
+    <xsl:otherwise>
+      <func:result select="$bw"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</func:function>
+
+<func:function name="grabber:thsep">
+  <xsl:param name="number" />
+  <func:result>
+    <xsl:value-of select="format-number($number, '#.###', 'de')" />
+  </func:result>
 </func:function>
 
 <func:function name="grabber:netmask">

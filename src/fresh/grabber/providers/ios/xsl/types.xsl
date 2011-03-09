@@ -25,6 +25,14 @@
       </description>
     </xsl:if>
 
+    <!-- Interface bandwidth. -->
+    <xsl:variable name="bw" select="grabber:bw2int(bw)" />
+    <xsl:if test="$bw != ''">
+      <bandwidth>
+        <xsl:value-of select="$bw"/>
+      </bandwidth>
+    </xsl:if>
+
     <!-- IPv4 addresses. -->
     <xsl:variable
       name="addresses"
@@ -74,10 +82,7 @@
       </description>
     </xsl:if>
  
-    <!-- Interface bandwidth. -->
-    <bandwidth>
-       <xsl:value-of select="bw"/>
-    </bandwidth>
+    <!-- Interface bandwidth (kann nicht ermittelt werden - sh controller). -->
 
     <!-- Layer 2 protocol status. -->
     <l2-status>
