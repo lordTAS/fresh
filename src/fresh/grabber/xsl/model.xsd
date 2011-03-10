@@ -100,7 +100,7 @@
 <xs:complexType name="unitType">
   <xs:sequence>
     <xs:element name="description" type="xs:normalizedString" minOccurs="0"/>
-    <xs:element name="bandwidth" type="nonEmptyString"/>
+    <xs:element name="bandwidth" type="nonEmptyString" minOccurs="0"/>
     <xs:element name="ipv4-address-list" type="IPv4AddressListType" minOccurs="0"/>
     <xs:element name="policy" type="policyReferenceType" minOccurs="0" maxOccurs="unbounded"/>
   </xs:sequence>
@@ -116,7 +116,7 @@
 <xs:complexType name="interfaceType">
   <xs:sequence>
     <xs:element name="description" type="xs:normalizedString" minOccurs="0"/>
-    <xs:element name="bandwidth" type="nonEmptyString"/>
+    <xs:element name="bandwidth" type="nonEmptyString" minOccurs="0"/>
     <xs:element name="l2-status" type="interfaceL2Status"/>
   </xs:sequence>
   <xs:attribute name="name" type="nonEmptyString" use="required"/>
