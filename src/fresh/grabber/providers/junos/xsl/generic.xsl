@@ -220,7 +220,7 @@
             </description>
 
             <!-- Interface bandwidth. -->
-            <xsl:variable name="bw" select="grabber:bw2int(shint:speed)" />
+            <xsl:variable name="bw" select="grabber:bw2int(../shint:speed)" />
             <xsl:if test="$bw != ''">
               <bandwidth>
                 <xsl:value-of select="$bw"/>
