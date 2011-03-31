@@ -139,6 +139,7 @@ class Execute(Action):
         host = conn.get_host()
         cmd  = repr(self.command)
         host.set('__last_command__', self.command)
+        self.log(conn, 'Executing %s' % repr(cmd))
 
         old_timeout = conn.get_timeout()
         if self.timeout is not None:
