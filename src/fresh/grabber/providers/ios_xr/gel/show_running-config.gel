@@ -660,6 +660,8 @@ grammar l2vpn_bridge_group_bridge_domain_mac_statements(default):
     match 'limit' nl:
         out.enter('$0')
         l2vpn_bridge_group_bridge_domain_mac_limit_statements()
+    match 'withdraw disable' nl:
+        out.add('widthdraw/disable')
     do.return()
 
 grammar l2vpn_bridge_group_bridge_domain_vfi_neighbor_statements(default):
@@ -945,6 +947,8 @@ grammar policy_map_class_statements(default):
     match 'set mpls experimental' fs 'imposition' fs number nl:
         out.add('$0?$2="$4"')
     match 'set precedence' fs name nl:
+        out.add('$0', '$2')
+    match 'set cos' fs number nl:
         out.add('$0', '$2')
     match 'set qos-group' fs name nl:
         out.add('$0', '$2')
