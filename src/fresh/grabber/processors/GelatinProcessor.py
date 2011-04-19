@@ -12,7 +12,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-import sys, os, glob, threading, traceback
+import os
+import threading
+from collections  import defaultdict
 from util         import str2filename
 from Gelatin.util import compile, generate_string
 from Processor    import Processor
@@ -22,28 +24,29 @@ class GelatinProcessor(Processor):
         self.dirname      = dirname
         self.format       = format
         self.compile_lock = threading.Lock()
-        self.converters   = {}
-        self.conv_locks   = {}
+        self.converters   = defaultdict(list)
 
-    def _load_syntax(self, filename):
+    def _acquire_converter(self, syntax_filename):
         with self.compile_lock:
-            # Compiled files are cached.
-            if self.converters.has_key(filename):
-                return self.converters[filename]
+            try:
+                converter = self.converters[syntax_filename].pop()
+            except IndexError:
+                filename  = os.path.join(self.dirname, syntax_filename)
+                converter = compile(filename)
+            return converter
 
-            # Make sure that the file exists.
-            full_filename             = os.path.join(self.dirname, filename)
-            self.converters[filename] = compile(full_filename)
-            self.conv_locks[filename] = threading.Lock()
-
-            return self.converters[filename]
+    def _release_converter(self, syntax_filename, converter):
+        with self.compile_lock:
+            self.converters[syntax_filename].append(converter)
 
     def start(self, provider, conn, **kwargs):
         syntax    = kwargs.get('syntax')
         outfile   = kwargs.get('filename')
-        converter = self._load_syntax(syntax)
+        converter = self._acquire_converter(syntax)
 
-        with self.conv_locks[syntax]:
+        try:
             result = generate_string(converter, conn.response, self.format)
+        finally:
+            self._release_converter(syntax, converter)
 
         provider.store.store(provider, conn, outfile, result)
