@@ -63,6 +63,24 @@
         <xsl:value-of select="@name"/>
       </policy>
     </xsl:for-each>
+
+    <!-- ISIS metric. -->
+    <xsl:variable name="isis-ifc"
+      select="$shrun//isis//interface[@name=$name] | $runint/isis" />
+    <xsl:variable name="l1metric"
+      select="$isis-ifc//metric[@level='1']" />
+    <xsl:variable name="l2metric"
+      select="$isis-ifc//metric[@level='2']" />
+    <xsl:if test="$l1metric != ''">
+      <isis-l1-metric>
+        <xsl:value-of select="$l1metric"/>
+      </isis-l1-metric>
+    </xsl:if>
+    <xsl:if test="$l2metric != ''">
+      <isis-l2-metric>
+        <xsl:value-of select="$l2metric"/>
+      </isis-l2-metric>
+    </xsl:if>
   </unit>
 </xsl:template>
 

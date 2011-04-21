@@ -11,6 +11,7 @@
 <xsl:import href="functions.xsl"/>
 
 <xsl:output method="xml" indent="yes" encoding="iso-8859-1" />
+<xsl:variable name="config" select="."/>
 <xsl:variable
  name="ver"
  select="document('show_version.xml', .)/rpc-reply/software-information"/>
@@ -260,6 +261,25 @@
                 <xsl:value-of select="shint:filter-name"/>
               </policy>
             </xsl:for-each>
+
+            <!-- ISIS metric. -->
+            <xsl:variable name="unit-name" select="shint:name"/>
+            <xsl:variable name="isis-ifc"
+              select="$config//protocols/isis/interface[name=$unit-name]" />
+            <xsl:variable name="l1metric"
+              select="$isis-ifc/level[name='1']/metric" />
+            <xsl:variable name="l2metric"
+              select="$isis-ifc/level[name='2']/metric" />
+            <xsl:if test="$l1metric != ''">
+              <isis-l1-metric>
+                <xsl:value-of select="$l1metric"/>
+              </isis-l1-metric>
+            </xsl:if>
+            <xsl:if test="$l2metric != ''">
+              <isis-l2-metric>
+                <xsl:value-of select="$l2metric"/>
+              </isis-l2-metric>
+            </xsl:if>
           </unit>
         </xsl:for-each>
       </unit-list>

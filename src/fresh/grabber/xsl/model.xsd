@@ -126,6 +126,8 @@
     <xs:element name="bandwidth" type="nonEmptyString" minOccurs="0"/>
     <xs:element name="ipv4-address-list" type="IPv4AddressListType" minOccurs="0"/>
     <xs:element name="policy" type="policyReferenceType" minOccurs="0" maxOccurs="unbounded"/>
+    <xs:element name="isis-l1-metric" type="number" minOccurs="0"/>
+    <xs:element name="isis-l2-metric" type="number" minOccurs="0"/>
   </xs:sequence>
   <xs:attribute name="name" type="nonEmptyString" use="required"/>
 </xs:complexType>

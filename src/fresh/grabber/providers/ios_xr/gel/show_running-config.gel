@@ -1107,7 +1107,7 @@ grammar isis_interface_af_statements(default):
     match 'metric' fs nows nl:
         out.add('$0', '$2')
     match 'metric' fs nows fs 'level' fs number nl:
-        out.add('$0?level="$5"', '$2')
+        out.add('$0?level="$6"', '$2')
     match 'mpls ldp sync' fs 'level' fs number nl:
         out.add('$0?$2="$4"')
     do.return()
