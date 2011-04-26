@@ -70,8 +70,9 @@ class Grabber(object):
         # Open the connection.
         logger.info('%s: Connecting...' % label)
         conn.connect()
+        logger.info('%s: Logging in...' % label)
         conn.login()
-        logger.info('%s: Authentication succeeded.' % label)
+        logger.info('%s: Login succeeded.' % label)
         update_progress()
 
         # Detect the operation system, and store it in the seeddb.
