@@ -1,0 +1,24 @@
+define ws     /\s+/
+define nows   /\S+/
+define fs     /[\t ]+/
+define nl     /[\r\n]+/
+define nonl   /[^\r\n]+/
+define number /\d+/
+
+grammar default:
+    match ws
+        | nl:
+        do.next()
+
+grammar node_statements(default):
+    match nows ws 'variable = ' nonl nl:
+        out.add('variable?name="$0"', '$3')
+    do.return()
+
+grammar input(default):
+    match ws nl:
+        do.skip()
+    match 'Node' ws nows ':' nl:
+        out.enter('node?name="$2"')
+        node_statements()
+    node_statements()
