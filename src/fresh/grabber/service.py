@@ -20,9 +20,10 @@ from Exscript.util.decorator import bind
 config  = __service__.config('config.xml', Config)
 grabber = config.get_grabber()
 
-def run(conn, order, logger):
-    host = conn.get_host()
-    task = host.get('__task__')
+def grab(conn, order):
+    host   = conn.get_host()
+    task   = host.get('__task__')
+    logger = __exscriptd__.get_logger(order, 'command.log')
     task.set_logfile(host.get_logname() + '.log')
     task.set_tracefile(host.get_logname() + '.log.error')
     task.set_status('in-progress')
@@ -40,7 +41,8 @@ def run(conn, order, logger):
     finally:
         __service__.save_task(order, task)
 
-def flush(order, task, logger):
+def flush(order, task):
+    logger = __exscriptd__.get_logger(order, 'command.log')
     task.set_logfile('flush.log')
     task.set_tracefile('flush.log.error')
     task.set_status('in-progress')
@@ -54,6 +56,7 @@ def flush(order, task, logger):
         raise
     else:
         task.completed()
+        logger.info('flush: success')
     finally:
         __service__.save_task(order, task)
 
@@ -82,7 +85,6 @@ def check(order):
     return True
 
 def enter(order):
-    logger = __service__.create_logger(order, 'command.log')
 
     # Since the order only contains a list of hostnames without any
     # other info (such as the address or path), we need to load the
@@ -103,13 +105,13 @@ def enter(order):
 
     __service__.enqueue_hosts(order,
                               hosts,
-                              bind(run, order, logger),
+                              bind(run, order),
                               handle_duplicates = True)
 
     if order.xml.find('flush') is not None:
         task = __service__.create_task(order, 'Delete obsolete hosts')
         __service__.enqueue(order,
-                            partial(flush, order, task, logger),
+                            partial(flush, order, task),
                             'flush')
 
     __service__.set_order_status(order, 'queued')
