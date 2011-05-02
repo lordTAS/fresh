@@ -22,7 +22,7 @@
 
 <xs:simpleType name='dnsName'>
   <xs:restriction base='xs:token'>
-    <xs:pattern value="[a-zA-Z][a-zA-Z0-9\-\.]*[a-zA-Z0-9]"/>
+    <xs:pattern value="[a-zA-Z0-9][a-zA-Z0-9\-\.]*[a-zA-Z0-9]"/>
   </xs:restriction>
 </xs:simpleType>
 
