@@ -25,14 +25,8 @@ def run(order):
     sec   = timedelta(seconds = 1)
     start = datetime.utcnow().replace(microsecond = 0) - sec
 
-    # Variables in an order are always lists; expand those into
-    # strings.
-    hosts = get_hosts_from_etree(order.xml)
-    for host in hosts:
-        for key, value in host.get_all().iteritems():
-            host.set(key, value[0])
-
     # Import the hosts, while preserving the values in other columns.
+    hosts  = get_hosts_from_etree(order.xml)
     fields = ('address',
               'name',
               'protocol',
