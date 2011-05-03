@@ -1,0 +1,2 @@
+from SmartEdgeOSProvider import SmartEdgeOSProvider
+provider = SmartEdgeOSProvider
