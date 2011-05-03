@@ -15,9 +15,9 @@
 """
 The API for updating the list of collected hosts.
 """
-from Exscript           import Host
+from Exscript import Host, Account, PrivateKey
 from Exscript.util.cast import to_list
-import sqlalchemy                 as sa
+import sqlalchemy as sa
 import sqlalchemy.databases.mysql as mysql
 
 class SeedDB(object):
@@ -70,6 +70,19 @@ class SeedDB(object):
                       sa.DateTime,
                       default  = sa.func.now(),
                       onupdate = sa.func.now()),
+            mysql_engine = 'INNODB'
+        ))
+
+        self.__add_table(sa.Table(pfx + 'account', self.metadata,
+            sa.Column('host',          sa.String(50), primary_key = True),
+            sa.Column('name',          sa.String(50)),
+            sa.Column('password',      sa.String(50)),
+            sa.Column('skey_password', sa.String(50)),
+            sa.Column('authorization_password',  sa.String(50)),
+            sa.Column('keyfile',       sa.String(50)),
+            sa.ForeignKeyConstraint(['host'],
+                                    [pfx + 'host.name'],
+                                    ondelete = 'CASCADE'),
             mysql_engine = 'INNODB'
         ))
 
@@ -151,40 +164,84 @@ class SeedDB(object):
             return all
         return dict((k, v) for (k, v) in all.iteritems() if k in fields)
 
+    def __account2dict(self, account, fields = None):
+        pw2     = account.authorization_password
+        key     = account.get_key()
+        keyfile = key is not None and key.get_filename() or None
+        all = dict(name                   = account.get_name(),
+                   password               = account.get_password(),
+                   authorization_password = pw2,
+                   skey_password          = None, # TODO: account.get_skey_password(),
+                   keyfile                = keyfile)
+        if fields is None:
+            return all
+        return dict((k, v) for (k, v) in all.iteritems() if k in fields)
+
     def __add_host(self, host):
         """
         Inserts the given host into the database.
         """
         if host is None:
             raise AttributeError('host argument must not be None')
+        account = host.get_account()
 
         # Insert the host.
-        insert = self._table_map['host'].insert()
-        result = insert.execute(**self.__host2dict(host))
-        return result.last_inserted_ids()[0]
+        with self.engine.contextual_connect(close_with_result = True).begin():
+            insert = self._table_map['host'].insert()
+            insert.execute(**self.__host2dict(host))
 
-    def __save_host(self, host, fields):
+            if account:
+                insert = self._table_map['account'].insert()
+                insert.execute(**self.__account2dict(account))
+
+    def __save_host(self, host, host_fields, account_fields):
         """
         Inserts or updates the given host into the database.
         """
         if host is None:
             raise AttributeError('host argument must not be None')
 
-        # Check if the host already exists.
-        table   = self._table_map['host']
-        where   = sa.and_(table.c.name == host.get_name())
-        thehost = table.select(where).execute().fetchone()
-        fields  = self.__host2dict(host, fields)
+        # Check if host and account already exist.
+        tbl_h       = self._table_map['host']
+        tbl_a       = self._table_map['account']
+        table       = tbl_h.outerjoin(tbl_a, tbl_h.c.name == tbl_a.c.host)
+        where       = sa.and_(tbl_h.c.name == host.get_name())
+        query       = sa.select([tbl_h.c.name, tbl_a.c.host.label('account')],
+                                where,
+                                from_obj = [table])
 
-        # Insert or update it.
-        if thehost is None:
-            query   = table.insert()
-            result  = query.execute(**fields)
-            host_id = result.last_inserted_ids()[0]
+        row         = query.execute().fetchone()
+        host_fields = self.__host2dict(host, host_fields)
+
+        # Insert or update the host.
+        if row is None:
+            query        = tbl_h.insert()
+            result       = query.execute(**host_fields)
+            host_id      = result.last_inserted_ids()[0]
+            have_account = False
         else:
-            query   = table.update(where)
-            result  = query.execute(**fields)
-            host_id = thehost[table.c.name]
+            query        = tbl_h.update(where)
+            result       = query.execute(**host_fields)
+            host_id      = row[tbl_h.c.name]
+            have_account = row['account'] is not None
+
+        # If the host has no account specified, remove the account
+        # from the DB (if any).
+        account = host.get_account()
+        if account is None:
+            if have_account:
+                query  = tbl_a.delete(host == host_id)
+                result = query.execute()
+            return host_id
+
+        # Else insert or update the account.
+        account_fields = dict(**self.__account2dict(account, account_fields))
+        if have_account:
+            query  = tbl_a.update(host == host_id)
+            result = query.execute(**account_fields)
+        else:
+            query  = tbl_a.insert()
+            result = query.execute(host = host_id, **account_fields)
 
         return host_id
 
@@ -203,17 +260,30 @@ class SeedDB(object):
         host.set('deleted',  row[tbl_h.c.deleted])
         return host
 
+    def __get_account_from_row(self, row):
+        assert row is not None
+        tbl_a = self._table_map['account']
+        if row[tbl_a.c.host] is None:
+            return None
+
+        key     = PrivateKey.from_file(row[tbl_a.c.keyfile])
+        account = Account(row[tbl_a.c.name], key = key)
+        account.set_password(row[tbl_a.c.password])
+        account.set_authorization_password(row[tbl_a.c.authorization_password])
+        #TODO: account.set_skey_password(row[tbl_a.c.skey_password])
+        return account
+
     def __get_hosts_from_query(self, query, filter = None):
         """
         Returns a list of hosts.
         """
         assert query is not None
-        result = query.execute()
-
-        tbl_h     = self._table_map['host']
+        result    = query.execute()
         host_list = []
         for row in result:
-            host = self.__get_host_from_row(row)
+            host    = self.__get_host_from_row(row)
+            account = self.__get_account_from_row(row)
+            host.set_account(account)
             if filter is None or filter(host) is True:
                 host_list.append(host)
 
@@ -284,8 +354,10 @@ class SeedDB(object):
         @return: The list of hosts.
         """
         tbl_h  = self._table_map['host']
+        tbl_a  = self._table_map['account']
+        table  = tbl_h.outerjoin(tbl_a, tbl_h.c.name == tbl_a.c.host)
         where  = self.__get_conditions(**kwargs)
-        select = tbl_h.select(where)
+        select = table.select(where, use_labels = True)
         return self.__get_hosts_from_query(select)
 
     def get_hosts_from_filter(self, filter, **kwargs):
@@ -302,8 +374,10 @@ class SeedDB(object):
         @return: The list of hosts for which the callback returned True.
         """
         tbl_h  = self._table_map['host']
+        tbl_a  = self._table_map['account']
+        table  = tbl_h.outerjoin(tbl_a, tbl_h.c.name == tbl_a.c.host)
         where  = self.__get_conditions(**kwargs)
-        select = tbl_h.select(where)
+        select = table.select(where, use_labels = True)
         return self.__get_hosts_from_query(select, filter = filter)
 
     def add_host(self, hosts):
@@ -336,7 +410,7 @@ class SeedDB(object):
         if hosts is None:
             raise AttributeError('hosts argument must not be None')
         for host in to_list(hosts):
-            self.__save_host(host, fields)
+            self.__save_host(host, fields, None)
         return True
 
     def delete_host(self, **kwargs):
