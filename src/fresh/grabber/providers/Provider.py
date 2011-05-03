@@ -208,7 +208,7 @@ class Provider(object):
     def test_condition(self, vars):
         if not self.condition:
             return True
-        return eval(self.condition, vars)
+        return eval(self.condition, vars.copy())
 
     def get_store(self):
         return self.store
