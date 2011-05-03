@@ -237,7 +237,7 @@ class SeedDB(object):
         # Else insert or update the account.
         account_fields = dict(**self.__account2dict(account, account_fields))
         if have_account:
-            query  = tbl_a.update(host == host_id)
+            query  = tbl_a.update(tbl_a.c.host == host_id)
             result = query.execute(**account_fields)
         else:
             query  = tbl_a.insert()
