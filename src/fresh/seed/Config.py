@@ -17,14 +17,16 @@ The API for updating the list of collected hosts.
 """
 
 import os
-from sqlalchemy        import create_engine
-from Exscriptd         import ConfigReader
+from sqlalchemy import create_engine
+from sqlalchemy.pool import NullPool
+from Exscriptd import ConfigReader
 from fresh.seed.SeedDB import SeedDB
 
 def get_seeddb_from_name(config, name):
+    # We use NullPool to prevent "MySQL server has gone away" errors.
     element = config._findelem('database[@name="%s"]' % name)
     dbn     = element.find('dbn').text
-    engine  = create_engine(dbn)
+    engine  = create_engine(dbn, poolclass = NullPool)
     db      = SeedDB(engine)
     db.install()
     return db
