@@ -83,7 +83,10 @@ class Grabber(object):
 
         # Find the provider.
         provider = self.get_provider_for_host(host)
-        logger.info('%s: Selected provider is %s.' % (label, provider.name))
+        module   = provider.__module__
+        logger.info('%s: Selected provider is %s using %s.' % (label,
+                                                               provider.name,
+                                                               module))
 
         # Init the command line.
         cfghostname = provider.get_hostname(conn)
