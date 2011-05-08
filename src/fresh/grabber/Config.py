@@ -21,6 +21,7 @@ from Exscriptd         import ConfigReader
 from Grabber           import Grabber
 from FileStore         import FileStore
 from processors        import GelatinProcessor, \
+                              LineSplitProcessor, \
                               XsltProcessor,    \
                               ExistDBStore,     \
                               ExistDBMetadataStore
@@ -42,6 +43,11 @@ class Config(ConfigReader):
             basedir = element.find('basedir').text
             #print 'Creating file store "%s".' % name
             self.stores[name] = FileStore(basedir)
+
+    def _init_linesplit(self):
+        for element in self.cfgtree.iterfind('processor[@type="linesplit"]'):
+            name = element.get('name')
+            self.processors[name] = LineSplitProcessor()
 
     def _init_gelatin(self):
         for element in self.cfgtree.iterfind('processor[@type="gelatin"]'):
@@ -108,6 +114,7 @@ class Config(ConfigReader):
 
     def _init(self):
         self._init_file_stores()
+        self._init_linesplit()
         self._init_gelatin()
         self._init_xsltproc()
         self._init_xmldb_store()

@@ -15,4 +15,5 @@
 from ExistDBStore         import ExistDBStore
 from ExistDBMetadataStore import ExistDBMetadataStore
 from GelatinProcessor     import GelatinProcessor
+from LineSplitProcessor   import LineSplitProcessor
 from XsltProcessor        import XsltProcessor

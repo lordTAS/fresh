@@ -441,10 +441,6 @@
       <!-- Commands with "| display set". -->
       <execute command="show configuration | display set">
           <store filename="show_configuration_display_set.txt"/>
-          <post-process
-            processor="gelatin"
-            syntax="../gel/linesplit.gel"
-            filename="show_configuration.lines.xml"/>
       </execute>
 
       <!-- XML commands. -->
