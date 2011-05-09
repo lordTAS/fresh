@@ -32,6 +32,13 @@
   <func:result select="$thetail = $tail"/>
 </func:function>
 
+<func:function name="grabber:index-of">
+  <xsl:param name="str" />
+  <xsl:param name="tail" />
+
+  <func:result = select="string-length(substring-before($str, $tail))" />
+</func:function>
+
 <!--
 Remove the given tail from the given string.
 Does nothing if the given string does not end with the given tail.
@@ -82,6 +89,23 @@ Does nothing if the given string does not end with the given tail.
     </xsl:otherwise>
   </xsl:choose>
 </func:function>
+
+<func:function name="grabber:fam2protocol">
+  <xsl:param name="family" />
+  <xsl:choose>
+    <xsl:when test="inet">
+      <func:result select="ipv4" />
+    </xsl:when>
+    <xsl:when test="inet6">
+      <func:result select="ipv6" />
+    </xsl:when>
+    <xsl:otherwise>
+      <func:result select="$family"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</func:function>
+
+
 
 <func:function name="grabber:thsep">
   <xsl:param name="number" />
