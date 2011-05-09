@@ -13,6 +13,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 from Processor import Processor
+from lxml import etree
 
 class ExistDBStore(Processor):
     def __init__(self, db):
@@ -25,12 +26,22 @@ class ExistDBStore(Processor):
         string   = string.replace('{hostname}', hostname)
         return string
 
+    def _txt2xml(self, hostname, content):
+        xml = etree.Element('xml', hostname = hostname)
+        for n, line in enumerate(content.split('\n')):
+            etree.SubElement(xml, 'line', number = str(n + 1)).text = line
+        return etree.tostring(xml)
+
     def start(self, provider, conn, **kwargs):
         host     = conn.get_host()
         filename = kwargs.get('filename')
         document = kwargs.get('document')
         document = self._replace_vars(host, document)
         content  = provider.store.get(conn, filename)
+
+        if filename.endswith('.txt'):
+            content = self._txt2xml(host.get_name(), content)
+
         self.db.store(document, content)
 
     def delete(self, provider, host, **kwargs):
