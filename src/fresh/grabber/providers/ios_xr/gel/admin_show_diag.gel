@@ -69,7 +69,7 @@ grammar input:
     match toplevel_card_name fs nows ' : ' nonl nl:
         out.enter('card?type="$0"&slot="$2"')
         out.add('description', '$4')
-        ignore_block()
+        card()
     match toplevel_card_name fs nows / */ nl:
         out.enter('card?type="$0"&slot="$2"')
         ignore_block()
