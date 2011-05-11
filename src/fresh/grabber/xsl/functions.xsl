@@ -36,7 +36,7 @@
   <xsl:param name="str" />
   <xsl:param name="tail" />
 
-  <func:result = select="string-length(substring-before($str, $tail))" />
+  <func:result select="string-length(substring-before($str, $tail))" />
 </func:function>
 
 <!--
