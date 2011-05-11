@@ -143,7 +143,9 @@
 <xs:complexType name="unitIPv4StatementType">
     <xs:complexContent>
         <xs:extension base="unitAddressFamiliyType">
-            <xs:element name="address-list" type="IPv4AddressListType" minOccurs="0"/>
+            <xs:sequence>
+                <xs:element name="address-list" type="IPv4AddressListType" minOccurs="0"/>
+            </xs:sequence>
         </xs:extension>
     </xs:complexContent>
 </xs:complexType>
@@ -151,7 +153,9 @@
 <xs:complexType name="unitIPv6StatementType">
     <xs:complexContent>
         <xs:extension base="unitAddressFamiliyType">
-            <xs:element name="address-list" type="IPv6AddressListType" minOccurs="0"/>
+            <xs:sequence>
+                <xs:element name="address-list" type="IPv6AddressListType" minOccurs="0"/>
+            </xs:sequence>
         </xs:extension>
     </xs:complexContent>
 </xs:complexType>
