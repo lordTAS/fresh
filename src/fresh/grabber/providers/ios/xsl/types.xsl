@@ -81,6 +81,54 @@
         <xsl:value-of select="$l2metric"/>
       </isis-l2-metric>
     </xsl:if>
+
+    <ipv4-statement>
+      <!-- Sampling information. -->
+      <xsl:for-each select="$runint/flow">
+        <sampling>
+          <xsl:attribute name="protocol">
+              <xsl:value-of select="@protocol" />
+          </xsl:attribute>
+          <name>
+              <xsl:value-of select="sampler" />
+          </name>
+          <direction>
+              <xsl:value-of select="direction" />
+          </direction>
+        </sampling>
+      </xsl:for-each>
+
+      <!-- Service policy bindings. -->
+      <xsl:for-each select="$runint/service-policy">
+        <policy>
+          <xsl:attribute name="direction">
+            <xsl:value-of select="@direction" />
+          </xsl:attribute>
+          <xsl:value-of select="@name"/>
+        </policy>
+      </xsl:for-each>
+
+      <!-- IPv4 addresses. -->
+      <!--xsl:variable
+        name="addresses"
+        select="$runint/ip-address | $runint/ipv4-address"/-->
+      <xsl:if test="$addresses/@address">
+        <address-list>
+          <xsl:for-each select="$addresses">
+            <xsl:if test="@address">
+              <ipv4-address>
+                <xsl:attribute name="address">
+                  <xsl:value-of select="@address" />
+                </xsl:attribute>
+                <xsl:attribute name="mask">
+                  <xsl:value-of select="@mask" />
+                </xsl:attribute>
+              </ipv4-address>
+            </xsl:if>
+          </xsl:for-each>
+        </address-list>
+      </xsl:if>
+    </ipv4-statement>
   </unit>
 </xsl:template>
 
