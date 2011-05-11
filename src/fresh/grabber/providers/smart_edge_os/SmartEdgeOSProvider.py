@@ -52,6 +52,7 @@ class SmartEdgeOSProvider(Provider):
         oldexecute = conn.execute
         def execute_wrapper(command):
             oldexecute(command)
+            response = conn.response.translate(None, '\r')
 
             # Strip the command from the response.
             response = response.split('\n')
