@@ -84,11 +84,8 @@
 
     <ipv4-statement>
       <!-- Sampling information. -->
-      <xsl:for-each select="$runint/flow">
+      <xsl:for-each select="$runint/flow[@protocol=ipv4]">
         <sampling>
-          <xsl:attribute name="protocol">
-              <xsl:value-of select="@protocol" />
-          </xsl:attribute>
           <name>
               <xsl:value-of select="sampler" />
           </name>
