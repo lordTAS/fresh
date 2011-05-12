@@ -12,6 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+import time
 from Processor import Processor
 from lxml import etree
 
@@ -27,7 +28,8 @@ class ExistDBStore(Processor):
         return string
 
     def _txt2xml(self, hostname, content):
-        xml = etree.Element('xml', hostname = hostname)
+        ts  = time.asctime()
+        xml = etree.Element('xml', hostname = hostname, timestamp = ts)
         for n, line in enumerate(content.split('\n')):
             etree.SubElement(xml, 'line', number = str(n + 1)).text = line
         return etree.tostring(xml)
