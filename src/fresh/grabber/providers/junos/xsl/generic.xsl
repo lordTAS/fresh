@@ -280,6 +280,54 @@
                 <xsl:value-of select="$l2metric"/>
               </isis-l2-metric>
             </xsl:if>
+
+            <ipv4-statement>
+              <!-- Sampling information. -->
+              <xsl:variable name="confunit" select="$config//configuration/interfaces/interface[name=substring-before($unit-name, '.')]/unit[name=substring-after($unit-name, '.')]" />
+              <xsl:for-each select="$confunit//sampling">
+                <xsl:if test="grabber:fam2protocol(local-name(..)) = 'ipv4'">
+                  <sampling>
+                    <direction>
+                      <xsl:value-of select="local-name(*[position()=1])" />
+                    </direction>
+                  </sampling>
+                </xsl:if>
+              </xsl:for-each>
+
+              <!-- Filter bindings. -->
+              <!--xsl:variable
+                name="filters"
+                select="shint:family/shint:inet/shint:filter"/-->
+              <xsl:for-each select="$filters/shint:input">
+                <policy direction="input">
+                  <xsl:value-of select="shint:filter-name"/>
+                </policy>
+              </xsl:for-each>
+              <xsl:for-each select="$filters/shint:output">
+                <policy direction="output">
+                  <xsl:value-of select="shint:filter-name"/>
+                </policy>
+              </xsl:for-each>
+
+              <!-- IPv4 addresses. -->
+              <!--xsl:variable
+                name="addresses"
+                select="shint:address-family[shint:address-family-name='inet']/shint:interface-address"/-->
+              <xsl:if test="$addresses">
+                <address-list>
+                  <xsl:for-each select="$addresses">
+                    <ipv4-address>
+                      <xsl:attribute name="address">
+                        <xsl:value-of select="shint:ifa-local" />
+                      </xsl:attribute>
+                      <xsl:attribute name="mask">
+                        <xsl:value-of select="grabber:netmask(str:tokenize(shint:ifa-destination, '/')[2])" />
+                      </xsl:attribute>
+                    </ipv4-address>
+                  </xsl:for-each>
+                </address-list>
+              </xsl:if>
+            </ipv4-statement>
           </unit>
         </xsl:for-each>
       </unit-list>
