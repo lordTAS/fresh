@@ -93,11 +93,11 @@ Does nothing if the given string does not end with the given tail.
 <func:function name="grabber:fam2protocol">
   <xsl:param name="family" />
   <xsl:choose>
-    <xsl:when test="inet">
-      <func:result select="ipv4" />
+    <xsl:when test="$family = 'inet'">
+      <func:result>ipv4</func:result>
     </xsl:when>
-    <xsl:when test="inet6">
-      <func:result select="ipv6" />
+    <xsl:when test="$family = 'inet6'">
+      <func:result>ipv6</func:result>
     </xsl:when>
     <xsl:otherwise>
       <func:result select="$family"/>
