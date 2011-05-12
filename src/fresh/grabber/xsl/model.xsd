@@ -128,7 +128,7 @@
 
 <xs:complexType name="samplingType">
   <xs:sequence>
-    <xs:element name="name" type="nonEmptyString"/>
+    <xs:element name="name" type="nonEmptyString" minOccurs="0" maxOccurs="1"/>
     <xs:element name="direction" type="directionType"/>
   </xs:sequence>
 </xs:complexType>
