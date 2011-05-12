@@ -18,6 +18,8 @@ from Exscript.util.match import first_match
 from providers.ios.util  import remove_passwords_from_config, \
                                 remove_descriptions_from_config
 
+prompt_re = re.compile(r'^\[\w+\]([^>#]+)[>#]')
+
 class SmartEdgeOSProvider(Provider):
     def get_hostname(self, conn):
         host = conn.get_host()
@@ -28,7 +30,8 @@ class SmartEdgeOSProvider(Provider):
         # and parsing the subsequent command line prompt.
         index, match = conn.execute('')
         prompt       = match.group(0).strip()
-        hostname     = prompt.rstrip('>').rstrip('#')
+        match        = prompt_re.match(prompt)
+        hostname     = match.group(1)
         host.set('__cfg_hostname__', hostname)
         return hostname
 
@@ -41,11 +44,6 @@ class SmartEdgeOSProvider(Provider):
     def init(self, conn):
         conn.autoinit()
         conn.set_timeout(15 * 60)
-
-        # Define a more reliable prompt.
-        hostname = self.get_hostname(conn)
-        prompt   = r'[\r\n]' + hostname + r'[#>] ?$'
-        conn.set_prompt(re.compile(prompt))
 
         # Whenever connection.execute() is called, clean
         # the response up.
