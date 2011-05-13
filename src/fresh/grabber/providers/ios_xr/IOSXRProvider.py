@@ -40,7 +40,7 @@ class IOSXRProvider(Provider):
 
         # Define a more reliable prompt.
         hostname = self.get_hostname(conn)
-        prompt   = r'[\r\n]\S+' + hostname + r'[#>] ?$'
+        prompt   = r'[\r\n]\S+' + re.escape(hostname) + r'[#>] ?$'
         conn.set_prompt(re.compile(prompt))
 
         # Whenever connection.execute() is called, clean
