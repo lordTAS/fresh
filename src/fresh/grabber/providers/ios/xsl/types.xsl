@@ -89,9 +89,12 @@
           <name>
               <xsl:value-of select="sampler" />
           </name>
-          <direction>
-              <xsl:value-of select="direction" />
-          </direction>
+          <xsl:if test="direction = 'ingress'">
+            <direction>input</direction>
+          </xsl:if>
+          <xsl:if test="direction = 'egress'">
+            <direction>output</direction>
+          </xsl:if>
         </sampling>
       </xsl:for-each>
 
