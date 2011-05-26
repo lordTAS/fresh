@@ -163,9 +163,7 @@
 <xs:complexType name="unitType">
   <xs:sequence>
     <xs:element name="description" type="xs:normalizedString" minOccurs="0"/>
-    <xs:element name="bandwidth" type="nonEmptyString" minOccurs="0"/>
-    <xs:element name="ipv4-address-list" type="IPv4AddressListType" minOccurs="0"/>
-    <xs:element name="policy" type="policyReferenceType" minOccurs="0" maxOccurs="unbounded"/>
+    <xs:element name="bandwidth" type="xs:integer" minOccurs="0"/>
     <xs:element name="isis-l1-metric" type="metricType" minOccurs="0"/>
     <xs:element name="isis-l2-metric" type="metricType" minOccurs="0"/>
     <xs:element name="ipv4-statement" type="unitIPv4StatementType" minOccurs="0" maxOccurs="1"/>
@@ -183,7 +181,7 @@
 <xs:complexType name="interfaceType">
   <xs:sequence>
     <xs:element name="description" type="xs:normalizedString" minOccurs="0"/>
-    <xs:element name="bandwidth" type="nonEmptyString" minOccurs="0"/>
+    <xs:element name="bandwidth" type="xs:integer" minOccurs="0"/>
     <xs:element name="l2-status" type="interfaceL2Status"/>
   </xs:sequence>
   <xs:attribute name="name" type="nonEmptyString" use="required"/>

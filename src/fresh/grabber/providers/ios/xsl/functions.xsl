@@ -121,4 +121,19 @@ this function returns the position, e.g. 1/0, 0, or 2/0.
   <func:result select="$interfaceName = grabber:getInterfaceName($unitName)"/>
 </func:function>
 
+<func:function name="grabber:isDirection">
+  <xsl:param name="direction"/>
+  <xsl:choose>
+    <xsl:when test="$direction = 'ingress'">
+        <func:result>input</func:result>
+    </xsl:when>
+    <xsl:when test="$direction = 'egress'">
+        <func:result>output</func:result>
+    </xsl:when>
+    <xsl:otherwise>
+      <func:result select="$direction"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</func:function>
+
 </xsl:stylesheet>

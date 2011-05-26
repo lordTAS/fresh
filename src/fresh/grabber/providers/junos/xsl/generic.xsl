@@ -228,40 +228,6 @@
               </bandwidth>
             </xsl:if>
 
-            <!-- IPv4 addresses. -->
-            <xsl:variable
-              name="addresses"
-              select="shint:address-family[shint:address-family-name='inet']/shint:interface-address"/>
-            <xsl:if test="$addresses">
-              <ipv4-address-list>
-                <xsl:for-each select="$addresses">
-                  <ipv4-address>
-                    <xsl:attribute name="address">
-                      <xsl:value-of select="shint:ifa-local" />
-                    </xsl:attribute>
-                    <xsl:attribute name="mask">
-                      <xsl:value-of select="grabber:netmask(str:tokenize(shint:ifa-destination, '/')[2])" />
-                    </xsl:attribute>
-                  </ipv4-address>
-                </xsl:for-each>
-              </ipv4-address-list>
-            </xsl:if>
-
-            <!-- Filter bindings. -->
-            <xsl:variable
-              name="filters"
-              select="shint:family/shint:inet/shint:filter"/>
-            <xsl:for-each select="$filters/shint:input">
-              <policy direction="input">
-                <xsl:value-of select="shint:filter-name"/>
-              </policy>
-            </xsl:for-each>
-            <xsl:for-each select="$filters/shint:output">
-              <policy direction="output">
-                <xsl:value-of select="shint:filter-name"/>
-              </policy>
-            </xsl:for-each>
-
             <!-- ISIS metric. -->
             <xsl:variable name="unit-name" select="shint:name"/>
             <xsl:variable name="isis-ifc"
@@ -295,9 +261,9 @@
               </xsl:for-each>
 
               <!-- Filter bindings. -->
-              <!--xsl:variable
+              <xsl:variable
                 name="filters"
-                select="shint:family/shint:inet/shint:filter"/-->
+                select="shint:family/shint:inet/shint:filter"/>
               <xsl:for-each select="$filters/shint:input">
                 <policy direction="input">
                   <xsl:value-of select="shint:filter-name"/>
@@ -310,9 +276,9 @@
               </xsl:for-each>
 
               <!-- IPv4 addresses. -->
-              <!--xsl:variable
+              <xsl:variable
                 name="addresses"
-                select="shint:address-family[shint:address-family-name='inet']/shint:interface-address"/-->
+                select="shint:address-family[shint:address-family-name='inet']/shint:interface-address"/>
               <xsl:if test="$addresses">
                 <address-list>
                   <xsl:for-each select="$addresses">

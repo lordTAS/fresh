@@ -33,37 +33,6 @@
       </bandwidth>
     </xsl:if>
 
-    <!-- IPv4 addresses. -->
-    <xsl:variable
-      name="addresses"
-      select="$runint/ip-address | $runint/ipv4-address"/>
-    <xsl:if test="$addresses/@address">
-      <ipv4-address-list>
-        <xsl:for-each select="$addresses">
-          <xsl:if test="@address">
-            <ipv4-address>
-              <xsl:attribute name="address">
-                <xsl:value-of select="@address" />
-              </xsl:attribute>
-              <xsl:attribute name="mask">
-                <xsl:value-of select="@mask" />
-              </xsl:attribute>
-            </ipv4-address>
-          </xsl:if>
-        </xsl:for-each>
-      </ipv4-address-list>
-    </xsl:if>
-
-    <!-- Service policy bindings. -->
-    <xsl:for-each select="$runint/service-policy">
-      <policy>
-        <xsl:attribute name="direction">
-          <xsl:value-of select="@direction" />
-        </xsl:attribute>
-        <xsl:value-of select="@name"/>
-      </policy>
-    </xsl:for-each>
-
     <!-- ISIS metric. -->
     <xsl:variable name="isis-ifc"
       select="$shrun//isis//interface[@name=$name] | $runint/isis" />
@@ -89,12 +58,9 @@
           <name>
               <xsl:value-of select="sampler" />
           </name>
-          <xsl:if test="direction = 'ingress'">
-            <direction>input</direction>
-          </xsl:if>
-          <xsl:if test="direction = 'egress'">
-            <direction>output</direction>
-          </xsl:if>
+          <direction>
+              <xsl:value-of select="grabber:isDirection(direction)" />
+          </direction>
         </sampling>
       </xsl:for-each>
 
@@ -109,9 +75,9 @@
       </xsl:for-each>
 
       <!-- IPv4 addresses. -->
-      <!--xsl:variable
+      <xsl:variable
         name="addresses"
-        select="$runint/ip-address | $runint/ipv4-address"/-->
+        select="$runint/ip-address | $runint/ipv4-address"/>
       <xsl:if test="$addresses/@address">
         <address-list>
           <xsl:for-each select="$addresses">
