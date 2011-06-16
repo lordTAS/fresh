@@ -66,26 +66,42 @@ Does nothing if the given string does not end with the given tail.
   </xsl:choose>
 </func:function>
 
+<!--
+Converts the given bandwidth string to an integer in kilobytes.
+
+@bandwidth: The bandwidth as a string.
+@return: The bandwidth in kilobytes.
+-->
 <func:function name="grabber:bw2int">
-  <xsl:param name="bw"/>
+  <xsl:param name="bandwidth"/>
+  <xsl:variable name="bw" select="grabber:rstrip(grabber:lower-case($bandwidth), 'bps')"/>
   <xsl:choose>
-    <xsl:when test="$bw = 'Unknown'">
-      <func:result></func:result>
+    <xsl:when test="not($bandwidth)
+                 or $bandwidth = ''
+                 or $bw = 'unknown'
+                 or $bw = 'unlimited'">
+      <func:result/>
     </xsl:when>
-    <xsl:when test="$bw = 'Unlimited'">
-      <func:result></func:result>
+    <xsl:when test="$bw = 'e1'">
+      <func:result select="2097152"/>
     </xsl:when>
-    <xsl:when test="grabber:ends-with($bw, 'mbps')">
-      <func:result select="concat(substring($bw, 1, string-length($bw)-4), '000')" />
+    <xsl:when test="$bw = 'e3'">
+      <func:result select="35192832"/>
     </xsl:when>
-    <xsl:when test="grabber:ends-with($bw, 'Gbps')">
-      <func:result select="concat(substring($bw, 1, string-length($bw)-4), '000000')" />
-    </xsl:when>
-    <xsl:when test="starts-with($bw, 'OC')">
+    <xsl:when test="starts-with($bw, 'oc')">
       <func:result select="substring($bw, 3) * 1024 * 52" />
     </xsl:when>
+    <xsl:when test="grabber:ends-with($bw, 'k')">
+      <func:result select="grabber:rstrip($bw, 'k')" />
+    </xsl:when>
+    <xsl:when test="grabber:ends-with($bw, 'm')">
+      <func:result select="concat(grabber:rstrip($bw, 'm'), '000')" />
+    </xsl:when>
+    <xsl:when test="grabber:ends-with($bw, 'g')">
+      <func:result select="concat(grabber:rstrip($bw, 'g'), '000000')" />
+    </xsl:when>
     <xsl:otherwise>
-      <func:result select="$bw"/>
+      <func:result select="$bw div 1024"/>
     </xsl:otherwise>
   </xsl:choose>
 </func:function>
