@@ -70,9 +70,8 @@ return
 '''
 
 class ExistDBMetadataStore(ExistDBStore):
-    def start(self, provider, conn, **kwargs):
+    def start(self, provider, host, conn, **kwargs):
         # Get the collection and document name.
-        host       = conn.get_host()
         document   = kwargs.get('document')
         document   = self._replace_vars(host, document)
         collection = 'ips'  #FIXME: well this sucks
@@ -81,7 +80,6 @@ class ExistDBMetadataStore(ExistDBStore):
             collection += '/' + path
 
         # Submit the metadata.
-        host     = conn.get_host()
         address  = host.get_address()
         hostname = host.get_name()
         country  = host.get('country')

@@ -39,7 +39,7 @@ class GelatinProcessor(Processor):
         with self.compile_lock:
             self.converters[syntax_filename].append(converter)
 
-    def start(self, provider, conn, **kwargs):
+    def start(self, provider, host, conn, **kwargs):
         syntax    = kwargs.get('syntax')
         outfile   = kwargs.get('filename')
         converter = self._acquire_converter(syntax)
@@ -49,4 +49,4 @@ class GelatinProcessor(Processor):
         finally:
             self._release_converter(syntax, converter)
 
-        provider.store.store(provider, conn, outfile, result)
+        provider.store.store(provider, host, outfile, result)

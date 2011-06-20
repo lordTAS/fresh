@@ -21,8 +21,7 @@ from providers.junos.util import remove_passwords_from_config,    \
                                  remove_descriptions_from_xml
 
 class JunOSProvider(Provider):
-    def get_hostname(self, conn):
-        host = conn.get_host()
+    def get_hostname(self, host, conn):
         if host.get('__cfg_hostname__'):
             return host.get('__cfg_hostname__')
         conn.execute('show version | match ^Hostname')
@@ -49,12 +48,12 @@ class JunOSProvider(Provider):
     def remove_descriptions_from_xml(self, xml):
         return remove_descriptions_from_xml(xml)
 
-    def init(self, conn):
+    def init(self, host, conn):
         conn.autoinit()
         conn.set_timeout(20 * 60)
 
         # Define a more reliable prompt.
-        hostname = self.get_hostname(conn)
+        hostname = self.get_hostname(host, conn)
         prompt   = r'[\r\n]\w+@' + re.escape(hostname) + r'[#>] ?$'
         conn.set_prompt(re.compile(prompt))
 

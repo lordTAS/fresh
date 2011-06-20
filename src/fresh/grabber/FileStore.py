@@ -21,8 +21,7 @@ class FileStore(object):
         if not os.path.isdir(self.base_dir):
             os.makedirs(self.base_dir)
 
-    def get_path(self, conn, filename = None):
-        host     = conn.get_host()
+    def get_path(self, host, filename = None):
         path     = host.get('__path__')
         host_dir = os.path.join(self.base_dir, path)
         if filename:
@@ -31,13 +30,13 @@ class FileStore(object):
 
     def store(self,
               provider,
-              conn,
+              host,
               filename,
               content,
               cleanpass = False,
               cleandesc = False):
-        host_dir = self.get_path(conn)
-        filename = self.get_path(conn, filename)
+        host_dir = self.get_path(host)
+        filename = self.get_path(host, filename)
         isxml    = filename.endswith('.xml')
 
         if not os.path.isdir(host_dir):
@@ -58,8 +57,8 @@ class FileStore(object):
             file.write(content)
         return filename
 
-    def get(self, conn, filename):
-        with open(self.get_path(conn, filename)) as file:
+    def get(self, host, filename):
+        with open(self.get_path(host, filename)) as file:
             return file.read()
 
     def delete(self, host):

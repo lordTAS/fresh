@@ -29,7 +29,7 @@ class XsltProcessor(Processor):
         self.add_address   = add_address
         self.add_timestamp = add_timestamp
 
-    def start(self, provider, conn, **kwargs):
+    def start(self, provider, host, conn, **kwargs):
         xslt_file = kwargs.get('xslt')
         xsd_file  = kwargs.get('xsd')
         infile    = kwargs.get('input')
@@ -42,18 +42,18 @@ class XsltProcessor(Processor):
         # Transform.
         xsl       = etree.parse(xslt_file)
         transform = etree.XSLT(xsl)
-        path      = provider.store.get_path(conn, infile)
-        input     = provider.store.get(conn, infile)
+        path      = provider.store.get_path(host, infile)
+        input     = provider.store.get(host, infile)
         doc       = etree.parse(StringIO(input), base_url = path)
         result    = transform(doc)
 
         # Add the address and a timestamp field to the root node in the resulting
         # XML.
         if self.add_address:
-            address = conn.get_host().get_address()
+            address = host.get_address()
             result.getroot().set('address', address)
         if self.add_hostname:
-            hostname = conn.get_host().get_name()
+            hostname = host.get_name()
             result.getroot().set('name', hostname)
         if self.add_timestamp:
             ts = time.asctime()
@@ -66,4 +66,4 @@ class XsltProcessor(Processor):
             schema.assertValid(result)
 
         # Write.
-        provider.store.store(provider, conn, outfile, str(result))
+        provider.store.store(provider, host, outfile, str(result))

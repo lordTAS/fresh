@@ -89,9 +89,9 @@ class Grabber(object):
                                                                module))
 
         # Init the command line.
-        cfghostname = provider.get_hostname(conn)
+        cfghostname = provider.get_hostname(host, conn)
         logger.info('%s: Prompt hostname is %s.' % (label, cfghostname))
-        provider.init(conn)
+        provider.init(host, conn)
         logger.info('%s: Command line initialized.' % label)
         update_progress()
 
@@ -102,7 +102,7 @@ class Grabber(object):
 
         # Run.
         logger.info('%s: Starting.' % label)
-        provider.start(conn, update_progress)
+        provider.start(host, conn, update_progress)
         logger.info('%s: Completed.' % label)
         conn.close(True)
 

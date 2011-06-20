@@ -21,8 +21,7 @@ from providers.ios.util  import remove_passwords_from_config, \
 prompt_re = re.compile(r'^\[\w+\]([^>#]+)[>#]')
 
 class SmartEdgeOSProvider(Provider):
-    def get_hostname(self, conn):
-        host = conn.get_host()
+    def get_hostname(self, host, conn):
         if host.get('__cfg_hostname__'):
             return host.get('__cfg_hostname__')
 
@@ -41,7 +40,7 @@ class SmartEdgeOSProvider(Provider):
     def remove_descriptions_from_config(self, config):
         return remove_descriptions_from_config(config)
 
-    def init(self, conn):
+    def init(self, host, conn):
         conn.autoinit()
         conn.set_timeout(15 * 60)
 

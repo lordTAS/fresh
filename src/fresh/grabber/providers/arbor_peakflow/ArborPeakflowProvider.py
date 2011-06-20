@@ -18,8 +18,7 @@ from providers import Provider
 _prompt_re = re.compile(r'[\w\-]+@(\S+):\S+[%#] $')
 
 class ArborPeakflowProvider(Provider):
-    def get_hostname(self, conn):
-        host = conn.get_host()
+    def get_hostname(self, host, conn):
         if host.get('__cfg_hostname__'):
             return host.get('__cfg_hostname__')
 
@@ -31,6 +30,6 @@ class ArborPeakflowProvider(Provider):
         host.set('__cfg_hostname__', hostname)
         return hostname
 
-    def init(self, conn):
+    def init(self, host, conn):
         conn.autoinit()
         conn.set_timeout(5 * 60)

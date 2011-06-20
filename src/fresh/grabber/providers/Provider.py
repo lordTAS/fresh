@@ -17,7 +17,7 @@ from lxml import etree
 from Exscript.protocols.Exception import ProtocolException
 
 class Action(object):
-    def do(self, conn):
+    def do(self, host, conn):
         raise NotImplementedError()
 
     def cleanup(self, host):
@@ -28,11 +28,11 @@ class Action(object):
         logger = host.get('__logger__')
         logger.log(level, label + ': ' + msg)
 
-    def log(self, conn, msg, level = logging.INFO):
-        self.hlog(conn.get_host(), msg, level)
+    def log(self, host, msg, level = logging.INFO):
+        self.hlog(host, msg, level)
 
-    def dbg(self, conn, msg):
-        self.log(conn, msg, logging.DEBUG)
+    def dbg(self, host, msg):
+        self.log(host, msg, logging.DEBUG)
 
 class PostProcess(Action):
     def __init__(self, provider, xml):
@@ -42,11 +42,11 @@ class PostProcess(Action):
         self.args           = xml.attrib
         del self.args['processor']
 
-    def do(self, conn):
+    def do(self, host, conn):
         name = repr(self.processor_name)
         args = repr(self.args)
-        self.dbg(conn, 'running post-processor %s with args %s' % (name, args))
-        self.processor.start(self.provider, conn, **self.args)
+        self.dbg(host, 'running post-processor %s with args %s' % (name, args))
+        self.processor.start(self.provider, host, conn, **self.args)
 
     def cleanup(self, host):
         name = repr(self.processor_name)
@@ -58,42 +58,42 @@ class Login(Action):
     def __init__(self, provider, xml):
         self.flush = bool(xml.get('flush', True))
 
-    def do(self, conn):
+    def do(self, host, conn):
         conn.login(flush = self.flush)
 
 class Authenticate(Action):
     def __init__(self, provider, xml):
         self.flush = bool(xml.get('flush', True))
 
-    def do(self, conn):
+    def do(self, host, conn):
         conn.authenticate(flush = self.flush)
 
 class ProtocolAuthenticate(Action):
     def __init__(self, provider, xml):
         pass
 
-    def do(self, conn):
+    def do(self, host, conn):
         conn.protocol_authenticate()
 
 class AppAuthenticate(Action):
     def __init__(self, provider, xml):
         self.flush = bool(xml.get('flush', True))
 
-    def do(self, conn):
+    def do(self, host, conn):
         conn.app_authenticate(flush = self.flush)
 
 class AppAuthorize(Action):
     def __init__(self, provider, xml):
         self.flush = bool(xml.get('flush', True))
 
-    def do(self, conn):
+    def do(self, host, conn):
         conn.app_authorize(flush = self.flush)
 
 class AutoAppAuthorize(Action):
     def __init__(self, provider, xml):
         self.flush = bool(xml.get('flush', True))
 
-    def do(self, conn):
+    def do(self, host, conn):
         conn.auto_app_authorize(flush = self.flush)
 
 class Store(Action):
@@ -104,9 +104,9 @@ class Store(Action):
         self.cleanpass = bool(int(xml.get('remove-passwords',    False)))
         self.cleandesc = bool(int(xml.get('remove-descriptions', False)))
 
-    def do(self, conn):
+    def do(self, host, conn):
         self.store.store(self.provider,
-                         conn,
+                         host,
                          self.filename,
                          conn.response,
                          cleanpass = self.cleanpass,
@@ -135,11 +135,10 @@ class Execute(Action):
             else:
                 raise Exception('Invalid XML tag: %s' % element.tag)
 
-    def do(self, conn):
-        host = conn.get_host()
+    def do(self, host, conn):
         cmd  = repr(self.command)
         host.set('__last_command__', self.command)
-        self.log(conn, 'Executing %s' % repr(cmd))
+        self.log(host, 'Executing %s' % repr(cmd))
 
         old_timeout = conn.get_timeout()
         if self.timeout is not None:
@@ -150,22 +149,22 @@ class Execute(Action):
         except ProtocolException, e:
             err = repr(str(e))
             if self.on_error == 'skip':
-                self.log(conn, '%s during %s, skipping' % (err, cmd))
+                self.log(host, '%s during %s, skipping' % (err, cmd))
                 return
             elif self.on_error == 'continue':
-                self.log(conn, '%s during %s, handling anyway' % (err, cmd))
+                self.log(host, '%s during %s, handling anyway' % (err, cmd))
             elif self.on_error == 'raise':
-                self.log(conn, 'Exception %s during %s' % (err, cmd))
+                self.log(host, 'Exception %s during %s' % (err, cmd))
                 raise
             else:
                 raise Exception('BUG: on_error is %s' % self.on_error)
         else:
-            self.log(conn, 'Command succeeded: %s' % cmd)
+            self.log(host, 'Command succeeded: %s' % cmd)
         finally:
             conn.set_timeout(old_timeout)
 
         for child in self.children:
-            child.do(conn)
+            child.do(host, conn)
 
     def cleanup(self, host):
         for child in self.children:
@@ -213,9 +212,9 @@ class Provider(object):
     def get_store(self):
         return self.store
 
-    def start(self, conn, update_progress_func):
+    def start(self, host, conn, update_progress_func):
         for task in self.tasks:
-            task.do(conn)
+            task.do(host, conn)
             update_progress_func()
 
     def delete(self, host):

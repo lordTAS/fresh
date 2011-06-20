@@ -34,12 +34,11 @@ class ExistDBStore(Processor):
             etree.SubElement(xml, 'line', number = str(n + 1)).text = line
         return etree.tostring(xml)
 
-    def start(self, provider, conn, **kwargs):
-        host     = conn.get_host()
+    def start(self, provider, host, conn, **kwargs):
         filename = kwargs.get('filename')
         document = kwargs.get('document')
         document = self._replace_vars(host, document)
-        content  = provider.store.get(conn, filename)
+        content  = provider.store.get(host, filename)
 
         if filename.endswith('.txt'):
             content = self._txt2xml(host.get_name(), content)

@@ -19,8 +19,7 @@ from providers.ios.util  import remove_passwords_from_config, \
                                 remove_descriptions_from_config
 
 class JunOSERXProvider(Provider):
-    def get_hostname(self, conn):
-        host = conn.get_host()
+    def get_hostname(self, host, conn):
         if host.get('__cfg_hostname__'):
             return host.get('__cfg_hostname__')
 
@@ -38,12 +37,12 @@ class JunOSERXProvider(Provider):
     def remove_descriptions_from_config(self, config):
         return remove_descriptions_from_config(config)
 
-    def init(self, conn):
+    def init(self, host, conn):
         conn.autoinit()
         conn.set_timeout(15 * 60)
 
         # Define a more reliable prompt.
-        hostname = self.get_hostname(conn)
+        hostname = self.get_hostname(host, conn)
         prompt   = r'[\r\n]' + re.escape(hostname) + r'[#>] ?$'
         conn.set_prompt(re.compile(prompt))
 

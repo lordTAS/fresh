@@ -20,14 +20,14 @@ class LineSplitProcessor(Processor):
     def __init__(self):
         pass
 
-    def start(self, provider, conn, **kwargs):
+    def start(self, provider, host, conn, **kwargs):
         outfile = kwargs.get('filename')
 
         # Create the XML document.
-        xml = etree.Element('xml', hostname = conn.get_host().get_name())
+        xml = etree.Element('xml', hostname = host.get_name())
         for n, line in enumerate(conn.response.split('\n')):
             etree.SubElement(xml, 'line', number = str(n + 1)).text = line
         xml = etree.tostring(xml)
 
         # Write to file system.
-        provider.store.store(provider, conn, outfile, xml)
+        provider.store.store(provider, host, outfile, xml)
