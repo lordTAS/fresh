@@ -84,7 +84,9 @@ class Packager(object):
             src_path = seedhost.get('path')
             dst_path = host.get('path')[0]
             dst_dir  = os.path.join(tmp_dir, dst_path)
-            vars     = {'os': seedhost.get('os')}
+            vars     = {'hostname': hostname,
+                        'address':  address,
+                        'os':       seedhost.get('os')}
 
             for profile in self.profiles:
                 if not profile.test_condition(vars):
