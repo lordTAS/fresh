@@ -37,10 +37,8 @@ class Grabber(object):
              + ')'
 
     def get_provider_for_host(self, host):
-        vars = dict(os       = host.get('os'),
-                    hostname = host.get_name(),
-                    address  = host.get_address(),
-                    path     = host.get('path'))
+        vars = dict(os = host.get('os'), path = host.get('path'))
+        vars.update(host.get_dict())
         for provider in self.providers:
             if provider.test_condition(vars):
                 return provider
