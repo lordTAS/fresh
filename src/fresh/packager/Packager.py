@@ -104,6 +104,7 @@ class Packager(object):
                         os.symlink(src, dst)
                     else:
                         logger.info(hostname + ': %s does not exist.' % src)
+                break
 
             if profile is None:
                 logger.info(hostname + ': No profile! ' + repr(vars))
