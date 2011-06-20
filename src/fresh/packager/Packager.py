@@ -88,9 +88,9 @@ class Packager(object):
                         'address':  address,
                         'os':       seedhost.get('os')}
 
+            profile = None
             for profile in self.profiles:
                 if not profile.test_condition(vars):
-                    logger.info(hostname + ': No profile! ' + repr(vars))
                     continue
                 logger.info(hostname + ': Selected profile is ' + profile.name)
                 for name, from_name in profile.files:
@@ -102,6 +102,11 @@ class Packager(object):
                         if not os.path.exists(dst_dir):
                             os.makedirs(dst_dir)
                         os.symlink(src, dst)
+                    else:
+                        logger.info(hostname + ': %s does not exist.' % src)
+
+            if profile is None:
+                logger.info(hostname + ': No profile! ' + repr(vars))
 
         path = os.path.join(self.out_dir, self.out_name)
         if self.format == 'directory':
