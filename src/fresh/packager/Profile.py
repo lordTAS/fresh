@@ -14,7 +14,8 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 class Profile(object):
-    def __init__(self):
+    def __init__(self, name):
+        self.name      = name
         self.condition = None
         self.files     = []
 

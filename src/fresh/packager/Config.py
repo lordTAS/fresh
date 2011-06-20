@@ -34,7 +34,7 @@ class Config(ConfigReader):
         element = self.cfgtree.find('profile[@name="%s"]' % name)
         if element is None:
             raise Exception('no such profile: %s' % name)
-        profile = Profile()
+        profile = Profile(name)
         for child in element.iterfind('link'):
             profile.add_file(child.get('name'), child.text)
         return profile

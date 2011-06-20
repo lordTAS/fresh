@@ -74,7 +74,7 @@ class Packager(object):
             tar.add(subdir, dir)
         tar.close()
 
-    def run(self, order):
+    def run(self, logger, order):
         tmp_dir = mkdtemp()
 
         for host in get_hosts_from_etree(order.xml):
@@ -90,7 +90,9 @@ class Packager(object):
 
             for profile in self.profiles:
                 if not profile.test_condition(vars):
+                    logger.info(hostname + ': No profile! ' + repr(vars))
                     continue
+                logger.info(hostname + ': Selected profile is ' + profile.name)
                 for name, from_name in profile.files:
                     src = os.path.join(self.in_dir, src_path, from_name)
                     dst = os.path.join(dst_dir, name)

@@ -19,10 +19,11 @@ from functools             import partial
 config = __service__.config('config.xml', Config)
 
 def run(order):
+    logger   = __service__.create_logger(order, 'export.log')
     packager = config.get_packager()
     order.set_description(packager.describe())
     __service__.set_order_status(order, 'running')
-    packager.run(order)
+    packager.run(logger, order)
 
 def check(order):
     order.set_description('Export to a directory or package')
