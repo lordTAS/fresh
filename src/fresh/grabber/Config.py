@@ -82,9 +82,10 @@ class Config(ConfigReader):
         port       = element.find('port').text
         user       = element.find('user').text
         password   = element.find('password').text
+        path       = element.find('path').text
         collection = element.find('collection').text
-        uri        = user + ':' + password + '@' + host + ':' + port
-        db         = ExistDB(uri, collection)
+        netloc     = user + ':' + password + '@' + host + ':' + port
+        db         = ExistDB(netloc + '/' + path, collection)
         self.exist_dbs['name'] = db
         return db
 

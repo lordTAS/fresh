@@ -21,6 +21,8 @@ class ExistDBStore(Processor):
         self.db = db
 
     def _replace_vars(self, host, string):
+        if string is None:
+            return None
         address  = host.get_address()
         hostname = host.get_name()
         string   = string.replace('{address}',  address)
@@ -32,17 +34,116 @@ class ExistDBStore(Processor):
         xml = etree.Element('xml', hostname = hostname, timestamp = ts)
         for n, line in enumerate(content.split('\n')):
             etree.SubElement(xml, 'line', number = str(n + 1)).text = line
-        return etree.tostring(xml)
+        return xml
+
+    def _move_to_history(self, document, collection):
+        xquery = '''
+        if (doc-available('%{document}'))
+        then
+            let $cstatus   := xmldb:create-collection('%{context}', '%{destination}')
+            let $abssource := '/%{context}/%{path}'
+            let $absdest   := '/%{context}/%{destination}'
+            let $mstatus   := xmldb:move($abssource, $absdest, '%{basename}')
+            return <status>{$mstatus}</status>
+        else ()
+        '''
+
+        path, basename = document.rsplit('/', 1)
+        query = self.db.query(xquery,
+                              context     = self.db.collection,
+                              document    = document,
+                              path        = path,
+                              basename    = basename,
+                              destination = collection)
+        return query.execute()
+        raise Exception(repr(xquery) + repr(query.execute()))
+
+    def _rename_if_exists(self, document, new_name):
+        xquery = '''
+        if (doc-available('%{document}'))
+        then
+            let $status := xmldb:rename('/%{context}/%{collection}',
+                                        '%{resource}',
+                                        '%{newname}')
+            return <status>{$status}</status>
+        else ()
+        '''
+        try:
+            collection, resource = document.rsplit('/', 1)
+        except ValueError:
+            collection = ''
+            resource   = document
+        query = self.db.query(xquery,
+                              context    = self.db.collection,
+                              document   = document,
+                              collection = collection,
+                              resource   = resource,
+                              newname    = new_name)
+        print query.query
+        query.execute()
+        return query
+
+    def _delete_if_exists(self, document):
+        xquery = '''
+        if (doc-available('%{document}'))
+        then
+            let $status := xmldb:remove('/%{context}/%{collection}',
+                                        '%{resource}')
+            return <status>{$status}</status>
+        else ()
+        '''
+        try:
+            collection, resource = document.rsplit('/', 1)
+        except ValueError:
+            collection = ''
+            resource   = document
+        query = self.db.query(xquery,
+                              context    = self.db.collection,
+                              document   = document,
+                              collection = collection,
+                              resource   = resource)
+        query.execute()
+        return query
+
+    def _push(self, document, collection, versions):
+        # Move the given document to the given history collection.
+        # Note the xquery has no API for moving a document and renaming
+        # it at the same time, so we append the sequence number to the
+        # document name later.
+        self._move_to_history(document, collection)
+
+        # Documents in the history have a sequence number appended.
+        # Increase this sequence number for each version, and delete
+        # the one with the highest sequence number.
+        basename = document.split('/')[-1]
+        pathname = collection + '/' + basename
+        for version in range(versions, -1, -1):
+            if version == 0:
+                source = pathname
+            else:
+                source = pathname + '.' + str(version)
+            if version == versions:
+                self._delete_if_exists(source)
+                continue
+            destination = basename + '.' + str(version + 1)
+            self._rename_if_exists(source, destination)
 
     def start(self, provider, host, conn, **kwargs):
         filename = kwargs.get('filename')
         document = kwargs.get('document')
         document = self._replace_vars(host, document)
+        history  = kwargs.get('history')
+        history  = self._replace_vars(host, history)
+        versions = int(kwargs.get('versions', 1))
         content  = provider.store.get(host, filename)
 
+        # Read the file, and parse it into a DOM.
         if filename.endswith('.txt'):
             content = self._txt2xml(host.get_name(), content)
 
+        # If requested, store the last version of the document in the history.
+        if history:
+            self._push(document, history, versions)
         self.db.store(document, content)
 
     def delete(self, provider, host, **kwargs):
