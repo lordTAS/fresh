@@ -78,8 +78,8 @@ Converts the given bandwidth string to an integer in kilobytes.
   <xsl:choose>
     <xsl:when test="not($bandwidth)
                  or $bandwidth = ''
-                 or $bw = 'unknown'
-                 or $bw = 'unlimited'">
+                 or contains($bw, 'unknown')
+                 or contains($bw, 'unlimited')">
       <func:result/>
     </xsl:when>
     <xsl:when test="$bw = 'e1'">
