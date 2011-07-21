@@ -26,9 +26,10 @@
     </xsl:if>
 
     <!-- Interface bandwidth. -->
+    <xsl:variable name="bw" select="grabber:bw2int(concat(bw, 'k'))" />
     <xsl:if test="bw != ''">
       <bandwidth>
-        <xsl:value-of select="grabber:bw2int(concat(bw, 'k'))"/>
+        <xsl:value-of select="$bw"/>
       </bandwidth>
     </xsl:if>
 
