@@ -24,8 +24,8 @@ class JunOSProvider(Provider):
     def get_hostname(self, host, conn):
         if host.get('__cfg_hostname__'):
             return host.get('__cfg_hostname__')
-        conn.execute('show version | match ^Hostname')
-        hostname = first_match(conn, r'Hostname: (\S+)')
+        index, match = conn.execute('')
+        hostname     = re.search(r'@[\w\-]+', match.group(0))
         host.set('__cfg_hostname__', hostname)
         return hostname
 
@@ -51,11 +51,6 @@ class JunOSProvider(Provider):
     def init(self, host, conn):
         conn.autoinit()
         conn.set_timeout(20 * 60)
-
-        # Define a more reliable prompt.
-        hostname = self.get_hostname(host, conn)
-        prompt   = r'[\r\n]\w+@' + re.escape(hostname) + r'[#>] ?$'
-        conn.set_prompt(re.compile(prompt))
 
         # Whenever connection.execute() is called, clean
         # the response up.
