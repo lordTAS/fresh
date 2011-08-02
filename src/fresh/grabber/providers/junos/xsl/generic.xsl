@@ -122,7 +122,7 @@
   </card>
 </xsl:template>
 
-<xsl:template match="/rpc-reply/configuration">
+<xsl:template match="configuration">
   <!--
   Collect a list of logical interfaces. Interfaces ending with ".32767" are
   internal interfaces created by JunOS automatically; we ignore them.
@@ -299,6 +299,10 @@
       </unit-list>
     </xsl:if>
   </host>
+</xsl:template>
+
+<xsl:template match="/rpc-reply">
+    <xsl:apply-templates select="configuration"/>
 </xsl:template>
 
 </xsl:stylesheet>
