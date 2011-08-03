@@ -13,6 +13,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import time
+from hashlib import md5
 from Processor import Processor
 from lxml import etree
 
@@ -56,7 +57,24 @@ class ExistDBStore(Processor):
                               basename    = basename,
                               destination = collection)
         return query.execute()
-        raise Exception(repr(xquery) + repr(query.execute()))
+
+    def _hash_equals(self, document, hash):
+        xquery = '''
+        if (empty(doc('%{document}')/*[@hash='%{hash}']))
+        then <status>not-found</status>
+        else <status>found</status>
+        '''
+        try:
+            collection, resource = document.rsplit('/', 1)
+        except ValueError:
+            collection = ''
+            resource   = document
+        query = self.db.query(xquery,
+                              document = document,
+                              resource = resource,
+                              hash     = hash)
+        result = query.execute().findtext('status')
+        return result == 'found'
 
     def _rename_if_exists(self, document, new_name):
         xquery = '''
@@ -79,7 +97,6 @@ class ExistDBStore(Processor):
                               collection = collection,
                               resource   = resource,
                               newname    = new_name)
-        print query.query
         query.execute()
         return query
 
@@ -107,7 +124,7 @@ class ExistDBStore(Processor):
 
     def _push(self, document, collection, versions):
         # Move the given document to the given history collection.
-        # Note the xquery has no API for moving a document and renaming
+        # Note that XQuery provides no API for moving a document and renaming
         # it at the same time, so we append the sequence number to the
         # document name later.
         self._move_to_history(document, collection)
@@ -136,10 +153,17 @@ class ExistDBStore(Processor):
         history  = self._replace_vars(host, history)
         versions = int(kwargs.get('versions', 1))
         content  = provider.store.get(host, filename)
+        hash     = md5(content).hexdigest()
+
+        if self._hash_equals(document, hash):
+            return
 
         # Read the file, and parse it into a DOM.
         if filename.endswith('.txt'):
             content = self._txt2xml(host.get_name(), content)
+        else:
+            content = etree.fromstring(content)
+        content.attrib['hash'] = hash
 
         # If requested, store the last version of the document in the history.
         if history:
