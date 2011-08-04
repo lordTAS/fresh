@@ -63,7 +63,7 @@ def check(order):
     if not hosts:
         descr = ''
     elif len(hosts) == 1:
-        descr = 'Update ' + hosts[0].get_name()
+        descr = 'Update !' + hosts[0].get_name()
     else:
         descr = 'Update %d hosts' % len(hosts)
 
@@ -89,7 +89,7 @@ def enter(order):
     # additional attributes from the database.
     hosts = []
     for host in get_hosts_from_etree(order.xml):
-        task     = __service__.create_task(order, 'Update %s' % host.get_name())
+        task     = __service__.create_task(order, 'Update !%s' % host.get_name())
         seedhost = grabber.get_seedhost_from_name(host.get_name())
 
         if not seedhost:
