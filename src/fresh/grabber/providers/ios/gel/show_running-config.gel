@@ -342,6 +342,9 @@ grammar bgp_neighbor_group_statements(default):
     match 'soft-reconfiguration' fs word nl:
         out.add('$0?direction="$2"')
         do.return()
+    match 'soo' fs nows nl:
+        out.add('$0', '$2')
+        do.return()
     match 'shutdown' nl:
         out.add('$0')
         do.return()
@@ -1236,6 +1239,11 @@ grammar ip_sla_statements(default):
         out.add('$0', '$2')
     match 'icmp-echo' fs ipvx_ip nl:
         out.add('$0', '$2')
+    match 'enable reaction-alerts' nl:
+        out.add('$0')
+    match 'schedule' fs number fs 'life' fs nows fs 'start-time' fs nows nl:
+        out.add('$0?sla="$2"/life',       '$6')
+        out.add('$0?sla="$2"/start-time', '$10')
     match 'timeout' fs number nl:
         out.add('$0', '$2')
     match 'vrf' fs nows nl:
@@ -1373,9 +1381,9 @@ grammar ip_statements(default):
     match 'sla' fs number nl:
         out.enter('$0?number="$2"')
         ip_sla_statements()
-    match 'sla schedule' fs number fs 'life' fs nows fs 'start-time' fs nows nl:
-        out.add('$0?sla="$2"/life',       '$6')
-        out.add('$0?sla="$2"/start-time', '$10')
+    match 'sla' fs:
+        out.enter('$0')
+        ip_sla_statements()
     match 'ssh' fs 'precedence' fs number nl:
         out.add('$0/$2', '$4')
     match 'ssh' fs 'source-interface' fs nows nl:
@@ -1840,6 +1848,8 @@ grammar input(default):
     match 'arp' fs ipv4_ip fs nows fs nows nl:
         out.add('$0?ip_address="$2"/mac-address', '$4')
         out.add('$0?ip_address="$2"/type', '$6')
+    match 'authentication mac-move permit' nl:
+        out.add('$0')
     match 'banner' fs word fs multi_line_str_start:
         out.enter('banner/$2')
         banner_statements()
@@ -1970,6 +1980,8 @@ grammar input(default):
         out.add('$0', '$2')
     match 'spanning-tree' fs 'backbonefast' nl:
         out.add('$0/$2')
+    match 'spanning-tree' fs 'etherchannel' fs 'guard misconfig' nl:
+        out.add('$0/$2/$4')
     match 'spanning-tree' fs /(?:mode|extend)/ fs nows nl:
         out.add('$0/$2', '$4')
     match 'spanning-tree' fs 'optimize' fs nonl nl:
