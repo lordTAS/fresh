@@ -12,8 +12,8 @@ define hostname name
 define ipv4_ip /\d+\.\d+\.\d+\.\d+/
 define ipv4_mask ipv4_ip
 define ipv4_umask ipv4_ip
-define ipv6_ip /[a-zA-Z0-9]+:[a-zA-Z0-9:]+/
-define ipvx_ip /[a-zA-Z0-9:\.]+[\.:][a-zA-Z0-9:\.]+/
+define ipv6_ip /[a-zA-Z0-9:]+:[a-zA-Z0-9:]*/
+define ipvx_ip /[a-zA-Z0-9:\.]+[\.:][a-zA-Z0-9:\.]*/
 define if_name /[a-zA-Z\-]+[0-9][0-9\/\.:]*/
 define if_type /\S+/
 define multi_line_str_start /\^CC?[\r\n]?/
@@ -87,6 +87,8 @@ grammar acl_statements(default):
 grammar ipv6_acl_statements(default):
     match acl_action fs nonl nl:
         out.add('$0?condition="$2"')
+    match 'sequence' fs number fs acl_action fs nonl nl:
+        out.add('$0?sequence="$2"&condition="$4"')
     do.return()
 
 grammar acl(default):
@@ -814,7 +816,7 @@ grammar interface_statements(default):
         out.add('ip-address/unnumbered?interface="$2"')
     match 'ip unreachables' nl:
         out.add('ip-unreachables')
-    match 'ip vrf forwarding' fs nows nl:
+    match /(?:ip )?vrf forwarding/ fs nows nl:
         out.add('$0', '$2')
     match 'ip' fs 'verify unicast' fs 'reverse-path' nl:
         out.add('$2/$4')
@@ -1056,6 +1058,8 @@ grammar interface_statements(default):
         out.add('$0/$2', '$4')
     match 'tunnel' fs 'checksum' nl:
         out.add('$0/$2')
+    match 'tunnel' fs 'vrf' fs nonl nl:
+        out.add('$0/$2', '$4')
     match 'tx-cos' fs nonl nl:
         out.add('$0', '$2')
     match 'tx-queue-limit' fs number nl:
@@ -1129,6 +1133,15 @@ grammar ip_route(default):
         ip_route_statements()
     do.return()
 
+grammar ipv6_route(default):
+    match 'route' fs ipv6_ip '/' number fs:
+        out.enter('static-route?ip="$2"&prefixlen="$4"')
+        ip_route_statements()
+    match 'route vrf' fs name fs ipv6_ip '/' number fs:
+        out.enter('options/ip/vrf-list/vrf?name="$2"/static-route?ip="$4"&prefixlen="$6"')
+        ip_route_statements()
+    do.return()
+
 grammar ipv6_statements(default):
     match 'cef' nl:
         out.add('$0')
@@ -1146,11 +1159,9 @@ grammar ipv6_statements(default):
     do.return()
 
 grammar ipv6(default):
-    match 'ipv6 route' fs ipv6_ip '/' number fs:
-        out.enter('static-route?ip="$2"&prefixlen="$4"')
-        ip_route_statements()
     match 'ipv6' fs:
         out.enter('ipv6')
+        ipv6_route()
         ipv6_statements()
     do.return()
 
@@ -1183,7 +1194,14 @@ grammar community_list_standard_statements(default):
 grammar community_list_expanded_statements(community_list_standard_statements):
     do.return()
 
+grammar ip_vrf_af_statements(default):
+    match 'exit-address-family' nl:
+        do.return()
+
 grammar ip_vrf_statements(default):
+    match 'address-family' fs nonl nl:
+        out.enter('$0?protocol="$2"')
+        ip_vrf_af_statements()
     match 'description' fs nonl nl:
         out.add('$0', '$2')
     match 'import map' fs name nl:
@@ -1771,11 +1789,11 @@ grammar transceiver_type_statements(default):
     do.return()
 
 grammar users(default):
-    match 'username' fs name fs 'password' fs word fs word nl:
+    match 'username' fs name fs /secret|password/ fs word fs word nl:
         out.add('users/user?name="$2"/password?type="$6"', '$8')
-    match 'username' fs name fs 'privilege' fs number fs 'secret' fs number fs nows nl:
+    match 'username' fs name fs 'privilege' fs number fs /secret|password/ fs number fs nows nl:
         out.add('users/user?name="$2"/privilege-level', '$6')
-        out.add('users/user?name="$2"/secret?type="$10"', '$12')
+        out.add('users/user?name="$2"/password?type="$10"', '$12')
     do.return()
 
 grammar vc_class_statements(default):
@@ -2005,6 +2023,9 @@ grammar input(default):
         out.add('$0/$2?name="$4"')
     match 'vlan' fs 'internal allocation policy' fs nows nl:
         out.add('$0/$2/$4')
+    match 'vrf definition' fs nonl nl:
+        out.enter('vrf-list/vrf?name="$2"')
+        ip_vrf_statements()
     acl()
     aaa()
     archive()
