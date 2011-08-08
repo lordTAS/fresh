@@ -18,12 +18,19 @@ from providers           import Provider
 from providers.ios.util  import remove_passwords_from_config, \
                                 remove_descriptions_from_config
 
+_prompt_re = re.compile(r':([\w\-\.]+)#')
+
 class IOSXRProvider(Provider):
     def get_hostname(self, host, conn):
         if host.get('__cfg_hostname__'):
             return host.get('__cfg_hostname__')
-        conn.execute('show configuration running-config | i ^hostname')
-        hostname = first_match(conn, r'hostname (\S+)')
+
+        # We attempt to find the hostname by sending a return keypress,
+        # and parsing the subsequent command line prompt.
+        index, match = conn.execute('')
+        prompt       = match.group(0)
+        hostmatch    = _prompt_re.search(prompt)
+        hostname     = hostmatch.group(1)
         host.set('__cfg_hostname__', hostname)
         return hostname
 
