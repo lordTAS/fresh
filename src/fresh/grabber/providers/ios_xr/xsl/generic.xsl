@@ -9,10 +9,10 @@
 <xsl:import href="types.xsl"/>
 <xsl:output method="xml" indent="yes" encoding="iso-8859-1" />
 
-<xsl:variable name="shrun" select="xml"/>
+<xsl:variable name="ver" select="xml"/>
 <xsl:variable
- name="ver"
- select="document('show_version.xml', .)/xml"/>
+ name="shrun"
+ select="document('show_running-config.xml', .)/xml"/>
 <xsl:variable
  name="install-active"
  select="document('show_install_active_summary.xml', .)/xml"/>
@@ -117,10 +117,10 @@
    xsi:noNamespaceSchemaLocation="model.xsd">
     <!-- General host specific fields. -->
     <configured-hostname>
-      <xsl:value-of select="normalize-space(hostname)" />
+      <xsl:value-of select="normalize-space($shrun/hostname)" />
     </configured-hostname>
     <configured-domain>
-      <xsl:value-of select="normalize-space(domain)" />
+      <xsl:value-of select="normalize-space($shrun/domain)" />
     </configured-domain>
     <os>
       <system><xsl:text>IOS XR</xsl:text></system>
