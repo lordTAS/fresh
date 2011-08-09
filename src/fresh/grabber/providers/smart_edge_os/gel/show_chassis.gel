@@ -1,0 +1,25 @@
+define ws     /\s+/
+define nows   /\S+/
+define number /\d+/
+define fs     /[\t ]+/
+define nl     /[\r\n]+/
+define nonl   /[^\r\n]+/
+
+grammar cards:
+    match ws:
+        do.next()
+    match number ' : ' nows fs number ' : ' nows fs nonl nl:
+        out.add('card?slot="$0"/configured', '$2')
+        out.add('card?slot="$4"/installed', '$6')
+    do.return()
+
+grammar input:
+    match ws:
+        do.next()
+    match /Current platform is / nonl nl:
+        out.add('platform', '$1')
+    match /-+/ nl:
+        out.enter('cards')
+        cards()
+    match nonl nl:
+        do.skip()

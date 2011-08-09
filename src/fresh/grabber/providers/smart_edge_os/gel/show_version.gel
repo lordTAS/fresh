@@ -1,0 +1,17 @@
+define ws   /\s+/
+define nows /\S+/
+define fs   /[\t ]+/
+define nl   /[\r\n]+/
+define nonl /[^\r\n]+/
+
+grammar input:
+    match ws:
+        do.next()
+    match /Redback Networks SmartEdge OS Version / nonl nl:
+        out.add('version', '$1')
+    match /System Bootstrap version is / nonl nl:
+        out.add('bootstrap-version', '$1')
+    match /Installed minikernel version is / nonl nl:
+        out.add('minikernel-version', '$1')
+    match nonl nl:
+        do.skip()

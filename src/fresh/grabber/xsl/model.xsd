@@ -220,8 +220,8 @@
 <xs:element name="host">
   <xs:complexType>
     <xs:sequence>
-      <xs:element name="configured-hostname" type="Hostname"/>
-      <xs:element name="configured-domain" type="domainName"/>
+      <xs:element name="configured-hostname" type="Hostname" minOccurs="0"/>
+      <xs:element name="configured-domain" type="domainName" minOccurs="0"/>
       <xs:element name="os" type="operatingSystem"/>
       <xs:element name="model" type="nonEmptyString"/>
       <xs:element name="chassis" type="chassisType" minOccurs="1" maxOccurs="unbounded"/>
