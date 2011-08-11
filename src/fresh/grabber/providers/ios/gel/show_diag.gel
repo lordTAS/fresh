@@ -44,7 +44,7 @@ grammar pa_bay_7300(default):
         do.skip()
 
 grammar slot_7xxx(default):
-    when /Slot/ fs slot /\s*[^:]*:[^\r\n]*/ nl:
+    when /Slot|SLOT|SUBSLOT/ fs slot /\s*[^:]*:[^\r\n]*/ nl:
         do.return()
     match /WIC Slot/ fs nonl nl:
         ignore_block()
@@ -124,10 +124,12 @@ grammar slot(default):
         out.add('l3engine', '$2')
     match 'ROM Monitor version' fs nows nl:
         out.add('rommon', '$2')
+    match 'SUBSLOT' fs slot /[^:]*:/ fs nonl nl:
+        out.enter('subslot?slot="$2"')
+        out.add('description', '$5')
+        slot_7xxx()
     match 'subslot' fs /\d+\/\d+/ ':' fs nonl nl:
         out.add('subslot?slot="$2"/description', '$5')
-    match /SUBSLOT .*/:
-        do.return()
     match nl:
         do.return()
     match nonl nl:
