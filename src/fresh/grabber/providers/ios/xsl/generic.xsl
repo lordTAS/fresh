@@ -57,10 +57,11 @@
     </serial-number>
 
     <!-- Submodules. -->
-    <xsl:apply-templates select="subslot"/>
+    <xsl:variable name="subslots" select="subslot[description != 'Empty']"/>
+    <xsl:apply-templates select="$subslots"/>
 
     <!-- Physical interfaces on this card. -->
-    <xsl:if test="not(subslot)">
+    <xsl:if test="not($subslots)">
       <xsl:variable name="card" select="."/>
 
       <xsl:for-each select="$interfaces">

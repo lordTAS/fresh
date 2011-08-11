@@ -124,12 +124,12 @@ grammar slot(default):
         out.add('l3engine', '$2')
     match 'ROM Monitor version' fs nows nl:
         out.add('rommon', '$2')
-    match 'SUBSLOT' fs slot /[^:]*:/ fs nonl nl:
-        out.enter('subslot?slot="$2"')
-        out.add('description', '$5')
+    match 'SUBSLOT' fs /\d+\// slot /[^:]*:/ fs nonl nl:
+        out.enter('subslot?slot="$3"')
+        out.replace('description', '$6')
         slot_7xxx()
-    match 'subslot' fs /\d+\/\d+/ ':' fs nonl nl:
-        out.add('subslot?slot="$2"/description', '$5')
+    match 'subslot' fs /\d+\// slot ':' fs nonl nl:
+        out.add('subslot?slot="$3"/description', '$6')
     match nl:
         do.return()
     match nonl nl:
