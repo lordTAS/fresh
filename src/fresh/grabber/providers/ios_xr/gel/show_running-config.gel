@@ -911,6 +911,8 @@ grammar ntp_statements(default):
         out.add('$0', '$2')
     match 'update-calendar' nl:
         out.add('$0')
+    match 'access-group' fs /ipv[46]/ fs nows fs nows nl:
+        out.add('$0/$2?access-type="$4"&name="$6"')
     do.return()
 
 grammar ntp(default):
@@ -1319,6 +1321,8 @@ grammar mpls_ldp_statements(default):
     do.return()
 
 grammar router_pim_af_statements(default):
+    match 'mofrr' fs 'rib' fs name nl:
+        out.add('$0?acl="$4"&rib="1"')
     match 'rp-address' fs ipv4_ip fs name fs 'override' nl:
         out.add('$0?acl="$4"&override="1"')
     match 'accept-register' fs nows nl:
@@ -1557,7 +1561,9 @@ grammar input(default):
     match 'ssh client' fs 'source-interface' fs nows nl:
         out.add('$0/$2', '$4')
     match 'ssh server' fs nows nl:
-        out.add('$0?version="$2"')
+        out.add('$0/version', '$2')
+    match 'ssh server' fs 'vrf' fs nows nl:
+        out.add('$0/$2', '$4')
     match 'tacacs-server' fs 'timeout' fs number nl:
         out.add('$0/timeout', '$2')
     match 'tacacs-server' fs 'host' fs nows fs 'port' fs number nl:

@@ -828,6 +828,8 @@ grammar interface_statements(default):
         out.add('isis')
     match 'ip router isis' fs nows nl:
         out.add('isis?name="$2"')
+    match 'ip rsvp' fs 'bandwidth' nl:
+        out.add('$0/$2/reservable', 'default')
     match 'ip rsvp' fs 'bandwidth' fs number nl:
         out.add('$0/$2/reservable', '$4')
     match 'ip rsvp' fs 'bandwidth' fs number fs number nl:
