@@ -37,13 +37,15 @@ Like XSLT's built-in document(), but instead of failing if the document
 does not exist, an empty node is returned.
 
 @filename: The name of the file.
+@nodeset: Used to resolve relative URLs.
 @return: Node
 -->
 <func:function name="grabber:doc">
   <xsl:param name="filename"/>
+  <xsl:param name="nodeset"/>
   <xsl:choose>
-    <xsl:when test="boolean(document($filename))">
-      <func:result select="document($filename, .)"/>
+    <xsl:when test="boolean(document($filename, $nodeset))">
+      <func:result select="document($filename, $nodeset)"/>
     </xsl:when>
     <xsl:otherwise>
       <func:result select="node()"/>
