@@ -12,13 +12,13 @@
 <xsl:variable name="ver" select="xml"/>
 <xsl:variable
  name="shrun"
- select="grabber:doc('show_running-config.xml', '.')/xml"/>
+ select="grabber:doc('show_running-config.xml', .)/xml"/>
 <xsl:variable
  name="diag"
- select="grabber:doc('show_diag.xml', '.')/xml"/>
+ select="grabber:doc('show_diag.xml', .)/xml"/>
 <xsl:variable
  name="shint"
- select="grabber:doc('show_interface.xml', '.')/xml"/>
+ select="grabber:doc('show_interface.xml', .)/xml"/>
 
 <xsl:variable name="interfaces" select="$shint/interface"/>
 
