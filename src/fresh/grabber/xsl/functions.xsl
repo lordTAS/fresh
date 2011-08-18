@@ -6,7 +6,7 @@
  xmlns:grabber="localhost"
  extension-element-prefixes="str func">
 
- <xsl:decimal-format name="de" decimal-separator="," grouping-separator="." />
+<xsl:decimal-format name="de" decimal-separator="," grouping-separator="." />
 
 <func:function name="grabber:lower-case">
   <xsl:param name="str"/>
@@ -32,11 +32,19 @@
   <func:result select="$thetail = $tail"/>
 </func:function>
 
-<func:function name="grabber:index-of">
-  <xsl:param name="str" />
-  <xsl:param name="tail" />
+<!--
+Returns the position of the given string "needle" in the given string
+"haystack".
 
-  <func:result select="string-length(substring-before($str, $tail))" />
+@haystack: str
+@needle: str
+@return: integer
+-->
+<func:function name="grabber:index-of">
+  <xsl:param name="haystack" />
+  <xsl:param name="needle" />
+
+  <func:result select="string-length(substring-before($haystack, $needle))" />
 </func:function>
 
 <!--
@@ -106,6 +114,12 @@ Converts the given bandwidth string to an integer in kilobytes.
   </xsl:choose>
 </func:function>
 
+<!--
+Converts an address family name to the corresponding network protocol name.
+
+@pfxlen: A string containing the address family type.
+@return: The name of the network protocol.
+-->
 <func:function name="grabber:fam2protocol">
   <xsl:param name="family" />
   <xsl:choose>
@@ -121,8 +135,12 @@ Converts the given bandwidth string to an integer in kilobytes.
   </xsl:choose>
 </func:function>
 
+<!--
+Inserts dots at thousand boundaries in the given integer.
 
-
+@pfxlen: An integer.
+@return: A string containing the given integer with separators added.
+-->
 <func:function name="grabber:thsep">
   <xsl:param name="number" />
   <func:result>
@@ -130,6 +148,12 @@ Converts the given bandwidth string to an integer in kilobytes.
   </func:result>
 </func:function>
 
+<!--
+Converts the given IPv4 prefix length to an IP mask.
+
+@pfxlen: The prefix length as an integer.
+@return: The IP mask.
+-->
 <func:function name="grabber:netmask">
   <xsl:param name="pfxlen"/>
   <xsl:choose>
