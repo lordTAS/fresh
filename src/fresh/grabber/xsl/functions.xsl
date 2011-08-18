@@ -4,6 +4,7 @@
  xmlns:str="http://exslt.org/strings"
  xmlns:func="http://exslt.org/functions"
  xmlns:grabber="localhost"
+ xmlns:py="localhost"
  extension-element-prefixes="str func">
 
 <xsl:decimal-format name="de" decimal-separator="," grouping-separator="." />
@@ -44,7 +45,7 @@ does not exist, an empty node is returned.
   <xsl:param name="filename"/>
   <xsl:param name="nodeset"/>
   <xsl:choose>
-    <xsl:when test="boolean(document($filename, $nodeset))">
+    <xsl:when test="py:file-exists($filename)">
       <func:result select="document($filename, $nodeset)"/>
     </xsl:when>
     <xsl:otherwise>

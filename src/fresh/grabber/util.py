@@ -13,6 +13,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import re
+import os
+from lxml import etree
 
 filename_strip_re = re.compile(r'[^a-z0-9_\-\.]', re.I)
 
@@ -21,3 +23,11 @@ def str2filename(string, suffix = '.txt'):
     if not '.' in filename:
         filename += suffix
     return filename
+
+python_ns = etree.FunctionNamespace('localhost')
+python_ns.prefix = 'py'
+python_ns['file-exists'] = lambda c, x: os.path.isfile(x)
+
+def apply_xslt(xslt, doc):
+    transform = etree.XSLT(xslt)
+    return transform(doc)

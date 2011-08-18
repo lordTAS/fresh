@@ -14,8 +14,9 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import os
 import time
-from StringIO  import StringIO
-from lxml      import etree
+from util import apply_xslt
+from StringIO import StringIO
+from lxml import etree
 from Processor import Processor
 
 class XsltProcessor(Processor):
@@ -40,12 +41,11 @@ class XsltProcessor(Processor):
             xsd_file = os.path.join(self.xsl_dir, xsd_file)
 
         # Transform.
-        xsl       = etree.parse(xslt_file)
-        transform = etree.XSLT(xsl)
-        path      = provider.store.get_path(host, infile)
-        input     = provider.store.get(host, infile)
-        doc       = etree.parse(StringIO(input), base_url = path)
-        result    = transform(doc)
+        path   = provider.store.get_path(host, infile)
+        input  = provider.store.get(host, infile)
+        doc    = etree.parse(StringIO(input), base_url = path)
+        xsl    = etree.parse(xslt_file)
+        result = apply_xslt(xsl, doc)
 
         # Add the address and a timestamp field to the root node in the resulting
         # XML.
