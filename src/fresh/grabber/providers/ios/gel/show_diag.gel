@@ -14,7 +14,7 @@ grammar pa_bay(default):
         do.skip()
     match 'Port adapter insertion time' nonl nl:
         do.skip()
-    match /[^\r\n]*(?:PA, |Port Adapter|, \d+ ports)[^\r\n]*/ nl:
+    match /.*(?:PA, |Port Adapter|, \d+ ports?).*/ nl:
         out.add('description', '$0')
     match /Serial number:?/ fs nows fs /Part number:?/ fs nows / */ nl:
         out.add('serialno', '$2')
@@ -35,7 +35,6 @@ grammar pa_bay_7300(default):
     pa_bay()
     match 'PA Carrier Card State Information':
         out.enter('..')
-        out.add('description', 'PA Carrier Card')
         slot_7xxx()
         do.return()
     when 'Slot' fs number ':':
@@ -68,7 +67,7 @@ grammar slot_7xxx(default):
         out.add('description', '$0')
     match /Chassis Interface.*/ nl:
         out.add('description', '$0')
-    match /.*\s[Pp]ort [Aa]dapter, \d+ ports?.*|.*PA,\s.*/ nl:
+    imatch /.*(?:PA, |port adapter|, \d+ ports?).*/ nl:
         out.add('description', '$0')
     match /[VE]IP.*/ nl:
         out.add('description', '$0')
