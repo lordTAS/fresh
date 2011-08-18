@@ -38,7 +38,7 @@ grammar pa_bay_7300(default):
         out.add('description', 'PA Carrier Card')
         slot_7xxx()
         do.return()
-    when 'Slot' fs number ':' nl:
+    when 'Slot' fs number ':':
         do.return()
     match nonl nl:
         do.skip()
