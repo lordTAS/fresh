@@ -12,13 +12,13 @@
 <xsl:variable name="ver" select="xml"/>
 <xsl:variable
  name="shrun"
- select="document('show_running-config.xml', .)/xml"/>
+ select="grabber:doc('show_running-config.xml')/xml"/>
 <xsl:variable
  name="diag"
- select="document('show_diag.xml', .)/xml"/>
+ select="grabber:doc('show_diag.xml')/xml"/>
 <xsl:variable
  name="shint"
- select="document('show_interface.xml', .)/xml"/>
+ select="grabber:doc('show_interface.xml')/xml"/>
 
 <xsl:variable name="interfaces" select="$shint/interface"/>
 
@@ -81,12 +81,14 @@
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
    xsi:noNamespaceSchemaLocation="model.xsd">
     <!-- General host specific fields. -->
-    <configured-hostname>
-      <xsl:value-of select="normalize-space($shrun/hostname)" />
-    </configured-hostname>
-    <configured-domain>
-      <xsl:value-of select="normalize-space($shrun/options/ip/domain)" />
-    </configured-domain>
+    <xsl:if test="$shrun">
+      <configured-hostname>
+        <xsl:value-of select="normalize-space($shrun/hostname)"/>
+      </configured-hostname>
+      <configured-domain>
+        <xsl:value-of select="normalize-space($shrun/options/ip/domain)"/>
+      </configured-domain>
+    </xsl:if>
     <os>
       <system><xsl:text>IOS</xsl:text></system>
       <version><xsl:value-of select="$ver/version"/></version>
@@ -126,9 +128,11 @@
     </chassis>
 
     <!-- Logical interface units. -->
-    <unit-list>
-      <xsl:apply-templates select="$interfaces" mode="logical"/>
-    </unit-list>
+    <xsl:if test="$interfaces">
+      <unit-list>
+        <xsl:apply-templates select="$interfaces" mode="logical"/>
+      </unit-list>
+    </xsl:if>
   </host>
 </xsl:template>
 

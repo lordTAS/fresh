@@ -33,6 +33,25 @@
 </func:function>
 
 <!--
+Like XSLT's built-in document(), but instead of failing if the document
+does not exist, an empty node is returned.
+
+@filename: The name of the file.
+@return: Node
+-->
+<func:function name="grabber:doc">
+  <xsl:param name="filename"/>
+  <xsl:choose>
+    <xsl:when test="boolean(document($filename))">
+      <func:result select="document($filename, .)"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <func:result select="node()"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</func:function>
+
+<!--
 Returns the position of the given string "needle" in the given string
 "haystack".
 
