@@ -21,7 +21,7 @@
  select="document('admin_show_diag.xml', .)/xml"/>
 <xsl:variable
  name="inv"
- select="document('admin_show_inventory.xml', .)/xml"/>
+ select="document('admin_show_inventory_all.xml', .)/xml"/>
 <xsl:variable
  name="shint"
  select="document('show_interface.xml', .)/xml"/>
