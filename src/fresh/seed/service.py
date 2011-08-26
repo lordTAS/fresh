@@ -17,11 +17,12 @@ from Exscriptd.xml     import get_hosts_from_etree
 from fresh.seed.Config import Config
 from functools         import partial
 
-config = __service__.config('config.xml', Config)
-seeddb = config.get_seeddb()
+config     = __service__.read_config('config.xml', Config)
+queue_name = __service__.get_queue_name()
+queue      = __exscriptd__.get_queue_from_name(queue_name)
+seeddb     = config.get_seeddb()
 
-def run(order):
-    __service__.set_order_status(order, 'running')
+def run(order, job):
     sec   = timedelta(seconds = 1)
     start = datetime.utcnow().replace(microsecond = 0) - sec
 
@@ -54,7 +55,7 @@ def check(order):
     return True
 
 def enter(order):
-    callback = partial(run, order)
-    __service__.enqueue(order, callback, 'update')
-    __service__.set_order_status(order, 'queued')
-    return True
+    task = __exscriptd__.create_task(order, 'Update the host database')
+    task.set_logfile('seed.log')
+    qtask = queue.enqueue(partial(run, order), 'seed')
+    task.set_job_id(qtask.job_ids.pop())

@@ -44,15 +44,13 @@ class Grabber(object):
                 return provider
         raise ValueError('no matching provider found for: ' + repr(vars))
 
-    def grab(self, conn, service, order, logger):
+    def grab(self, exscriptd, job_id, conn, host, logger):
         # Initial log message.
-        host  = conn.get_host()
         label = self.get_label_from_host(host)
         logger.info('%s: Estimating required time...' % label)
 
         # Prepare for progress updates.
         start = time.time()
-        task  = host.get('__task__')
         total = float(host.get('duration') or 60 * 10)
 
         def update_progress():
@@ -62,12 +60,10 @@ class Grabber(object):
             started.
             """
             time_spent = time.time() - start
-            task.set_progress(min(time_spent / total, 1.0))
-            service.save_task(order, task)
+            progress   = min(time_spent / total, 1.0)
+            exscriptd.set_job_progress(job_id, progress)
 
         # Open the connection.
-        logger.info('%s: Connecting...' % label)
-        conn.connect()
         logger.info('%s: Logging in...' % label)
         conn.authenticate()
         logger.info('%s: Authentication succeeded.' % label)
@@ -108,7 +104,7 @@ class Grabber(object):
         host.set('duration', time.time() - start)
         self.save_seedhost(host)
 
-    def flush(self, service, order, logger):
+    def flush(self, exscriptd, logger):
         # Pass each deleted host to it's provider to clean up the data.
         for host in self.seeddb.get_hosts(deleted = True):
             label = self.get_label_from_host(host)

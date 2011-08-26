@@ -12,31 +12,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-from Exscriptd.xml            import get_hosts_from_etree
+from Exscriptd.xml import get_hosts_from_etree
 from fresh.provisioner.Config import Config
-from Exscript.util.decorator  import bind
+from functools import partial
 
-config = __service__.config('config.xml', Config)
-prov   = config.get_provisioner()
-
-def run(conn, order, script):
-    host = conn.get_host()
-    task = host.get('__task__')
-    del host.vars['__task__']
-    task.set_logfile(host.get_logname() + '.log')
-    task.set_tracefile(host.get_logname() + '.log.error')
-    task.set_status('in-progress')
-    __service__.save_task(order, task)
-
-    try:
-        prov.run(conn, __service__, order, host, script)
-    except Exception, e:
-        task.close('error')
-        raise
-    else:
-        task.completed()
-    finally:
-        __service__.save_task(order, task)
+config     = __service__.read_config('config.xml', Config)
+queue_name = __service__.get_queue_name()
+queue      = __exscriptd__.get_queue_from_name(queue_name)
+prov       = config.get_provisioner()
 
 def _get_script_from_xml(xml):
     # Read the script name.
@@ -86,13 +69,10 @@ def enter(order):
         return False
 
     descr = 'Run ' + script_type + ' ' + repr(script_name)
+    start = partial(prov.run, script)
     for host in hosts:
-        task = __service__.create_task(order, descr + ' on ' + host.get_name())
-        host.set('__task__', task)
-
-    __service__.enqueue_hosts(order,
-                              hosts,
-                              bind(run, order, script),
-                              handle_duplicates = True)
-    __service__.set_order_status(order, 'queued')
-    return True
+        msg  = descr + ' on ' + host.get_name()
+        task = __exscriptd__.create_task(order, msg)
+        task.set_logfile(host.get_name() + '.log')
+        qtask = queue.run(partial(run, order, script), 'packager')
+        task.set_job_id(qtask.job_ids.pop())

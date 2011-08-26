@@ -16,13 +16,14 @@ from Exscriptd.xml         import get_hosts_from_etree
 from fresh.packager.Config import Config
 from functools             import partial
 
-config = __service__.config('config.xml', Config)
+config     = __service__.read_config('config.xml', Config)
+queue_name = __service__.get_queue_name()
+queue      = __exscriptd__.get_queue_from_name(queue_name)
 
-def run(order):
-    logger   = __service__.create_logger(order, 'export.log')
+def run(order, job):
+    logger   = __exscriptd__.create_logger(order, 'export.log')
     packager = config.get_packager()
     order.set_description(packager.describe())
-    __service__.set_order_status(order, 'running')
     packager.run(logger, order)
 
 def check(order):
@@ -36,7 +37,7 @@ def check(order):
     return True
 
 def enter(order):
-    callback = partial(run, order)
-    __service__.enqueue(order, callback, 'update')
-    __service__.set_order_status(order, 'queued')
-    return True
+    task = __exscriptd__.create_task(order, 'Update the host database')
+    task.set_logfile('packager.log')
+    qtask = queue.enqueue(partial(run, order), 'packager')
+    task.set_job_id(qtask.job_ids.pop())

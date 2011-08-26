@@ -12,50 +12,32 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-from functools               import partial
-from Exscriptd.xml           import get_hosts_from_etree
-from fresh.grabber.Config    import Config
-from Exscript.util.decorator import bind
+from functools import partial
+from Exscriptd.xml import get_hosts_from_etree
+from Exscript.util.log import log_to_file
+from fresh.grabber.Config import Config
 
-config  = __service__.config('config.xml', Config)
-grabber = config.get_grabber()
+config     = __service__.read_config('config.xml', Config)
+queue_name = __service__.get_queue_name()
+queue      = __exscriptd__.get_queue_from_name(queue_name)
+grabber    = config.get_grabber()
 
-def run(conn, order, logger):
-    host = conn.get_host()
-    task = host.get('__task__')
-    task.set_logfile(host.get_logname() + '.log')
-    task.set_tracefile(host.get_logname() + '.log.error')
-    task.set_status('in-progress')
-    __service__.save_task(order, task)
-
+def run(logger, job, host, conn):
     try:
-        grabber.grab(conn, __service__, order, logger)
-    except Exception, e:
         label = grabber.get_label_from_host(host)
-        logger.info('%s: Exception: %s' % (label, repr(str(e))))
-        task.close('error')
+    except Exception, e:
+        logger.error('Label not found: %s' % str(e))
         raise
-    else:
-        task.completed()
-    finally:
-        __service__.save_task(order, task)
-
-def flush(order, task, logger):
-    task.set_logfile('flush.log')
-    task.set_tracefile('flush.log.error')
-    task.set_status('in-progress')
-    __service__.save_task(order, task)
 
     try:
-        grabber.flush(__service__, order, logger)
+        logger.info('%s: Connected.' % label)
+        grabber.grab(__exscriptd__, job.id, conn, host, logger)
     except Exception, e:
-        logger.info('flush: Exception: %s' % repr(str(e)))
-        task.close('error')
+        logger.error('%s: Exception: %s' % (label, repr(str(e))))
         raise
-    else:
-        task.completed()
-    finally:
-        __service__.save_task(order, task)
+
+def flush(logger, job):
+    grabber.flush(__exscriptd__, logger)
 
 def check(order):
     hosts = get_hosts_from_etree(order.xml)
@@ -82,35 +64,42 @@ def check(order):
     return True
 
 def enter(order):
-    logger = __service__.create_logger(order, 'command.log')
+    logdir = __exscriptd__.get_order_logdir(order)
+    logger = __exscriptd__.get_logger(order, 'command.log')
 
-    # Since the order only contains a list of hostnames without any
-    # other info (such as the address or path), we need to load the
-    # additional attributes from the database.
-    hosts = []
     for host in get_hosts_from_etree(order.xml):
-        task     = __service__.create_task(order, 'Update !%s' % host.get_name())
-        seedhost = grabber.get_seedhost_from_name(host.get_name())
+        # Track the status of the update per-host.
+        hostname = host.get_name()
+        task     = __exscriptd__.create_task(order, 'Update !%s' % hostname)
+        task.set_logfile(hostname + '.log')
 
+        # Since the order only contains a list of hostnames without any
+        # other info (such as the address or path), we need to load the
+        # additional attributes from the database.
+        seedhost = grabber.get_seedhost_from_name(hostname)
         if not seedhost:
-            hostname = host.get_name()
             logger.info('%s: Error: Address for host not found.' % hostname)
             task.close('address-not-found')
-            __service__.save_task(order, task)
-        else:
-            hosts.append(seedhost)
-            seedhost.set('__task__', task)
+            continue
 
-    __service__.enqueue_hosts(order,
-                              hosts,
-                              bind(run, order, logger),
-                              handle_duplicates = True)
+        # Enqueue the host.
+        decor = log_to_file(logdir, delete = True)
+        qtask = queue.run_or_ignore(seedhost, decor(partial(run, logger)))
+        if qtask is None:
+            logger.info('%s: Already queued, so request ignored.' % hostname)
+            task.close('duplicate')
+            continue
 
+        # Associate the queued job with the task such that Exscriptd can
+        # update the status of the task.
+        job_id = qtask.job_ids.pop()
+        task.set_job_id(job_id)
+        logger.info('%s: Queued with job id %s.' % (hostname, job_id))
+
+    # If the order contains a <flush/> tag, delete the data of all unknown
+    # hosts.
     if order.xml.find('flush') is not None:
-        task = __service__.create_task(order, 'Delete obsolete hosts')
-        __service__.enqueue(order,
-                            partial(flush, order, task, logger),
-                            'flush')
-
-    __service__.set_order_status(order, 'queued')
-    return True
+        task = __exscriptd__.create_task(order, 'Delete obsolete hosts')
+        task.set_logfile('flush.log')
+        qtask = queue.enqueue(partial(flush, logger), 'flush')
+        task.set_job_id(qtask.job_ids.pop())
