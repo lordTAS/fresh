@@ -21,7 +21,7 @@ queue_name = __service__.get_queue_name()
 queue      = __exscriptd__.get_queue_from_name(queue_name)
 
 def run(order, job):
-    logger   = __exscriptd__.create_logger(order, 'export.log')
+    logger   = __exscriptd__.get_logger(order, 'export.log')
     packager = config.get_packager()
     order.set_description(packager.describe())
     packager.run(logger, order)
