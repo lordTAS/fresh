@@ -37,7 +37,8 @@ def check(order):
     return True
 
 def enter(order):
+    logdir = __exscriptd__.get_order_logdir(order)
     task = __exscriptd__.create_task(order, 'Update the host database')
-    task.set_logfile('packager.log')
+    task.set_logfile(logdir, 'packager.log')
     qtask = queue.enqueue(partial(run, order), 'packager')
     task.set_job_id(qtask.job_ids.pop())

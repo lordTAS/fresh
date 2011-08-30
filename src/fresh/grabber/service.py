@@ -71,7 +71,7 @@ def enter(order):
         # Track the status of the update per-host.
         hostname = host.get_name()
         task     = __exscriptd__.create_task(order, 'Update !%s' % hostname)
-        task.set_logfile(hostname + '.log')
+        task.set_logfile(logdir, hostname + '.log')
 
         # Since the order only contains a list of hostnames without any
         # other info (such as the address or path), we need to load the
@@ -100,6 +100,6 @@ def enter(order):
     # hosts.
     if order.xml.find('flush') is not None:
         task = __exscriptd__.create_task(order, 'Delete obsolete hosts')
-        task.set_logfile('flush.log')
+        task.set_logfile(logdir, 'flush.log')
         qtask = queue.enqueue(partial(flush, logger), 'flush')
         task.set_job_id(qtask.job_ids.pop())
