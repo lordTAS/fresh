@@ -4,7 +4,7 @@ define ws /\s+/
 define nows /\S+/
 define nl /[\r\n]+/
 define nonl /[^\r\n]+/
-define comment /[!#][^\r\n]*/
+define comment /[!#][^\r\n]*[\r\n]/
 define number /\d+/
 define word /\w+/
 define name /\w[0-9a-zA-Z_-]*/
@@ -29,7 +29,7 @@ define async_line_name name
 
 # Define grammar.
 grammar default:
-    match ws
+    match fs
         | comment:
         do.skip()
     match 'no' fs:
@@ -417,13 +417,28 @@ grammar dhcp_statements(default):
         dhcp_profile_statements()
     do.return()
 
+grammar event_manager_policy_statements(default):
+    match nl:
+        do.return()
+    match 'username' fs nows:
+        out.add('$0', '$2')
+    match 'persist-time' fs number:
+        out.add('$0', '$2')
+
+grammar event_manager_statements(default):
+    match 'environment' fs nonl nl:
+        out.add('$0', '$2')
+    match 'directory' fs nonl nl:
+        out.add('$0', '$2')
+    match 'policy' fs nows:
+        out.enter('$0?name="$2"')
+        event_manager_policy_statements()
+    do.return()
+
 grammar event(default):
-    match 'event manager' fs 'environment' fs nonl nl:
-        out.add('$0/$2', '$4')
-    match 'event manager' fs 'directory' fs nonl nl:
-        out.add('$0/$2', '$4')
-    match 'event manager' fs 'policy' fs nows fs 'username' fs nows nl:
-        out.add('$0/$2?name="$4"/$6', '$8')
+    match 'event manager' fs:
+        out.enter('$0')
+        event_manager_statements()
     do.return()
 
 grammar explicit_path_statements(default):
