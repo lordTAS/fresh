@@ -34,6 +34,7 @@ class ExistDBStore(Processor):
         ts  = time.asctime()
         xml = etree.Element('xml', hostname = hostname, timestamp = ts)
         for n, line in enumerate(content.split('\n')):
+            line = unicode(line, 'latin-1')
             etree.SubElement(xml, 'line', number = str(n + 1)).text = line
         return xml
 
