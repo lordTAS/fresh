@@ -1,12 +1,12 @@
 define ws      /[\t ]+/
 define nows    /\S+/
 define fs      /[\t ]*,[\t ]*/
-define card    /[A-Z0-9]+\/(?:[A-Z0-9]+\/\*|\d+\/CPU[0-9]+)/
-define spa     /\d+\/\d+\/\d+/
-define port    /[a-zA-Z0-9]+\/[A-Z0-9]+\/[A-Z0-9*]+\/\d+/
+define chassis /[^"]*Chassis/
+define fan     /[^"]*Fan[^"]*/
+define card    /[^"]+\/(?:\*|CPU[0-9]+|SP)/
+define port    /[^"]+\/[A-Z0-9]+\/[A-Z0-9*]+(?:\/\d+)+/
 define power   /PEM\d+|[-a-zA-Z0-9_ \t]+Power[-a-zA-Z0-9_ \t]+/
-define fan     /[-a-zA-Z0-9_ \t]*Fan[-a-zA-Z0-9_ \t]+/
-define chassis /[-a-zA-Z0-9_ \t]*Chassis/
+define spa     /\d+\/\d+\/\d+/
 define field1  /[^"]*/
 define field2  /\S+/
 define field3  /(\S+|[^,]*?)/
