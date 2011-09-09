@@ -75,5 +75,5 @@ def enter(order):
         msg  = descr + ' on ' + host.get_name()
         task = __exscriptd__.create_task(order, msg)
         task.set_logfile(logdir, host.get_name() + '.log')
-        qtask = queue.run(partial(run, order, script), 'packager')
+        qtask = queue.run(partial(start, order, script), 'packager')
         task.set_job_id(qtask.job_ids.pop())
