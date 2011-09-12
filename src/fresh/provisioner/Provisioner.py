@@ -19,8 +19,6 @@ class Provisioner(object):
     def __init__(self):
         pass
 
-    def run(self, script, job, conn, host):
-        conn.connect()
-        conn.login()
+    def run(self, script, job, host, conn):
         template.eval(conn, script, **host.get_all())
         conn.close(True)

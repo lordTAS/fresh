@@ -13,6 +13,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 from Exscriptd.xml import get_hosts_from_etree
+from Exscript.util.decorators import autologin
 from fresh.provisioner.Config import Config
 from functools import partial
 
@@ -64,16 +65,21 @@ def enter(order):
     if script is None:
         return False
 
-    hosts = _get_hosts_from_xml(order.xml)
+    logger = __exscriptd__.get_logger(order, 'provisioner.log')
+    hosts  = _get_hosts_from_xml(order.xml)
     if not hosts:
+        logger.info('Order contains no hosts.')
         return False
 
     logdir = __exscriptd__.get_order_logdir(order)
     descr = 'Run ' + script_type + ' ' + repr(script_name)
-    start = partial(prov.run, script)
+    decor = autologin()
+    start = decor(partial(prov.run, script))
     for host in hosts:
-        msg  = descr + ' on ' + host.get_name()
-        task = __exscriptd__.create_task(order, msg)
-        task.set_logfile(logdir, host.get_name() + '.log')
-        qtask = queue.run(partial(start, order, script), 'packager')
+        hostname = host.get_name()
+        msg      = descr + ' on ' + hostname
+        task     = __exscriptd__.create_task(order, msg)
+        task.set_logfile(logdir, hostname + '.log')
+        qtask = queue.run(host, start)
         task.set_job_id(qtask.job_ids.pop())
+        logger.info('%s: Queued with job id %s.' % (hostname, job_id))
