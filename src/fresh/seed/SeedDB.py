@@ -60,7 +60,7 @@ class SeedDB(object):
             sa.Column('address',   sa.String(50)),
             sa.Column('protocol',  sa.String(10)),
             sa.Column('tcp_port',  sa.Integer),
-            sa.Column('path',      sa.String(50)),
+            sa.Column('path',      sa.String(150)),
             sa.Column('country',   sa.String(50)),
             sa.Column('city',      sa.String(50)),
             sa.Column('os',        sa.String(50)),
