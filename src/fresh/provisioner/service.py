@@ -13,7 +13,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 from Exscriptd.xml import get_hosts_from_etree
-from Exscript.util.decorators import autologin
+from Exscript.util.decorator import autologin
 from fresh.provisioner.Config import Config
 from functools import partial
 
