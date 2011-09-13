@@ -3,6 +3,8 @@ define ows       /[ \t\f\v]*/
 define nows      /\S+/
 define nl        /[\t ]*\r?\n/
 define num       /\d+/
+define count     /\d+|Unknown/
+define countfs   /, ?|[\r\n]/
 define nonl      /[^\r\n]+/
 define st        /(?:up|down|administratively down|up \(looped\)|not ready)/
 define field     /[^\r\n,]+/
@@ -48,14 +50,24 @@ grammar encapsulation(default):
         out.add('second-vlan-id', '$2')
 
 grammar counters(default):
-    match num ws 'packets' ws /input|output/ ',' ws num ws 'bytes' nl:
+    match count ws 'packets' ws /input|output/ countfs
+       ws count ws 'bytes' nl:
         out.add('$4-$2', '$0')
         out.add('$4-$9', '$7')
-    match num ws io ws 'drops' ',' ws num ws 'queue drops' ',' ws num ws io ws 'errors' nl:
+    match count ws io ws 'drops' countfs
+       ws count ws 'queue drops' countfs
+       ws count ws io ws 'errors' nl:
         out.enter('$2/errors/drops')
         out.add('total',   '$0')
         out.add('$9',      '$7')
         out.add('$14-$16', '$12')
+    match count ws 'packets' ws io countfs
+       ws count ws nows countfs
+       ws count ws 'total' ws io ws 'drops' nl:
+        out.enter('$4/totals')
+        out.add('$2-$4', '$0')
+        out.add('$9-$4', '$7')
+        out.add('$14-$16-$18', '$12')
     match num ws 'carrier transitions' nl:
         out.add('$2', '$0')
     match 'Datarate information' ws /\w+/ / *\.?/ nl:
@@ -67,12 +79,7 @@ grammar counters(default):
         out.add('interval', '$0')
         out.add('bits',     '$6 $8')
         out.add('packets',  '$10 $12')
-    match num ws 'packets' ws io ',' ws num ws nows ',' ws num ws 'total' ws io ws 'drops' nl:
-        out.enter('$4/totals')
-        out.add('$2-$4', '$0')
-        out.add('$9-$4', '$7')
-        out.add('$14-$16-$18', '$12')
-    match num ws 'drops for' ws 'unrecognized upper-level protocol' nl:
+    match count ws 'drops for' ws 'unrecognized upper-level protocol' nl:
         out.add('$4', '$0')
     match /Received|Output/ ws num ws 'broadcast packets' ',' ws num ws 'multicast packets' nl:
         out.add('$4', '$2')
@@ -82,7 +89,12 @@ grammar counters(default):
         out.add('$8', '$6')
         out.add('$13', '$13')
         out.add('$18', '$16')
-    match num ws 'input errors' ',' ws num ws 'CRC' ',' ws num ws 'frame' ',' ws num ws 'overrun' ',' ws num ws 'ignored' ',' ws num ws 'abort' nl:
+    match count ws 'input errors' countfs
+       ws count ws 'CRC' countfs
+       ws count ws 'frame' countfs
+       ws count ws 'overrun' countfs
+       ws count ws 'ignored' countfs
+       ws count ws 'abort' nl:
         out.enter('input/errors')
         out.add('total', '$0')
         out.add('$7', '$5')
@@ -90,9 +102,12 @@ grammar counters(default):
         out.add('$17', '$15')
         out.add('$22', '$20')
         out.add('$27', '$25')
-    match num ws 'output errors' nl:
+    match count ws 'output errors' nl:
         out.add('output/errors/total', '$0')
-    match num ws 'output errors' ',' ws num ws 'underruns' ',' ws num ws 'applique' ',' ws num ws 'resets' nl:
+    match count ws 'output errors' countfs
+       ws count ws 'underruns' countfs
+       ws count ws 'applique' countfs
+       ws count ws 'resets' nl:
         out.enter('output/errors')
         out.add('total', '$0')
         out.add('$7', '$5')
@@ -209,7 +224,7 @@ grammar interface_block(default):
         counters()
     match 'Last input' ws nows ', output' ws nows nl:
         out.add('last-input',  '$2')
-        out.add('last-output', '$6')
+        out.add('last-output', '$5')
 
 grammar input(default):
     match /.* (?:UTC|MET)/ nl:
