@@ -25,7 +25,8 @@ class JunOSProvider(Provider):
         if host.get('__cfg_hostname__'):
             return host.get('__cfg_hostname__')
         index, match = conn.execute('')
-        hostname     = re.search(r'@[\w\-]+', match.group(0))
+        hostmatch    = re.search(r'@([\w\-]+)', match.group(0))
+        hostname     = hostmatch.group(1)
         host.set('__cfg_hostname__', hostname)
         return hostname
 
