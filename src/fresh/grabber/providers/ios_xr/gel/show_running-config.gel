@@ -180,6 +180,8 @@ grammar bgp_neighbor_statements(default):
         out.add('$0', '$2')
     match 'ebgp-multihop' fs number nl:
         out.add('$0', '$2')
+    match 'precedence' fs nows nl:
+        out.add('$0', '$2')
     match 'password' fs 'encrypted' fs nows nl:
         out.add('$0?type="$2"', '$4')
     match 'remote-as' fs number nl:
@@ -1333,6 +1335,8 @@ grammar mpls_ldp_statements(default):
         out.add('$0', '$2')
     match 'session protection' nl:
         out.add('$0')
+    match 'signalling dscp' fs number nl:
+        out.add('$0', '$2')
     do.return()
 
 grammar router_pim_af_statements(default):
@@ -1525,6 +1529,8 @@ grammar telnet_vrf_server_statements:
         do.return()
 
 grammar telnet_vrf_statements:
+    match 'dscp' fs number:
+        out.add('dscp', '$2')
     match 'server':
         out.enter('$0')
         telnet_vrf_server_statements()
