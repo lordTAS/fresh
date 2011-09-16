@@ -66,6 +66,8 @@ def check(order):
 def enter(order):
     logdir = __exscriptd__.get_order_logdir(order)
     logger = __exscriptd__.get_logger(order, 'command.log')
+    decor  = log_to_file(logdir, delete = True)
+    run_cb = decor(partial(run, logger))
 
     for host in get_hosts_from_etree(order.xml):
         # Track the status of the update per-host.
@@ -83,8 +85,7 @@ def enter(order):
             continue
 
         # Enqueue the host.
-        decor = log_to_file(logdir, delete = True)
-        qtask = queue.run_or_ignore(seedhost, decor(partial(run, logger)))
+        qtask = queue.run_or_ignore(seedhost, run_cb)
         if qtask is None:
             logger.info('%s: Already queued, so request ignored.' % hostname)
             task.close('duplicate')
