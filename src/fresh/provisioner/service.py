@@ -80,6 +80,7 @@ def enter(order):
         msg      = descr + ' on ' + hostname
         task     = __exscriptd__.create_task(order, msg)
         task.set_logfile(logdir, hostname + '.log')
-        qtask = queue.run(host, start)
-        task.set_job_id(qtask.job_ids.pop())
+        qtask  = queue.run(host, start)
+        job_id = qtask.job_ids.pop()
+        task.set_job_id(job_id)
         logger.info('%s: Queued with job id %s.' % (hostname, job_id))
