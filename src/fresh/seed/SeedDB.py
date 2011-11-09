@@ -266,8 +266,10 @@ class SeedDB(object):
         if row[tbl_a.c.host] is None:
             return None
 
-        key     = PrivateKey.from_file(row[tbl_a.c.keyfile])
-        account = Account(row[tbl_a.c.name], key = key)
+        if row[tbl_a.c.keyfile]:
+            account = Account(row[tbl_a.c.name], key = row[tbl_a.c.keyfile])
+        else:
+            account = Account(row[tbl_a.c.name])
         account.set_password(row[tbl_a.c.password])
         account.set_authorization_password(row[tbl_a.c.authorization_password])
         #TODO: account.set_skey_password(row[tbl_a.c.skey_password])
