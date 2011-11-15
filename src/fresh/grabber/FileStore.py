@@ -43,11 +43,12 @@ class FileStore(object):
         for version in range(versions, 0, -1):
             source = path + '.' + str(version)
             target = path + '.' + str(version + 1)
-            if version == versions:
-                if os.path.exists(source):
-                    os.remove(source)
+            if not os.path.exists(source):
                 continue
-            shutil.move(source, target)
+            if version == versions:
+                os.remove(source)
+            else:
+                shutil.move(source, target)
         shutil.move(filename, source)
 
     def store(self,
