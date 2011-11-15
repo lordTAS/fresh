@@ -100,6 +100,7 @@ class Store(Action):
     def __init__(self, provider, xml):
         self.provider  = provider
         self.filename  = xml.get('filename')
+        self.versions  = int(xml.get('versions', 1))
         self.store     = provider.store
         self.cleanpass = bool(int(xml.get('remove-passwords',    False)))
         self.cleandesc = bool(int(xml.get('remove-descriptions', False)))
@@ -109,6 +110,7 @@ class Store(Action):
                          host,
                          self.filename,
                          conn.response,
+                         versions  = self.versions,
                          cleanpass = self.cleanpass,
                          cleandesc = self.cleandesc)
 

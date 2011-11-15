@@ -14,12 +14,16 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import os
 import shutil
+from tempfile import NamedTemporaryFile
 
 class FileStore(object):
-    def __init__(self, base_dir):
+    def __init__(self, base_dir, history_dir):
         self.base_dir = base_dir
+        self.history_dir = history_dir
         if not os.path.isdir(self.base_dir):
             os.makedirs(self.base_dir)
+        if not os.path.isdir(self.history_dir):
+            os.makedirs(self.history_dir)
 
     def get_path(self, host, filename = None):
         path     = host.get('__path__')
@@ -28,21 +32,41 @@ class FileStore(object):
             return os.path.join(host_dir, filename)
         return host_dir
 
+    def get_history_path(self, host, filename = None):
+        path     = host.get('__path__')
+        host_dir = os.path.join(self.history_dir, path)
+        if filename:
+            return os.path.join(host_dir, filename)
+        return host_dir
+
+    def move_to_history(self, filename, path, versions):
+        for version in range(versions, 0, -1):
+            source = path + '.' + str(version)
+            target = path + '.' + str(version + 1)
+            if version == versions:
+                if os.path.exists(source):
+                    os.remove(source)
+                continue
+            shutil.move(source, target)
+        shutil.move(filename, source)
+
     def store(self,
               provider,
               host,
               filename,
               content,
+              versions  = 1,
               cleanpass = False,
               cleandesc = False):
-        host_dir = self.get_path(host)
-        filename = self.get_path(host, filename)
-        isxml    = filename.endswith('.xml')
+        host_dir     = self.get_path(host)
+        history_file = self.get_history_path(host, filename)
+        filename     = self.get_path(host, filename)
+        isxml        = filename.endswith('.xml')
 
         if not os.path.isdir(host_dir):
             os.makedirs(host_dir)
 
-        # Save to disk.
+        # Pre-process the content.
         if cleanpass and isxml:
             content = provider.remove_passwords_from_xml(content)
         elif cleanpass:
@@ -51,10 +75,17 @@ class FileStore(object):
             content = provider.remove_descriptions_from_xml(content)
         elif cleandesc:
             content = provider.remove_descriptions_from_config(content)
+
+        # Save to a temporary file.
+        with NamedTemporaryFile(delete = False) as tempfile:
+            tempfile.write(content)
+
+        # Move the old file away (to history or just delete).
         if os.path.isfile(filename):
-            os.remove(filename)
-        with open(filename, 'w') as file:
-            file.write(content)
+            self.move_to_history(filename, history_file, versions)
+
+        # Rename the temporary file.
+        shutil.move(tempfile.name, filename)
         return filename
 
     def get(self, host, filename):

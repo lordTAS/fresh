@@ -39,10 +39,11 @@ class Config(ConfigReader):
 
     def _init_file_stores(self):
         for element in self.cfgtree.iterfind('file-store'):
-            name    = element.get('name')
-            basedir = element.find('basedir').text
+            name       = element.get('name')
+            basedir    = element.find('basedir').text
+            historydir = element.find('historydir').text
             #print 'Creating file store "%s".' % name
-            self.stores[name] = FileStore(basedir)
+            self.stores[name] = FileStore(basedir, historydir)
 
     def _init_linesplit(self):
         for element in self.cfgtree.iterfind('processor[@type="linesplit"]'):
