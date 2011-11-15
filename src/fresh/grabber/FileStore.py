@@ -40,6 +40,8 @@ class FileStore(object):
         return host_dir
 
     def move_to_history(self, filename, path, versions):
+        if not os.path.isdir(os.path.dirname(path)):
+            os.makedirs(os.path.dirname(path))
         for version in range(versions, 0, -1):
             source = path + '.' + str(version)
             target = path + '.' + str(version + 1)
