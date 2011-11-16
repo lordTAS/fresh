@@ -342,7 +342,7 @@ class SeedDB(object):
         @param limit: The maximum number of items that is returned.
         @type  kwargs: dict
         @param kwargs: The following keys may be used:
-                         - hostname - the hostname (str)
+                         - name - the hostname (str)
                          - address - the host address (str)
                          - protocol - the protocol name (str)
                          - tcp_port - the TCP port number (int)
