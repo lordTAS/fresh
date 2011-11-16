@@ -81,6 +81,7 @@ class FileStore(object):
 
         # Save to a temporary file.
         with NamedTemporaryFile(delete = False) as tempfile:
+            os.fchmod(tempfile.fileno(), 0644)
             tempfile.write(content)
 
         # Move the old file away (to history or just delete).
