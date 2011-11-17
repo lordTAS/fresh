@@ -14,6 +14,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import os
 import shutil
+from hashlib import md5
 from tempfile import NamedTemporaryFile
 
 class FileStore(object):
@@ -78,6 +79,13 @@ class FileStore(object):
             content = provider.remove_descriptions_from_xml(content)
         elif cleandesc:
             content = provider.remove_descriptions_from_config(content)
+
+        # If the file is unchanged just move on.
+        if os.path.isfile(filename):
+            hash1 = md5(open(filename).read()).hexdigest()
+            hash2 = md5(content).hexdigest()
+            if hash1 == hash2:
+                return filename
 
         # Save to a temporary file.
         with NamedTemporaryFile(delete = False) as tempfile:
