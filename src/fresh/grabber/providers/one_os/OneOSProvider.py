@@ -18,7 +18,7 @@ from Exscript.util.match import first_match
 from providers.ios.util  import remove_passwords_from_config, \
                                 remove_descriptions_from_config
 
-prompt_re = re.compile(r'^\[\w+\]([^>#]+)[>#]')
+prompt_re = re.compile(r'^([^>#]+)[>#]')
 
 class OneOSProvider(Provider):
     def get_hostname(self, host, conn):
