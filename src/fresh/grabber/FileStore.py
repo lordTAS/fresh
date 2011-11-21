@@ -54,11 +54,21 @@ class FileStore(object):
                 shutil.move(source, target)
         shutil.move(filename, source)
 
+    def alias(self, host, filename, name):
+        if name is None:
+            return
+        path = self.get_path(host, filename)
+        link = self.get_path(host, name)
+        if os.path.lexists(link):
+            os.remove(link)
+        os.symlink(path, link)
+
     def store(self,
               provider,
               host,
               filename,
               content,
+              alias     = None,
               versions  = 1,
               cleanpass = False,
               cleandesc = False):
@@ -85,6 +95,7 @@ class FileStore(object):
             hash1 = md5(open(filename).read()).hexdigest()
             hash2 = md5(content).hexdigest()
             if hash1 == hash2:
+                self.alias(host, filename, alias)
                 return filename
 
         # Save to a temporary file.
@@ -98,6 +109,7 @@ class FileStore(object):
 
         # Rename the temporary file.
         shutil.move(tempfile.name, filename)
+        self.alias(host, filename, alias)
         return filename
 
     def get(self, host, filename):
