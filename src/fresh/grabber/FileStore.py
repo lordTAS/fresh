@@ -57,11 +57,10 @@ class FileStore(object):
     def alias(self, host, filename, name):
         if name is None:
             return
-        path = self.get_path(host, filename)
         link = self.get_path(host, name)
         if os.path.lexists(link):
             os.remove(link)
-        os.symlink(path, link)
+        os.symlink(filename, link)
 
     def store(self,
               provider,
