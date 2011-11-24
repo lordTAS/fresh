@@ -13,6 +13,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import os
+import re
+import glob
 import shutil
 from hashlib import md5
 from tempfile import NamedTemporaryFile
@@ -40,19 +42,23 @@ class FileStore(object):
             return os.path.join(host_dir, filename)
         return host_dir
 
-    def move_to_history(self, filename, path, versions):
-        if not os.path.isdir(os.path.dirname(path)):
-            os.makedirs(os.path.dirname(path))
-        for version in range(versions, 0, -1):
-            source = path + '.' + str(version)
-            target = path + '.' + str(version + 1)
-            if not os.path.exists(source):
-                continue
-            if version == versions:
-                os.remove(source)
-            else:
-                shutil.move(source, target)
-        shutil.move(filename, source)
+    def move_to_history(self, filename, history_filename, versions):
+        if not os.path.isdir(os.path.dirname(history_filename)):
+            os.makedirs(os.path.dirname(history_filename))
+
+        # Get a list of all old versions (oldest first).
+        file_re = re.compile(re.escape(path) + r'\.(\w+)')
+        files   = sorted([(os.path.getmtime(f), f)
+                          for f in glob.glob(history_filename + '.*')
+                          if file_re.match(f)])
+
+        # Delete outdated versions.
+        for timestamp, thefilename in files[:-versions]:
+            os.remove(thefilename)
+
+        # Store the additional version.
+        thehash = md5(open(filename).read()).hexdigest()
+        shutil.move(filename, history_filename + '.' + thehash)
 
     def alias(self, host, filename, name):
         if name is None:
@@ -91,8 +97,8 @@ class FileStore(object):
 
         # If the file is unchanged just move on.
         if os.path.isfile(filename):
-            hash1 = md5(open(filename).read()).hexdigest()
-            hash2 = md5(content).hexdigest()
+            hash1 = md5(content).hexdigest()
+            hash2 = md5(open(filename).read()).hexdigest()
             if hash1 == hash2:
                 self.alias(host, filename, alias)
                 return filename
