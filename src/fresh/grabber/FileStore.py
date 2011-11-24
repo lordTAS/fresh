@@ -47,13 +47,13 @@ class FileStore(object):
             os.makedirs(os.path.dirname(history_filename))
 
         # Get a list of all old versions (oldest first).
-        file_re = re.compile(re.escape(history_filename) + r'\.(\w+)')
+        file_re = re.compile(re.escape(history_filename) + r'\.\w+$')
         files   = sorted([(os.path.getmtime(f), f)
                           for f in glob.glob(history_filename + '.*')
                           if file_re.match(f)])
 
         # Delete outdated versions.
-        for timestamp, thefilename in files[:-versions]:
+        for timestamp, thefilename in files[:-(versions + 1)]:
             os.remove(thefilename)
 
         # Store the additional version.
