@@ -58,12 +58,22 @@ grammar aaa_group_statements(default):
         out.add('$0', '$2')
     do.return()
 
+grammar aaa_accounting_statements(default):
+    match 'action-type' fs nows nl:
+        out.add('$0', '$2')
+    match 'group' fs nows nl:
+        out.add('$0', '$2')
+    do.return()
+
 grammar aaa(default):
     match 'aaa' fs 'new-model' nl:
         out.add('aaa/$2')
     match 'aaa group server' fs nows fs nows nl:
         out.enter('aaa/group?type="$2"&name="$4"')
         aaa_group_statements()
+    match 'aaa accounting' fs /exec|commands \d+/ fs nows nl:
+        out.enter('aaa/accounting?for="$2"&list="$4"')
+        aaa_accounting_statements()
     match 'aaa authentication' fs /\w+-prompt/ fs '"' nonl '"' nl:
         out.add('aaa/$2', '$4')
     match 'aaa' fs nonl nl:
