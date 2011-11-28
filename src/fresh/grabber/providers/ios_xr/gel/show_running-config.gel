@@ -1339,6 +1339,15 @@ grammar mpls_ldp_statements(default):
         out.add('$0', '$2')
     do.return()
 
+grammar mpls_static_statements(default):
+    match 'crossconnect' fs number fs if_name fs ipv4_ip fs number nl:
+        out.open('$0')
+        out.add('incoming-label', '$2')
+        out.add('interface', '$4')
+        out.add('next-hop', '$6')
+        out.add('outgoing-label', '$8')
+    do.return()
+
 grammar router_pim_af_statements(default):
     match 'mofrr' fs 'rib' fs name nl:
         out.add('$0?acl="$4"&rib="1"')
@@ -1461,6 +1470,9 @@ grammar protocols(default):
     match 'mpls ldp' nl:
         out.enter('$0')
         mpls_ldp_statements()
+    match 'mpls static' nl:
+        out.enter('$0')
+        mpls_static_statements()
     match 'mpls oam' nl:
         out.add('$0')
     match 'router pim' nl:
