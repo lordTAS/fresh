@@ -14,9 +14,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import os
 import tarfile
-from tempfile      import mkdtemp
-from shutil        import move, rmtree
+from tempfile import mkdtemp
+from shutil import move, rmtree
 from Exscriptd.xml import get_hosts_from_etree
+from fresh.grabber.FileStore import FileStore
 
 class Packager(object):
     def __init__(self,
@@ -28,7 +29,7 @@ class Packager(object):
                  profiles,
                  format    = 'bz2',
                  overwrite = False):
-        self.in_dir    = in_dir
+        self.store     = FileStore(in_dir)
         self.out_dir   = out_dir
         self.out_name  = out_name
         self.send_to   = send_to
@@ -81,7 +82,6 @@ class Packager(object):
             seedhost = self.get_seedhost_from_name(host.get_name())
             address  = seedhost.get_address()
             hostname = seedhost.get_name()
-            src_path = seedhost.get('path')
             dst_path = host.get('path')[0]
             dst_dir  = os.path.join(tmp_dir, dst_path)
             vars     = {'hostname': hostname,
@@ -94,7 +94,11 @@ class Packager(object):
                     continue
                 logger.info(hostname + ': Selected profile is ' + profile.name)
                 for name, from_name in profile.files:
-                    src = os.path.join(self.in_dir, src_path, from_name)
+                    logger.info('%s: %s -> %s' % (hostname, from_name, name))
+                    src = self.store.get_path(seedhost, from_name)
+                    if src is None:
+                        logger.info(hostname + ': %s not found' % from_name)
+                        continue
                     dst = os.path.join(dst_dir, name)
                     dst = dst.replace('{address}',  address)
                     dst = dst.replace('{hostname}', hostname)
