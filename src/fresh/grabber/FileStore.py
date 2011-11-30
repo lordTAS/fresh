@@ -40,7 +40,7 @@ class FileStore(object):
         if version is None:
             versions = self.list_versions(host, filename)
             try:
-                timestamp, version, filename = versions[-1]
+                timestamp, version, filename = versions[0]
             except IndexError:
                 return None
         return os.path.join(host_dir, filename + '.' + version)
@@ -78,6 +78,7 @@ class FileStore(object):
     def list_versions(self, host, filename):
         """
         Returns a list of tuples: (timestamp, version, filename)
+        Returns the most recent version first.
         (The filename is the basename of each file.)
         """
         path     = host.get('path')
