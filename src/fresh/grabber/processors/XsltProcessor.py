@@ -40,9 +40,13 @@ class XsltProcessor(Processor):
         if xsd_file and not xsd_file.startswith('/'):
             xsd_file = os.path.join(self.xsl_dir, xsd_file)
 
+        # Fetch the latest version of the file.
+        path = provider.store.get_path(host, infile)
+        if path is None:
+            return # file not found
+        input = provider.store.get(host, infile)
+
         # Transform.
-        path   = provider.store.get_path(host, infile)
-        input  = provider.store.get(host, infile)
         doc    = etree.parse(StringIO(input), base_url = path)
         xsl    = etree.parse(xslt_file)
         result = apply_xslt(xsl, doc)

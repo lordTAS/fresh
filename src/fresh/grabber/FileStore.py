@@ -20,53 +20,96 @@ from hashlib import md5
 from tempfile import NamedTemporaryFile
 
 class FileStore(object):
-    def __init__(self, base_dir, history_dir):
+    def __init__(self, base_dir):
         self.base_dir = base_dir
-        self.history_dir = history_dir
         if not os.path.isdir(self.base_dir):
             os.makedirs(self.base_dir)
-        if not os.path.isdir(self.history_dir):
-            os.makedirs(self.history_dir)
 
-    def get_path(self, host, filename = None):
-        path     = host.get('__path__')
+    def get_path(self, host, filename = None, version = None):
+        """
+        Returns the full path to the host with the given name.
+        If the filename is not None, the path also has the filename
+        appended, where the version is either the latest version
+        (if version is None), or the specified one.
+        Returns None if a version does not yet exist.
+        """
+        path     = host.get('path')
         host_dir = os.path.join(self.base_dir, path)
-        if filename:
-            return os.path.join(host_dir, filename)
-        return host_dir
+        if not filename:
+            return host_dir
+        if version is None:
+            versions = self.list_versions(host, filename)
+            try:
+                timestamp, version, filename = versions[-1]
+            except IndexError:
+                return None
+        return os.path.join(host_dir, filename + '.' + version)
 
-    def get_history_path(self, host, filename = None):
-        path     = host.get('__path__')
-        host_dir = os.path.join(self.history_dir, path)
-        if filename:
-            return os.path.join(host_dir, filename)
-        return host_dir
+    def get_filename_from_alias(self, host, alias):
+        """
+        Resolves the alias to the filename, if possible.
+        """
+        path     = host.get('path')
+        filename = os.path.join(self.base_dir, path, alias)
+        if os.path.lexists(filename):
+            filename = os.path.realpath(filename)
+            return os.path.basename(filename).rsplit('.', 1)[0]
+        return alias
 
-    def move_to_history(self, filename, history_filename, versions):
-        if not os.path.isdir(os.path.dirname(history_filename)):
-            os.makedirs(os.path.dirname(history_filename))
+    def list_files(self, host):
+        """
+        Returns a list of available files for the given host.
+        (Returns the basename of each file.)
+        """
+        path     = host.get('path')
+        host_dir = os.path.join(self.base_dir, path)
+        file_re  = re.compile(r'(.*)\.\w+$')
+        files    = set()
+        for filename in os.listdir(host_dir):
+            current = os.path.join(host_dir, filename)
+            if os.path.islink(current):
+                continue
+            match = file_re.search(filename)
+            if match is None:
+                continue
+            files.add(match.group(1))
+        return list(files)
 
-        # Get a list of all old versions (oldest first).
-        file_re = re.compile(re.escape(history_filename) + r'\.\w+$')
+    def list_versions(self, host, filename):
+        """
+        Returns a list of tuples: (timestamp, version, filename)
+        (The filename is the basename of each file.)
+        """
+        path     = host.get('path')
+        filename = os.path.join(self.base_dir, path, filename)
+        file_re  = re.compile(re.escape(filename) + r'\.\w+$')
+        return sorted([(os.path.getmtime(f),
+                        f.split('.')[-1],
+                        os.path.basename(f).rsplit('.', 1)[0])
+                      for f in glob.glob(filename + '.*')
+                      if file_re.match(f)], reverse = True)
+
+    def flush_history(self, host, filename, versions):
+        # Get a list of all versions (oldest first).
+        path    = host.get('path')
+        prefix  = os.path.join(self.base_dir, path, filename)
+        file_re = re.compile(re.escape(prefix) + r'\.\w+$')
         files   = sorted([(os.path.getmtime(f), f)
-                          for f in glob.glob(history_filename + '.*')
+                          for f in glob.glob(prefix + '.*')
                           if file_re.match(f)])
 
         # Delete outdated versions.
-        for timestamp, thefilename in files[:-(versions + 1)]:
-            os.remove(thefilename)
+        for timestamp, filename in files[:-versions]:
+            os.remove(filename)
 
-        # Store the additional version.
-        thehash = md5(open(filename).read()).hexdigest()
-        shutil.move(filename, history_filename + '.' + thehash)
-
-    def alias(self, host, filename, name):
+    def alias(self, host, filename, version, name):
         if name is None:
             return
-        link = self.get_path(host, name)
+        host_dir = self.get_path(host)
+        link     = os.path.join(host_dir, name)
         if os.path.lexists(link):
             os.remove(link)
-        os.symlink(filename, link)
+        os.symlink(filename + '.' + version, link)
 
     def store(self,
               provider,
@@ -77,10 +120,8 @@ class FileStore(object):
               versions  = 1,
               cleanpass = False,
               cleandesc = False):
-        host_dir     = self.get_path(host)
-        history_file = self.get_history_path(host, filename)
-        filename     = self.get_path(host, filename)
-        isxml        = filename.endswith('.xml')
+        isxml    = filename.endswith('.xml')
+        host_dir = self.get_path(host)
 
         if not os.path.isdir(host_dir):
             os.makedirs(host_dir)
@@ -96,26 +137,26 @@ class FileStore(object):
             content = provider.remove_descriptions_from_config(content)
 
         # If the file is unchanged just move on.
-        if os.path.isfile(filename):
-            hash1 = md5(content).hexdigest()
-            hash2 = md5(open(filename).read()).hexdigest()
-            if hash1 == hash2:
-                self.alias(host, filename, alias)
-                return filename
+        thehash = md5(content).hexdigest()
+        path    = self.get_path(host, filename, thehash)
+        if os.path.isfile(path):
+            os.utime(path, None)
+            self.alias(host, filename, thehash, alias)
+            self.alias(host, filename, thehash, filename)
+            self.flush_history(host, filename, versions)
+            return path
 
         # Save to a temporary file.
         with NamedTemporaryFile(delete = False) as tempfile:
             os.fchmod(tempfile.fileno(), 0644)
             tempfile.write(content)
 
-        # Move the old file away (to history or just delete).
-        if os.path.isfile(filename):
-            self.move_to_history(filename, history_file, versions)
-
         # Rename the temporary file.
-        shutil.move(tempfile.name, filename)
-        self.alias(host, filename, alias)
-        return filename
+        shutil.move(tempfile.name, path)
+        self.alias(host, filename, thehash, alias)
+        self.alias(host, filename, thehash, filename)
+        self.flush_history(host, filename, versions)
+        return path
 
     def get(self, host, filename):
         with open(self.get_path(host, filename)) as file:

@@ -90,7 +90,6 @@ class Grabber(object):
         update_progress()
 
         # Init default variables.
-        host.set('__path__',   host.get('path'))
         host.set('__label__',  label)
         host.set('__logger__', logger)
 
