@@ -148,9 +148,9 @@ class FileStore(object):
             return path
 
         # Find the last version number.
-        versions = self.list_versions(host, filename)
+        version_list = self.list_versions(host, filename)
         try:
-            last_hash = versions[0]
+            last_hash = version_list[0]
         except IndexError:
             last_hash = None
 
