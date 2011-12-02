@@ -150,7 +150,7 @@ class FileStore(object):
         # Find the last version number.
         version_list = self.list_versions(host, filename)
         try:
-            last_hash = version_list[0]
+            last_hash = version_list[0][1]
         except IndexError:
             last_hash = None
 
