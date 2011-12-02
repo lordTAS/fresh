@@ -44,7 +44,7 @@ def run(logger, job, host, conn):
         hostname = host.get_name()
         old, new = change
         name     = 'Update !%s/diff/config/%s/%s' % (hostname, new, old)
-        __exscriptd__.set_job_name(name)
+        __exscriptd__.set_job_name(job.id, name)
 
 def flush(logger, job):
     grabber.flush(__exscriptd__, logger)
