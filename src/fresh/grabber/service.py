@@ -23,18 +23,28 @@ queue      = __exscriptd__.get_queue_from_name(queue_name)
 grabber    = config.get_grabber()
 
 def run(logger, job, host, conn):
+    # Create the label that is prefixed before each log entry.
     try:
         label = grabber.get_label_from_host(host)
     except Exception, e:
         logger.error('Label not found: %s' % str(e))
         raise
 
+    # Start the grabber.
     try:
         logger.info('%s: Connected.' % label)
         grabber.grab(__exscriptd__, job.id, conn, host, logger)
     except Exception, e:
         logger.error('%s: Exception: %s' % (label, repr(str(e))))
         raise
+
+    # Update the task description to include a link to a changeset.
+    change = host.get('__changed__').get('config')
+    if change:
+        hostname = host.get_name()
+        old, new = change
+        name     = 'Update !%s/diff/config/%s/%s' % (hostname, new, old)
+        __exscriptd__.set_job_name(name)
 
 def flush(logger, job):
     grabber.flush(__exscriptd__, logger)

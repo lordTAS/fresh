@@ -90,8 +90,9 @@ class Grabber(object):
         update_progress()
 
         # Init default variables.
-        host.set('__label__',  label)
-        host.set('__logger__', logger)
+        host.set('__label__',   label)
+        host.set('__logger__',  logger)
+        host.set('__changed__', {})
 
         # Run.
         logger.info('%s: Starting.' % label)

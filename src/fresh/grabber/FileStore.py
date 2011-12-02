@@ -147,6 +147,13 @@ class FileStore(object):
             self.flush_history(host, filename, versions)
             return path
 
+        # Find the last version number.
+        versions = self.list_versions(host, filename)
+        try:
+            last_hash = versions[0]
+        except IndexError:
+            last_hash = None
+
         # Save to a temporary file.
         with NamedTemporaryFile(delete = False) as tempfile:
             os.fchmod(tempfile.fileno(), 0644)
@@ -157,6 +164,12 @@ class FileStore(object):
         self.alias(host, filename, thehash, alias)
         self.alias(host, filename, thehash, filename)
         self.flush_history(host, filename, versions)
+
+        # Remember the change.
+        changed = host.get('__changed__')
+        changed[filename] = last_hash, thehash
+        if alias:
+            changed[alias] = last_hash, thehash
         return path
 
     def get(self, host, filename):
