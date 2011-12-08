@@ -1312,6 +1312,10 @@ grammar ip_statements(default):
         acl_nested_statements()
     match 'accounting-threshold' fs number nl:
         out.add('$0', '$2')
+    match 'admission' fs 'max-nodata-conns' fs number nl:
+        out.add('admission', '$2')
+    match 'auth-proxy' fs 'max-nodata-conns' fs number nl:
+        out.add('auth_proxy', '$3')
     match 'bgp-community' fs 'new-format' nl:
         out.add('$0/$2')
     match 'bootp server' nl:
@@ -1659,6 +1663,8 @@ grammar ntp(default):
 grammar ospf_statements(default):
     match 'area' fs number fs 'authentication' fs nows nl:
         out.add('$0?number="$2"/authentication', '$6')
+    match 'auto-cost' fs 'reference-bandwidth' fs number nl:
+        out.add('$0', '$2')
     match 'default-information' fs nonl nl:
         out.add('$0', '$2')
     match 'domain-tag' fs number nl:
@@ -1680,6 +1686,8 @@ grammar ospf_statements(default):
     match 'redistribute' fs /(?:bgp \d+(?: subnets)?|connected|static|ospf \d+(?: vrf \S+)?|isis ip level-[12])/:
         out.enter('redistribute/source?name="$2"')
         redistribute_statements()
+    match 'router-id' fs ipv4_ip nl:
+        out.add('$0', '$2')
     do.return()
 
 grammar ospf(default):
@@ -1950,6 +1958,8 @@ grammar input(default):
         out.add('$0?name="$4"/enable', '$6')
     match 'cns' fs nonl nl:
         out.add('$0', '$2')
+    match 'config-register' fs name nl:
+        out.add('config-register', '$2')
     match 'control-plane' nl:
         out.enter('$0')
         control_plane_statements()
@@ -2119,6 +2129,8 @@ grammar input(default):
         out.add('$0/$2/$4', '$6')
     match 'vlan' fs 'dot1q tag' fs nows / */ nl:
         out.add('$0/$2?name="$4"')
+    match 'vlan' fs 'ifdescr' fs 'detail' nl:
+        out.add('$0/$2/$4')
     match 'vlan' fs 'internal allocation policy' fs nows nl:
         out.add('$0/$2/$4')
     match 'voice-card' fs number nl:
@@ -2127,6 +2139,10 @@ grammar input(default):
     match 'vrf definition' fs nonl nl:
         out.enter('vrf-list/vrf?name="$2"')
         ip_vrf_statements()
+    match 'login' nl:
+        out.add('$0')
+    match 'transport' fs 'input' fs nows nl:
+        out.add('$0/$2')
     acl()
     aaa()
     archive()
