@@ -23,7 +23,7 @@ queue      = __exscriptd__.get_queue_from_name(queue_name)
 def run(order, job):
     logger   = __exscriptd__.get_logger(order, 'export.log')
     packager = config.get_packager()
-    order.set_description(packager.describe())
+    __exscriptd__.set_job_name(job.id, packager.describe())
     packager.run(logger, order)
 
 def check(order):
@@ -38,7 +38,7 @@ def check(order):
 
 def enter(order):
     logdir = __exscriptd__.get_order_logdir(order)
-    task = __exscriptd__.create_task(order, 'Update the host database')
+    task = __exscriptd__.create_task(order, 'Export a directory or package')
     task.set_logfile(logdir, 'packager.log')
     qtask = queue.enqueue(partial(run, order), 'packager')
     task.set_job_id(qtask.job_ids.pop())
