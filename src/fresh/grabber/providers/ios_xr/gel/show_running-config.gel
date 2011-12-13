@@ -328,6 +328,8 @@ grammar controller_dsu_statements(default):
     do.return()
 
 grammar controller_statements(default):
+    match 'admin-state' fs nows nl:
+        out.add('$0', '$2')
     match 'au' fs number nl:
         out.enter('$0?number="$2"')
         controller_au_statements()
