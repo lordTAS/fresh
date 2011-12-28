@@ -109,14 +109,39 @@ Converts the given bandwidth string to an integer in kilobytes.
     <xsl:when test="not($bandwidth)
                  or $bandwidth = ''
                  or contains($bw, 'unknown')
+                 or contains($bw, 'unspecified')
                  or contains($bw, 'unlimited')">
       <func:result/>
     </xsl:when>
     <xsl:when test="$bw = 'e1'">
       <func:result select="2097152"/>
     </xsl:when>
+    <xsl:when test="$bw = 'e2'">
+      <func:result select="8650752"/>
+    </xsl:when>
     <xsl:when test="$bw = 'e3'">
       <func:result select="35192832"/>
+    </xsl:when>
+    <xsl:when test="$bw = 'e4'">
+      <func:result select="142606336"/>
+    </xsl:when>
+    <xsl:when test="$bw = 'e5'">
+      <func:result select="578711552"/>
+    </xsl:when>
+    <xsl:when test="$bw = 't1'">
+      <func:result select="1581056"/>
+    </xsl:when>
+    <xsl:when test="$bw = 't2'">
+      <func:result select="6463488"/>
+    </xsl:when>
+    <xsl:when test="$bw = 't3'">
+      <func:result select="45809664"/>
+    </xsl:when>
+    <xsl:when test="$bw = 't4'">
+      <func:result select="280756224"/>
+    </xsl:when>
+    <xsl:when test="$bw = 't5'">
+      <func:result select="409960448"/>
     </xsl:when>
     <xsl:when test="starts-with($bw, 'oc')">
       <func:result select="substring($bw, 3) * 1024 * 52" />
