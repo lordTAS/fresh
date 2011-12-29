@@ -14,6 +14,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 from Processor import Processor
 from Exscriptd.util import find_module_recursive
+from imp import load_module
 
 class InvokeModule(Processor):
     def __init__(self, module):
