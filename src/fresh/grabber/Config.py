@@ -59,6 +59,12 @@ class Config(ConfigReader):
             #print 'Creating Gelatin processor "%s".' % name
             self.processors[name] = GelatinProcessor(syntax_dir, format)
 
+    def _init_invoke_module(self):
+        for element in self.cfgtree.iterfind('processor[@type="invoke-module"]'):
+            name        = element.get('name')
+            module_name = element.find('module').text
+            self.processors[name] = InvokeModule(module_name)
+
     def _init_xsltproc(self):
         for element in self.cfgtree.iterfind('processor[@type="xslt"]'):
             name      = element.get('name')
@@ -118,6 +124,7 @@ class Config(ConfigReader):
         self._init_linesplit()
         self._init_gelatin()
         self._init_xsltproc()
+        self._init_invoke_module()
         self._init_xmldb_store()
         self._init_xmldb_metadata()
 

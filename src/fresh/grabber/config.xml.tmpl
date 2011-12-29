@@ -41,6 +41,14 @@
   </processor>
 
   <!--
+  The invoke-module processor loads an external Python module and
+  calls it's start() and delete() functions when needed.
+  -->
+  <processor type="invoke-module" name="ips-import">
+    <module>ips.util.generic2sql</module>
+  </processor>
+
+  <!--
   This section creates a connection to an eXist XML database.
   -->
   <exist-db name="exist-db">
