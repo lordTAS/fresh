@@ -17,7 +17,11 @@ from Exscriptd.util import find_module_recursive
 
 class InvokeModule(Processor):
     def __init__(self, module):
-        self.module = find_module_recursive(module)
+        file, path, description = find_module_recursive(module)
+        try:
+            self.module = load_module(module, file, path, description)
+        finally:
+            file.close()
 
     def start(self, provider, host, conn, **kwargs):
         return self.module.__dict__['start'](provider, host, conn)
