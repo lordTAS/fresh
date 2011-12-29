@@ -24,7 +24,8 @@ from processors        import GelatinProcessor, \
                               LineSplitProcessor, \
                               XsltProcessor,    \
                               ExistDBStore,     \
-                              ExistDBMetadataStore
+                              ExistDBMetadataStore, \
+                              InvokeModule
 
 __dirname__ = os.path.dirname(__file__)
 
