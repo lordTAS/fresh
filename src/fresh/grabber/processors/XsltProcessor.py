@@ -24,9 +24,11 @@ def _find_or_create(node, path, value):
         if name.startswith('@'):
             node.set(name[1:], value)
             return node
-        node = node.find(name)
-        if node is None:
+        child = node.find(name)
+        if child is None:
             node = etree.SubElement(node, name)
+        else:
+            child = node
     node.text = value
     return node
 
