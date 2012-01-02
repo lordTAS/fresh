@@ -19,16 +19,26 @@ from StringIO import StringIO
 from lxml import etree
 from Processor import Processor
 
+def _find_or_create(node, path, value):
+    for name in path.split('/'):
+        if name.startswith('@'):
+            node.set(name[1:], value)
+            return node
+        node = node.find(name)
+        if node is None:
+            node = etree.SubElement(node, name)
+    node.text = value
+    return node
+
 class XsltProcessor(Processor):
-    def __init__(self,
-                 xsl_dir,
-                 add_hostname  = False,
-                 add_address   = False,
-                 add_timestamp = False):
-        self.xsl_dir       = xsl_dir
-        self.add_hostname  = add_hostname
-        self.add_address   = add_address
-        self.add_timestamp = add_timestamp
+    def __init__(self, base_dir, xml):
+        xsl_dir      = xml.find('xsl-dir').text
+        self.xsl_dir = os.path.join(base_dir, xsl_dir)
+        self.add     = dict()
+        for node in xml.iterfind('add'):
+            path = node.findtext('path')
+            expr = node.findtext('expression')
+            self.add[path] = compile(expr, 'config', 'eval')
 
     def start(self, provider, host, conn, **kwargs):
         xslt_file = kwargs.get('xslt')
@@ -51,17 +61,10 @@ class XsltProcessor(Processor):
         xsl    = etree.parse(xslt_file)
         result = apply_xslt(xsl, doc)
 
-        # Add the address and a timestamp field to the root node in the resulting
-        # XML.
-        if self.add_address:
-            address = host.get_address()
-            result.getroot().set('address', address)
-        if self.add_hostname:
-            hostname = host.get_name()
-            result.getroot().set('name', hostname)
-        if self.add_timestamp:
-            ts = time.asctime()
-            etree.SubElement(result.getroot(), 'last-update').text = ts
+        # Insert extra data into the resulting XML.
+        for path, expression in self.add.iteritems():
+            text = eval(expression, {'host': host, 'time': time})
+            node = _find_or_create(result.getroot(), path, text)
 
         # Validate.
         if xsd_file:

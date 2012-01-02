@@ -68,18 +68,9 @@ class Config(ConfigReader):
 
     def _init_xsltproc(self):
         for element in self.cfgtree.iterfind('processor[@type="xslt"]'):
-            name      = element.get('name')
-            xsl_dir   = element.find('xsl-dir').text
-            hostname  = element.find('add-hostname') is not None
-            address   = element.find('add-address') is not None
-            timestamp = element.find('add-timestamp') is not None
-            if not xsl_dir.startswith('/'):
-                xsl_dir = os.path.join(__dirname__, xsl_dir)
+            name = element.get('name')
             #print 'Creating XSLT processor "%s".' % name
-            self.processors[name] = XsltProcessor(xsl_dir,
-                                                  hostname,
-                                                  address,
-                                                  timestamp)
+            self.processors[name] = XsltProcessor(__dirname__, element)
 
     def init_existdb_from_name(self, name):
         if self.exist_dbs.has_key(name):

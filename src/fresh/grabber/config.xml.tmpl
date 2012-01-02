@@ -35,9 +35,10 @@
   -->
   <processor type="xslt" name="xslt">
     <xsl-dir>providers</xsl-dir>
-    <add-hostname/>
-    <add-address/>
-    <add-timestamp/>
+    <add>
+        <path>@address</path>
+        <expression>host.get_address()</expression>
+    </add>
   </processor>
 
   <!--
