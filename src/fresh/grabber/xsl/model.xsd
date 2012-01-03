@@ -216,10 +216,18 @@
   <xs:attribute name="name" type="nonEmptyString" use="required"/>
 </xs:complexType>
 
+<xs:complexType name="metadataType">
+  <xs:sequence>
+    <xs:element name="city" type="nonEmptyString"/>
+    <xs:element name="country" type="nonEmptyString"/>
+  </xs:sequence>
+</xs:complexType>
+
 <!-- The document schema. -->
 <xs:element name="host">
   <xs:complexType>
     <xs:sequence>
+      <xs:element name="metadata" type="metadataType"/>
       <xs:element name="configured-hostname" type="Hostname" minOccurs="0"/>
       <xs:element name="configured-domain" type="domainName" minOccurs="0"/>
       <xs:element name="os" type="operatingSystem"/>

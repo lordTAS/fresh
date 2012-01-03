@@ -36,8 +36,24 @@
   <processor type="xslt" name="xslt">
     <xsl-dir>providers</xsl-dir>
     <add>
+        <path>metadata/city</path>
+        <expression>host.get('city')</expression>
+    </add>
+    <add>
+        <path>metadata/country</path>
+        <expression>host.get('country')</expression>
+    </add>
+    <add>
         <path>@address</path>
         <expression>host.get_address()</expression>
+    </add>
+    <add>
+        <path>@name</path>
+        <expression>host.get_name()</expression>
+    </add>
+    <add>
+        <path>last-update</path>
+        <expression>time.asctime()</expression>
     </add>
   </processor>
 
