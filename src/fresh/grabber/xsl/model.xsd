@@ -220,6 +220,7 @@
   <xs:sequence>
     <xs:element name="city" type="nonEmptyString"/>
     <xs:element name="country" type="nonEmptyString"/>
+    <xs:element name="last-update" type="nonEmptyString"/>
   </xs:sequence>
 </xs:complexType>
 
@@ -227,14 +228,13 @@
 <xs:element name="host">
   <xs:complexType>
     <xs:sequence>
-      <xs:element name="metadata" type="metadataType"/>
       <xs:element name="configured-hostname" type="Hostname" minOccurs="0"/>
       <xs:element name="configured-domain" type="domainName" minOccurs="0"/>
       <xs:element name="os" type="operatingSystem"/>
       <xs:element name="model" type="nonEmptyString"/>
       <xs:element name="chassis" type="chassisType" minOccurs="1" maxOccurs="unbounded"/>
       <xs:element name="unit-list" type="unitListType" minOccurs="0"/>
-      <xs:element name="last-update" type="nonEmptyString"/>
+      <xs:element name="metadata" type="metadataType"/>
     </xs:sequence>
     <xs:attribute name="name" type="dnsName" use="required"/>
     <xs:attribute name="address" type="nonEmptyString"/>
