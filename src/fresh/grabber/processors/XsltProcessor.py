@@ -36,11 +36,11 @@ class XsltProcessor(Processor):
     def __init__(self, base_dir, xml):
         xsl_dir      = xml.find('xsl-dir').text
         self.xsl_dir = os.path.join(base_dir, xsl_dir)
-        self.add     = dict()
+        self.add     = []
         for node in xml.iterfind('add'):
             path = node.findtext('path')
             expr = node.findtext('expression')
-            self.add[path] = compile(expr, 'config', 'eval')
+            self.add.append((path, compile(expr, 'config', 'eval')))
 
     def start(self, provider, host, conn, **kwargs):
         xslt_file = kwargs.get('xslt')
@@ -64,7 +64,7 @@ class XsltProcessor(Processor):
         result = apply_xslt(xsl, doc)
 
         # Insert extra data into the resulting XML.
-        for path, expression in self.add.iteritems():
+        for path, expression in self.add:
             text = eval(expression, {'host': host, 'time': time})
             node = _find_or_create(result.getroot(), path, text)
 
