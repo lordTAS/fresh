@@ -37,6 +37,7 @@ class XsltProcessor(Processor):
         xsl_dir      = xml.find('xsl-dir').text
         self.xsl_dir = os.path.join(base_dir, xsl_dir)
         self.add     = []
+        self.debug   = False
         for node in xml.iterfind('add'):
             path = node.findtext('path')
             expr = node.findtext('expression')
@@ -66,7 +67,7 @@ class XsltProcessor(Processor):
         # Insert extra data into the resulting XML.
         for path, expression in self.add:
             text = eval(expression, {'host': host, 'time': time})
-            node = _find_or_create(result.getroot(), path, text)
+            _find_or_create(result.getroot(), path, text)
 
         # Validate.
         if xsd_file:
@@ -75,4 +76,39 @@ class XsltProcessor(Processor):
             schema.assertValid(result)
 
         # Write.
-        provider.store.store(provider, host, outfile, str(result))
+        if self.debug:
+            print str(result)
+        else:
+            provider.store.store(provider, host, outfile, str(result))
+
+if __name__ == '__main__':
+    import sys
+    from FileStore import FileStore
+    from Exscript import Host
+
+    basedir   = os.path.dirname(os.path.dirname(__file__))
+    prov_dir  = os.path.join(basedir, 'providers')
+    xsd_file  = os.path.join(basedir, 'xsl', 'model.xsd')
+    xslt_file = os.path.join(prov_dir, 'ios', 'xsl', 'generic.xsl')
+    xml       = etree.parse(sys.argv[1])
+    proc_xml  = xml.find('processor[@type="xslt"]')
+    fs_dir    = os.path.expandvars(xml.findtext('file-store/basedir'))
+    proc_xml.find('xsl-dir').text = basedir
+    print 'Assuming file store is in', fs_dir
+    class FakeProvider(object):
+        store = FileStore(fs_dir)
+    prov = FakeProvider()
+
+    p       = XsltProcessor(basedir, proc_xml)
+    p.debug = True
+    host    = Host('m4docirom1ea.do-a-11.de.ipmb.dtag.de')
+    host.set('path',    'ipmb/pe/m4docirom1ea.do-a-11.de.ipmb.dtag.de')
+    host.set('country', 'mycountry')
+    host.set('city',    'mycity')
+    p.start(prov,
+            host,
+            object,
+            xslt   = xslt_file,
+            xsd    = xsd_file,
+            input  = 'show_version.xml',
+            output = 'not-used.xml')
