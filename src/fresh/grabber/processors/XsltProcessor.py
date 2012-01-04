@@ -28,7 +28,7 @@ def _find_or_create(node, path, value):
         if child is None:
             node = etree.SubElement(node, name)
         else:
-            child = node
+            node = child
     node.text = value
     return node
 
