@@ -83,6 +83,8 @@ grammar aaa(default):
 grammar acl_nested_statements(default):
     match acl_action fs nonl nl:
         out.add('$0?condition="$2"')
+    match 'remark' fs nonl nl:
+        do.skip()
     do.return()
 
 grammar acl_statements(default):
@@ -788,6 +790,8 @@ grammar interface_statements(default):
         out.add('$0', '$2')
     match 'hold-queue' fs number fs nows nl:
         out.add('$0?direction="$4"', '$2')
+    match 'history' fs word fs nows /(?:[ \t]+\S+)*/ nl:
+        out.add('$0?type="$2"', '$4$5')
     match 'ip access-group' fs nows fs /in|out/ nl:
         out.add('access-group?name="$2"&direction="$4"')
     match 'ip' fs 'accounting' fs 'mac-address' fs /(?:input|output)/ nl:

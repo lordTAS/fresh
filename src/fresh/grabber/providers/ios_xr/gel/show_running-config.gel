@@ -550,10 +550,12 @@ grammar interface_statements(default):
         out.add('$0', '$2')
     match 'down-when-looped' nl:
         out.add('$0')
-    match 'dot1q' fs 'vlan' fs number nl:
-        out.add('$0?vlan="$4"')
-    match 'dot1q' fs 'vlan' fs number fs number nl:
-        out.add('$0?vlan="$4"&vlan2="$6"')
+    match /'dot1q'|'dot1ad'/ fs 'vlan' fs number nl:
+        out.add('$0?$2="$4"')
+    match /'dot1q'|'dot1ad'/ fs 'vlan' fs number fs number nl:
+        out.add('$0?$2="$4"&vlan2="$6"')
+    match /'dot1q'|'dot1ad'/ fs 'vlan' fs number fs 'any' nl:
+        out.add('$0?$2="$4"&vlan2="$6"')
     match 'duplex' fs word nl:
         out.add('$0', '$2')
     match 'encapsulation' fs nonl nl:
