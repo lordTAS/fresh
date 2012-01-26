@@ -66,33 +66,6 @@
   </processor>
 
   <!--
-  This section creates a connection to an eXist XML database.
-  -->
-  <exist-db name="exist-db">
-    <host>localhost</host>
-    <port>6949</port>
-    <user>ips-import</user>
-    <password>ips-import</password>
-    <collection>/exist/rest/ips</collection>
-  </exist-db>
-
-  <!--
-  The xml-db-store processor takes an XML file and sends it to an
-  eXist-db XML database.
-  -->
-  <processor type="xml-db-store" name="xml-db-store">
-    <xml-db>exist-db</xml-db>
-  </processor>
-
-  <!--
-  The xml-db-metadata processor stores metadata such as the country
-  and city name in an XML database.
-  -->
-  <processor type="xml-db-metadata" name="xml-db-metadata">
-    <xml-db>exist-db</xml-db>
-  </processor>
-
-  <!--
   Actions taken on hosts running IOS.
   -->
   <provider

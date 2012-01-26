@@ -12,20 +12,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-import os, re, imp
-from sqlalchemy        import create_engine
+import os
+import re
+import imp
+from sqlalchemy import create_engine
 from fresh.seed.Config import get_seeddb_from_name
-from lxml              import etree
-from pyexist           import ExistDB
-from Exscriptd         import ConfigReader
-from Grabber           import Grabber
-from FileStore         import FileStore
-from processors        import GelatinProcessor, \
-                              LineSplitProcessor, \
-                              XsltProcessor,    \
-                              ExistDBStore,     \
-                              ExistDBMetadataStore, \
-                              InvokeModule
+from Exscriptd import ConfigReader
+from Grabber import Grabber
+from FileStore import FileStore
+from processors import GelatinProcessor, \
+                       LineSplitProcessor, \
+                       XsltProcessor,    \
+                       InvokeModule
 
 __dirname__ = os.path.dirname(__file__)
 
@@ -34,7 +32,6 @@ class Config(ConfigReader):
         ConfigReader.__init__(self, filename, parent = parent)
         self.stores     = {}
         self.processors = {}
-        self.exist_dbs  = {}
         self.grabber    = None
         self._init()
 
@@ -72,37 +69,6 @@ class Config(ConfigReader):
             #print 'Creating XSLT processor "%s".' % name
             self.processors[name] = XsltProcessor(__dirname__, element)
 
-    def init_existdb_from_name(self, name):
-        if self.exist_dbs.has_key(name):
-            return self.exist_dbs[name]
-        element    = self.cfgtree.find('exist-db[@name="%s"]' % name)
-        host       = element.find('host').text
-        port       = element.find('port').text
-        user       = element.find('user').text
-        password   = element.find('password').text
-        path       = element.find('path').text
-        collection = element.find('collection').text
-        netloc     = user + ':' + password + '@' + host + ':' + port
-        db         = ExistDB(netloc + '/' + path, collection)
-        self.exist_dbs['name'] = db
-        return db
-
-    def _init_xmldb_store(self):
-        path = 'processor[@type="xml-db-store"]'
-        for element in self.cfgtree.iterfind(path):
-            name   = element.get('name')
-            dbname = element.find('xml-db').text
-            db     = self.init_existdb_from_name(dbname)
-            self.processors[name] = ExistDBStore(db)
-
-    def _init_xmldb_metadata(self):
-        path = 'processor[@type="xml-db-metadata"]'
-        for element in self.cfgtree.iterfind(path):
-            name   = element.get('name')
-            dbname = element.find('xml-db').text
-            db     = self.init_existdb_from_name(dbname)
-            self.processors[name] = ExistDBMetadataStore(db)
-
     def _init_provider_from_name(self, name):
         element = self.cfgtree.find('provider[@name="%s"]' % name)
         modname = element.get('module')
@@ -117,8 +83,6 @@ class Config(ConfigReader):
         self._init_gelatin()
         self._init_xsltproc()
         self._init_invoke_module()
-        self._init_xmldb_store()
-        self._init_xmldb_metadata()
 
         grabber_elem = self.cfgtree.find('grabber')
         seeddb_name  = grabber_elem.find('seeddb').text
