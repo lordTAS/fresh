@@ -95,7 +95,7 @@ class Packager(object):
                 logger.info(hostname + ': Selected profile is ' + profile.name)
                 for name, from_name in profile.files:
                     logger.info('%s: %s -> %s' % (hostname, from_name, name))
-                    src = self.store.get_path(seedhost, from_name)
+                    src = self.store.get_alias(seedhost, from_name)
                     if src is None:
                         logger.info(hostname + ': %s not found' % from_name)
                         continue

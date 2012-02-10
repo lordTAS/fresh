@@ -45,6 +45,18 @@ class FileStore(object):
                 return None
         return os.path.join(host_dir, filename + '.' + version)
 
+    def get_alias(self, host, alias):
+        """
+        Returns the full path to the alias linking to the current version
+        of the filename for the host with the given name.
+        Returns None if the file does not exist.
+        """
+        path     = host.get('path')
+        alias = os.path.join(self.base_dir, path, filename)
+        if not os.path.exists(alias) or not os.path.islink(alias):
+            return None
+        return alias
+
     def get_filename_from_alias(self, host, alias):
         """
         Resolves the alias to the filename, if possible.
