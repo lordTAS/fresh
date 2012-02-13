@@ -26,19 +26,23 @@ def run(order, job):
     sec   = timedelta(seconds = 1)
     start = datetime.utcnow().replace(microsecond = 0) - sec
 
-    # Import the hosts, while preserving the values in other columns.
-    hosts  = get_hosts_from_etree(order.xml)
-    fields = ('address',
-              'name',
-              'protocol',
-              'tcp_port',
-              'path',
-              'country',
-              'city')
-    seeddb.save_host(hosts, fields)
+    try:
+        # Import the hosts, while preserving the values in other columns.
+        hosts  = get_hosts_from_etree(order.xml)
+        fields = ('address',
+                  'name',
+                  'protocol',
+                  'tcp_port',
+                  'path',
+                  'country',
+                  'city')
+        seeddb.save_host(hosts, fields)
 
-    # Mark all hosts that are no longer known as 'deleted'.
-    seeddb.mark_old_hosts(start)
+        # Mark all hosts that are no longer known as 'deleted'.
+        seeddb.mark_old_hosts(start)
+    except Exception:
+        logger.error(traceback.format_exc())
+        raise
 
 def check(order):
     order.set_description('Update the host database')
