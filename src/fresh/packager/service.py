@@ -12,6 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+import traceback
 from Exscriptd.xml         import get_hosts_from_etree
 from fresh.packager.Config import Config
 from functools             import partial
@@ -22,9 +23,9 @@ queue      = __exscriptd__.get_queue_from_name(queue_name)
 
 def run(order, job):
     logger   = __exscriptd__.get_logger(order, 'export.log')
-    packager = config.get_packager()
-    __exscriptd__.set_job_name(job.id, packager.describe())
     try:
+        packager = config.get_packager()
+        __exscriptd__.set_job_name(job.id, packager.describe())
         packager.run(logger, order)
     except Exception:
         logger.error(traceback.format_exc())
