@@ -12,8 +12,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+import traceback
 from Exscriptd.xml import get_hosts_from_etree
-from Exscript.util.decorator import autologin
+from Exscript.util.log import log_to_file
 from fresh.provisioner.Config import Config
 from functools import partial
 
@@ -73,8 +74,13 @@ def enter(order):
 
     logdir = __exscriptd__.get_order_logdir(order)
     descr = 'Run ' + script_type + ' ' + repr(script_name)
-    decor = autologin()
-    start = decor(partial(prov.run, script))
+    @log_to_file(logdir, delete = True)
+    def start(*args, **kwargs):
+        try:
+            return prov.run(script, *args, **kwargs)
+        except Exception:
+            logger.error(traceback.format_exc())
+            raise
     for host in hosts:
         hostname = host.get_name()
         msg      = descr + ' on ' + hostname

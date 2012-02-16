@@ -20,5 +20,6 @@ class Provisioner(object):
         pass
 
     def run(self, script, job, host, conn):
+        conn.authenticate()
         template.eval(conn, script, **host.get_all())
         conn.close(True)
