@@ -74,7 +74,7 @@ def enter(order):
 
     logdir = __exscriptd__.get_order_logdir(order)
     descr = 'Run ' + script_type + ' ' + repr(script_name)
-    @log_to_file(logdir, delete = True)
+    @log_to_file(logdir)
     def start(*args, **kwargs):
         try:
             return prov.run(script, *args, **kwargs)
