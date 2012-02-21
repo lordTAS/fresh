@@ -207,6 +207,8 @@ grammar bgp_vrf_statements(default):
     do.return()
 
 grammar bgp_statements(default):
+    match 'nsr' nl:
+        out.add('$0')
     match 'address-family' fs nonl nl:
         out.enter('$0?name="$2"')
         bgp_af_statements()
@@ -1189,6 +1191,8 @@ grammar isis_af_statements(default):
     do.return()
 
 grammar isis_statements(default):
+    match 'nsf' fs /cisco|ietf/ nl:
+        out.add('$0?method="$2"')
     match 'address-family' fs nonl nl:
         out.enter('$0?name="$2"')
         isis_af_statements()
@@ -1315,9 +1319,15 @@ grammar mpls_ldp_label_statements(default):
 grammar mpls_ldp_log_statements(default):
     match 'neighbor' nl:
         out.add('$0')
+    match 'graceful-restart' nl:
+        out.add('$0')
+    match 'nsr' nl:
+        out.add('$0')
     do.return()
 
 grammar mpls_ldp_statements(default):
+    match 'nsr' nl:
+        out.add('$0')
     match 'interface' fs if_name nl:
         out.enter('$0?name="$2"')
         mpls_ldp_interface_statements()
@@ -1382,12 +1392,16 @@ grammar multicast_routing_af_statements(default):
         out.add('$0')
     match 'ssm range' fs name nl:
         out.add('$0', '$2')
+    match 'nsf' nl:
+        out.add('$0')
     do.return()
 
 grammar multicast_routing_statements(default):
     match 'address-family' fs nows nl:
         out.enter('$0?name="$2"')
         multicast_routing_af_statements()
+    match 'nsf' nl:
+        out.add('$0')
     do.return()
 
 grammar vrrp_interface_vrrp_statements(default):
@@ -1610,6 +1624,10 @@ grammar input(default):
         out.enter('$0/key?type="$4"&string="$6"')
         tacacs_server_statements()
     match 'tacacs' fs 'source-interface' fs nows nl:
+        out.add('$0/$2', '$4')
+    match 'tacacs' fs 'source-interface' fs nows fs 'vrf' fs nows nl:
+        out.add('$0/$2?$6="$8"', '$4')
+    match 'nsr' fs 'process-failures' fs nows nl:
         out.add('$0/$2', '$4')
     match 'tcp' fs nonl nl:
         out.add('$0?option="$2"')
