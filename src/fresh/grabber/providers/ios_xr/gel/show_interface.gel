@@ -234,5 +234,11 @@ grammar input(default):
         out.add('status',   '$4')
         out.add('$7', '$11')
         interface_block()
+    match nows ws 'is' ws st ', line' ws 'protocol' ws 'is' ws st ws '(' ows 'APS' ws 'not Configured' ows ')' nl:
+        out.enter('interface?name="$0"')
+        out.add('status',   '$4')
+        out.add('$7', '$11')
+        out.add('$14', '$15')
+        interface_block()
     match nl:
         do.skip()
