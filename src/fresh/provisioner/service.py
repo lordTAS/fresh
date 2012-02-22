@@ -82,11 +82,26 @@ def enter(order):
             logger.error(traceback.format_exc())
             raise
     for host in hosts:
+        # Track the status of the update per-host.
         hostname = host.get_name()
         msg      = descr + ' on ' + hostname
         task     = __exscriptd__.create_task(order, msg)
         task.set_logfile(logdir, hostname + '.log')
-        qtask  = queue.run(host, start)
+
+        # Since the order only contains a list of hostnames without any
+        # other info (such as static passwords), we need to load the
+        # additional attributes from the database.
+        seedhost = prov.get_seedhost_from_name(hostname)
+        if not seedhost:
+            logger.info('%s: Error: Address for host not found.' % hostname)
+            task.close('address-not-found')
+            continue
+
+        # Enqueue the host.
+        qtask  = queue.run(seedhost, start)
+
+        # Associate the queued job with the task such that Exscriptd can
+        # update the status of the task.
         job_id = qtask.job_ids.pop()
         task.set_job_id(job_id)
         logger.info('%s: Queued with job id %s.' % (hostname, job_id))

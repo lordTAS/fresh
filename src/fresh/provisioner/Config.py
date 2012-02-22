@@ -13,6 +13,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import os
+from fresh.seed.Config import get_seeddb_from_name
 from Exscriptd   import ConfigReader
 from Provisioner import Provisioner
 
@@ -23,7 +24,9 @@ class Config(ConfigReader):
         self._init()
 
     def _init(self):
-        self.provisioner = Provisioner()
+        seeddb_name  = grabber_elem.find('database').text
+        seeddb       = get_seeddb_from_name(self, seeddb_name)
+        self.provisioner = Provisioner(seeddb)
 
     def get_provisioner(self):
         return self.provisioner

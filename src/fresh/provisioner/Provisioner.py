@@ -16,8 +16,14 @@ import time
 from Exscript.util import template
 
 class Provisioner(object):
-    def __init__(self):
-        pass
+    def __init__(self, seeddb):
+        self.seeddb = seeddb
+
+    def get_seedhost_from_name(self, name):
+        host = self.seeddb.get_host(name = name)
+        if not host:
+            raise Exception('unknown host: %s' % name)
+        return host
 
     def run(self, script, job, host, conn):
         conn.authenticate()
