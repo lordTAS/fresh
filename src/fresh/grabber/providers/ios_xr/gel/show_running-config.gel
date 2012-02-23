@@ -975,6 +975,8 @@ grammar policy_map_class_statements(default):
         out.add('$0', '$2')
     match 'set cos' fs number nl:
         out.add('$0', '$2')
+    match 'set dscp' fs nows nl:
+        out.add('$0', '$2')
     match 'set qos-group' fs name nl:
         out.add('$0', '$2')
     match 'shape' fs 'average' fs 'percent' fs number nl:

@@ -949,6 +949,8 @@ grammar interface_statements(default):
         out.add('$0', '$2')
     match 'negotiation' fs nonl nl:
         out.add('$0', '$2')
+    match 'no' fs 'ipv6' fs nows nl:
+        out.add('disable/$2-$4')
     match 'nrzi-encoding' nl:
         out.add('$0')
     match 'ntp broadcast client' nl:
@@ -1673,6 +1675,8 @@ grammar ospf_statements(default):
         out.add('$0', '$2')
     match 'default-information' fs nonl nl:
         out.add('$0', '$2')
+    match 'distribute-list' fs 'route-map' fs nows fs acl_direction nl:
+        out.add('$0/$2?name="$4"&direction="$6"')
     match 'domain-tag' fs number nl:
         out.add('$0', '$2')
     match 'log-adjacency-changes' nl:
