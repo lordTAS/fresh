@@ -24,7 +24,7 @@ class Config(ConfigReader):
         self._init()
 
     def _init(self):
-        seeddb_name  = grabber_elem.find('database').text
+        seeddb_name  = self.cfgtree.find('provisioner').find('database').text
         seeddb       = get_seeddb_from_name(self, seeddb_name)
         self.provisioner = Provisioner(seeddb)
 
