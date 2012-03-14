@@ -501,6 +501,8 @@ grammar hw_module(default):
         out.add('$0/$2/$4/$10?name="$12"/$6/$8')
     match 'hw-module' fs 'service offline' fs 'location' fs nonl nl:
         out.add('$0/$2/$4?name="$6"')
+    match 'hw-module' fs 'pse' fs 'allocate tcam location' fs nows fs 'region' fs nows fs number nl:
+        out.add('$0/$2-tcam/$8?name="$10"&percentage="$12"')
     do.return()
 
 grammar interface_l2transport_statements(default):
