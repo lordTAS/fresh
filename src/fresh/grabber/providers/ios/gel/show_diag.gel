@@ -80,6 +80,10 @@ grammar slot_7xxx(default):
     match 'PA Bay' fs number fs 'Information:' nl:
         out.enter('subslot?slot="$2"')
         pa_bay()
+    match 'FRU Part Number' fs nows /[\t ]*/ nl:
+        out.add('type', '$2')
+    match 'Product (FRU) Number' fs ':' fs nows /[\t ]*/ nl:
+        out.add('type', '$4')
     match 'ROM Monitor version' fs nows:
         out.add('rommon', '$2')
     match nonl nl:
