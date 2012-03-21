@@ -65,7 +65,13 @@ class Grabber(object):
 
         # Open the connection.
         logger.info('%s: Logging in...' % label)
-        conn.authenticate()
+        try:
+            conn.authenticate()
+        except LoginFailure, e:
+            account = conn.last_account
+            user    = repr(account and account.get_name() or None)
+            logger.info('%s: Authentication as %s failed' % (label, user))
+            raise
         logger.info('%s: Authentication succeeded.' % label)
         update_progress()
 
