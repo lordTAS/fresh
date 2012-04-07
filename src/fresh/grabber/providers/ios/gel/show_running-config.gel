@@ -196,6 +196,8 @@ grammar async_line_statements(default):
     match /access-(?:group|class)/ fs acl_name fs acl_direction fs nows nl:
         out.add('$0?name="$2"/direction', '$4')
         out.add('$0?name="$2"/option', '$6')
+    match 'activation-character' nl:
+        out.add('$0')
     match 'activation-character' fs number nl:
         out.add('$0', '$2')
     match 'authorization' fs nonl nl:
@@ -269,6 +271,8 @@ grammar redistribute_statements:
         out.add('destination', '$2')
     match 'ip metric' fs number:
         out.add('$0', '$2')
+    match 'metric-type' fs number:
+        out.add('$0', '$2')
     match 'route-map' fs nows:
         out.add('$0', '$2')
     match 'ip route-map' fs nows:
@@ -277,6 +281,10 @@ grammar redistribute_statements:
         out.add('$0', '$2')
     match 'match' fs nonl:
         out.add('match', '$2')
+    match 'subnets':
+        out.add('$0')
+    match 'route-map' fs nows:
+        out.add('$0', '$2')
     match name nl:
         out.add('destination', '$0')
         do.return()
@@ -1795,6 +1803,8 @@ grammar redundancy(default):
 grammar route_map_statements(default):
     match 'continue' nl:
         out.add('$0')
+    match 'continue' ws number nl:
+        out.add('$0?at="$2"')
     match 'description' fs description nl:
         out.add('$0', '$2')
     match 'description' fs nl:
@@ -2052,6 +2062,8 @@ grammar input(default):
         out.add('$0?name="$2"', '$4')
     match 'parser cache' nl:
         out.add('$0')
+    match 'power enable module' fs number nl:
+        out.add('$0?number="$2"')
     match 'power-mgr' fs 'disable' nl:
         out.add('$0/$2')
     match 'power redundancy-mode' fs nows nl:

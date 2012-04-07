@@ -16,8 +16,8 @@ define ipv6_ip /(?:[a-fA-F0-9]*:){1,7}(?:\d+\.\d+\.\d+\.\d+|[a-fA-F0-9]+)?/
 define ipvx_ip /[a-zA-Z0-9:\.]+[\.:][a-zA-Z0-9:\.]+/
 define if_name /[a-zA-Z\-]+[A-Z0-9\/\.:]+/
 define if_type /\S+/
-define multi_line_str_start /\^?[Cc=#] ?[\r\n]/
-define multi_line_str_end /\^?[Cc=#][\r\n]/
+define multi_line_str_start /\^?[Cc=#+] ?[\r\n]/
+define multi_line_str_end /\^?[Cc=#+][\r\n]/
 define as_number /[1-9]\d{0,4}/
 define description /[^\r\n]+/
 define file /\S+/
@@ -97,7 +97,7 @@ grammar async_line_statements(default):
         out.add('$0?type="$2"', '$4')
     match 'timeout login response' fs number nl:
         out.add('$0', '$2')
-    match 'transport' fs nows fs nows nl:
+    match 'transport' fs nows fs nonl nl:
         out.add('$0/$2', '$4')
     do.return()
 
@@ -488,6 +488,13 @@ grammar flow(default):
         flow_statements()
     do.return()
 
+grammar region_statements(default):
+    match 'region' fs nows fs number nl:
+        out.add('$0?name="$2"&percentage="$4"')
+    match nl:
+        do.skip()
+    do.return()
+
 grammar hw_module(default):
     match 'hw-module' fs 'subslot' fs nows fs 'cardtype' fs nows nl:
         out.add('$0?$2="$4"/$6', '$8')
@@ -501,8 +508,9 @@ grammar hw_module(default):
         out.add('$0/$2/$4/$10?name="$12"/$6/$8')
     match 'hw-module' fs 'service offline' fs 'location' fs nonl nl:
         out.add('$0/$2/$4?name="$6"')
-    match 'hw-module' fs 'pse' fs 'allocate tcam location' fs nows fs 'region' fs nows fs number nl:
-        out.add('$0/$2-tcam/$8?name="$10"&percentage="$12"')
+    match 'hw-module' fs 'pse' fs 'allocate tcam location' fs nows:
+        out.add('$0/$2-tcam?location="$6"')
+        region_statements()
     do.return()
 
 grammar interface_l2transport_statements(default):
@@ -542,6 +550,8 @@ grammar interface_statements(default):
         out.add('$0?id="$4"/$6', '$8')
     match 'bundle' fs 'minimum-active links' fs number nl:
         out.add('$0/$2', '$4')
+    match 'capture software packets' nl:
+        out.add('$0')
     match 'carrier-delay' fs 'up' fs number fs 'down' fs number nl:
         out.add('$0?up="$4"&down="$8"', '$8')
     match 'cdp' nl:
@@ -798,6 +808,13 @@ grammar logging_statements(default):
         out.add('$0')
     do.return()
 
+grammar logging_rules(default):
+    match 'alarm' fs nonl nl:
+        out.add('$0', '$2')
+    match 'all-of-router' nl:
+        out.add('$0')
+    do.return()
+
 grammar logging(default):
     match 'logging' nl:
         out.enter('logging')
@@ -805,6 +822,12 @@ grammar logging(default):
     match 'logging archive' nl:
         out.enter('logging/option?string="archive"')
         logging_statements()
+    match 'logging' fs 'suppress' fs 'rule' fs nows nl:
+        out.enter('$0/$2-$4?name="$6"')
+        logging_rules()
+    match 'logging' fs 'suppress' fs word fs 'rule' fs nows nl:
+        out.enter('$0/$2-$4-$6?name="$8"')
+        logging_rules()
     match 'logging' fs nonl nl:
         out.add('logging/option?string="$2"')
     do.return()
@@ -1411,23 +1434,29 @@ grammar multicast_routing_statements(default):
 grammar vrrp_interface_vrrp_statements(default):
     match 'ipv4' fs ipv4_ip nl:
         out.add('$0?address="$2"', '$2')
-        do.return()
     match 'ipv4' fs ipv4_ip fs 'secondary' nl:
         out.add('$0?address="$2"/$4')
-        do.return()
     match 'priority' fs number nl:
         out.add('$0', '$2')
-        do.return()
     match 'preempt delay' fs number nl:
         out.add('$0', '$2')
-        do.return()
+    match 'address' fs ipv4_ip nl:
+        out.add('$0', '$2')
     match 'text-authentication' fs nows nl:
         out.add('$0', '$2')
-        do.return()
     do.return()
 
 grammar vrrp_interface_statements(default):
-    match 'vrrp' fs name fs:
+    match 'vrrp' fs nows fs:
+        out.enter('$0?name="$2"')
+        vrrp_interface_vrrp_statements()
+    match 'address-family ipv4' nl:
+        out.enter('$0')
+        vrrp_af_statements()
+    do.return()
+
+grammar vrrp_af_statements(default):
+    match 'vrrp' fs nows nl:
         out.enter('$0?name="$2"')
         vrrp_interface_vrrp_statements()
     do.return()
@@ -1571,6 +1600,11 @@ grammar telnet_vrf_statements:
     match nl:
         do.return()
 
+grammar svd_statements(default):
+    match 'disable' nl:
+        out.add('$0')
+    do.return()
+
 grammar input(default):
     match 'Building configuration...' nl
         | /Current configuration : \d+ bytes/ nl
@@ -1613,6 +1647,9 @@ grammar input(default):
         out.add('$0')
     match 'mpls label range table' fs nonl nl:
         out.add('$0', '$2')
+    match 'selective-vrf-download' nl:
+        out.enter('$0')
+        svd_statements()
     match 'ssh client' fs 'source-interface' fs nows nl:
         out.add('$0/$2', '$4')
     match 'ssh server' fs nows nl:

@@ -1,5 +1,6 @@
 define ws      /[\t ]+/
 define nows    /\S+/
+define nonl               /[^\r\n]+/
 define fs      /[\t ]*,[\t ]*/
 define chassis /[^"]*Chassis/
 define fan     /[^"]*Fan[^"]*/
@@ -47,5 +48,15 @@ grammar input:
     match 'NAME:' ws '"' port '"' fs:
         out.enter('element?name="$3"&type="PORT"')
         element()
+    match 'NAME:' ws '""' nonl nl:
+        trash()
+    match nl:
+        do.skip()
+
+grammar trash:
+    when /^NAME:/:
+        do.return()
+    match nonl nl:
+        do.skip()
     match nl:
         do.skip()
