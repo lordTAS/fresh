@@ -6,7 +6,7 @@ define num       /\d+/
 define count     /\d+|Unknown/
 define countfs   /, ?|[\r\n]/
 define nonl      /[^\r\n]+/
-define st        /(?:up|down|administratively down|up \(looped\)|not ready)/
+define st        /(?:up|down|administratively down|up \(looped\)|down \(looped\)|not ready)/
 define field     /[^\r\n,]+/
 define field_end / *,?[ \t\f\v]*/
 define interval  /\d+ (?:second|minute|hour)/
@@ -81,7 +81,7 @@ grammar counters(default):
         out.add('packets',  '$10 $12')
     match count ws 'drops for' ws 'unrecognized upper-level protocol' nl:
         out.add('$4', '$0')
-    match /Received|Output/ ws num ws 'broadcast packets' ',' ws num ws 'multicast packets' nl:
+    match /Received|Output/ ws count ws 'broadcast packets' ',' ws count ws 'multicast packets' nl:
         out.add('$4', '$2')
         out.add('$9', '$7')
     match /(?:Received[ \t\f\v]+)?/ num ws 'runts' ',' ws num ws 'giants' ',' ws num ws 'throttles' ',' ws num ws 'parity' nl:
@@ -229,7 +229,7 @@ grammar interface_block(default):
 grammar input(default):
     match /.* (?:UTC|MET)/ nl:
         do.next()
-    match nows ws 'is' ws st ', line' ws 'protocol' ws 'is' ws st nl:
+    match nows ws 'is' ws st ', line' ws 'protocol' ws 'is' ws st nl /[\r\n]*/:
         out.enter('interface?name="$0"')
         out.add('status',   '$4')
         out.add('$7', '$11')
