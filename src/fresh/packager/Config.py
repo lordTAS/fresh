@@ -24,6 +24,7 @@ from fresh.packager.Profile  import Profile
 from fresh.packager.Packager import Packager
 from fresh.packager.Mailer   import Mailer
 from fresh.packager.FTPPush  import FTPPush
+from fresh.packager.SCPPush  import SCPPush
 
 class Config(ConfigReader):
     def __init__(self, filename, parent):
@@ -53,6 +54,22 @@ class Config(ConfigReader):
         server = element.find('server').text
         return Mailer(server, mail)
 
+    def init_scp_from_name(self, name):
+        element = self.cfgtree.find('scp[@name="%s"]' % name)
+        if element is None:
+            return None
+
+        address  = element.find('address').text
+        path     = element.find('path').text
+        filename = element.find('filename').text
+        user     = element.find('user').text
+        pw_elmnt = element.find('password')
+        password = base64.decodestring(pw_elmnt.text) if pw_elmnt is not None else ""
+        kf_elmnt = element.find('keyfile')
+        keyfile  = kf_elmnt.text if kf_elmnt is not None else None
+        pw_only  = element.find('pw-only') is not None
+        return SCPPush(address, path, filename, user, password, keyfile, pw_only)
+
     def init_ftp_from_name(self, name):
         element = self.cfgtree.find('ftp[@name="%s"]' % name)
         if element is None:
@@ -69,6 +86,9 @@ class Config(ConfigReader):
         mailer = self.init_mailer_from_name(name)
         if mailer:
             return mailer
+        scp = self.init_scp_from_name(name)
+        if scp:
+            return scp
         ftp = self.init_ftp_from_name(name)
         if ftp:
             return ftp
