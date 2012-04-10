@@ -48,13 +48,13 @@ grammar input:
     match 'NAME:' ws '"' port '"' fs:
         out.enter('element?name="$3"&type="PORT"')
         element()
-    match 'NAME:' ws '""' nonl nl:
+    match 'NAME:' ws '""' fs 'DESCR:' ws '""' nl:
         trash()
     match nl:
         do.skip()
 
 grammar trash:
-    when /^NAME:/:
+    when 'NAME:':
         do.return()
     match nonl nl:
         do.skip()
