@@ -19,8 +19,8 @@ try:
 except IndexError:
     parser.error('please enter the name of the XML file')
 
-path = os.path.basename(xml_file)
-doc = etree.parse(xml_file, base_url = path)
+doc = etree.parse(xml_file, base_url = xml_file)
 xsl = etree.parse(xslt_file)
 
-print apply_xslt(xsl, doc)
+path = os.path.dirname(xml_file)
+print apply_xslt(path, xsl, doc)

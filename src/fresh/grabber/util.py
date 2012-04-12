@@ -14,6 +14,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 import re
 import os
+from functools import partial
 from lxml import etree
 
 filename_strip_re = re.compile(r'[^a-z0-9_\-\.]', re.I)
@@ -26,8 +27,11 @@ def str2filename(string, suffix = '.txt'):
 
 python_ns = etree.FunctionNamespace('localhost')
 python_ns.prefix = 'py'
-python_ns['file-exists'] = lambda c, x: os.path.isfile(x)
+def _file_exists(base_dir, context, filename):
+    return os.path.isfile(os.path.join(base_dir, filename))
 
-def apply_xslt(xslt, doc):
-    transform = etree.XSLT(xslt)
+def apply_xslt(host_dir, xslt, doc):
+    exists      = partial(_file_exists, host_dir)
+    extensions  = {('localhost', 'file-exists'): exists}
+    transform   = etree.XSLT(xslt, extensions = extensions)
     return transform(doc)

@@ -62,7 +62,7 @@ class XsltProcessor(Processor):
         # Transform.
         doc    = etree.parse(StringIO(input), base_url = path)
         xsl    = etree.parse(xslt_file)
-        result = apply_xslt(xsl, doc)
+        result = apply_xslt(os.path.dirname(path), xsl, doc)
 
         # Insert extra data into the resulting XML.
         for path, expression in self.add:
